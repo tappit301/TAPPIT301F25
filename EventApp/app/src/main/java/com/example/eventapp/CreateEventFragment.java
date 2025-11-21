@@ -90,7 +90,6 @@ public class CreateEventFragment extends Fragment {
         btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
     }
 
-    // --------------------- CREATE NEW EVENT --------------------------------
     private void publishEvent(View view) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
