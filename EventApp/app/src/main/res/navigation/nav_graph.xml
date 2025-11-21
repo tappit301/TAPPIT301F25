@@ -5,7 +5,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/organizerLandingFragment">
 
-
     <fragment
         android:id="@+id/organizerLandingFragment"
         android:name="com.example.eventapp.OrganizerLandingFragment"
@@ -21,17 +20,16 @@
             app:destination="@id/eventDetailsFragment" />
     </fragment>
 
-
     <fragment
         android:id="@+id/createEventFragment"
         android:name="com.example.eventapp.CreateEventFragment"
         android:label="Create Event"
         tools:layout="@layout/create_event">
+
         <action
             android:id="@+id/action_createEventFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
     </fragment>
-
 
     <fragment
         android:id="@+id/eventDetailsFragment"
@@ -43,19 +41,40 @@
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
+        <!-- ✅ FIX: action needed for Edit/Manage button -->
+        <action
+            android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
+
+        <argument android:name="eventId" app:argType="string" android:defaultValue="" />
         <argument android:name="title" app:argType="string" android:defaultValue="" />
         <argument android:name="desc" app:argType="string" android:defaultValue="" />
         <argument android:name="date" app:argType="string" android:defaultValue="" />
         <argument android:name="time" app:argType="string" android:defaultValue="" />
         <argument android:name="location" app:argType="string" android:defaultValue="" />
-    </fragment>
+        <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
+        <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
 
+        <!-- Poster -->
+        <argument android:name="imageUrl" app:argType="string" android:defaultValue="" />
+    </fragment>
 
     <fragment
         android:id="@+id/qrCodeFragment"
         android:name="com.example.eventapp.QrCodeFragment"
         android:label="QR Code"
         tools:layout="@layout/fragment_qr_code">
+
+        <action
+            android:id="@+id/action_qrCodeFragment_to_organizerLandingFragment"
+            app:destination="@id/organizerLandingFragment"
+            app:popUpTo="@id/organizerLandingFragment"
+            app:popUpToInclusive="false" />
+
+        <argument
+            android:name="cameFromDetails"
+            app:argType="boolean"
+            android:defaultValue="false" />
 
         <argument
             android:name="qrData"
