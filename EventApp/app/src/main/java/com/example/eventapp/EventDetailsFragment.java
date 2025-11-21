@@ -13,6 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -23,40 +25,20 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
- * Displays detailed information about a selected event.
- * Allows users to join the waiting list and view a generated QR code.
- *
- * Retrieves event data passed through a Bundle, checks if the user
- * has already joined, and updates Firestore accordingly.
+ * Shows full event details including cover image, description,
+ * date/time/location, join waiting list, and QR code.
  */
 public class EventDetailsFragment extends Fragment {
 
-    /** Log tag for this class. */
     private static final String TAG = "EventDetailsFragment";
 
-    /** Button that allows the user to join the waiting list. */
-    private MaterialButton joinBtn;
+    private MaterialButton joinBtn, btnViewQr;
+    private ImageView ivEventCover;
 
-    /** Button that navigates to the event QR code view. */
-    private MaterialButton btnViewQr;
-
-    /** The Firestore document ID for the current event. */
     private String eventId;
-
-    /** Firestore database reference. */
     private FirebaseFirestore firestore;
-
-    /** Currently authenticated Firebase user. */
     private FirebaseUser currentUser;
 
-    /**
-     * Inflates the event details layout for this fragment.
-     *
-     * @param inflater LayoutInflater used to inflate the view
-     * @param container Parent view group
-     * @param savedInstanceState Saved state if available
-     * @return The inflated event details layout
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,13 +47,6 @@ public class EventDetailsFragment extends Fragment {
         return inflater.inflate(R.layout.event_details, container, false);
     }
 
-    /**
-     * Initializes the fragment, populates UI with event data,
-     * and sets up listeners for joining the waiting list and viewing QR codes.
-     *
-     * @param view The root view for this fragment
-     * @param savedInstanceState Saved instance state, if any
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -81,25 +56,44 @@ public class EventDetailsFragment extends Fragment {
 
         joinBtn = view.findViewById(R.id.btnJoinWaitingList);
         btnViewQr = view.findViewById(R.id.btnViewQr);
+        ivEventCover = view.findViewById(R.id.ivEventCover);
 
         Bundle args = getArguments();
         if (args != null) {
+
             eventId = args.getString("eventId");
 
             ((TextView) view.findViewById(R.id.tvEventTitle))
                     .setText(args.getString("title", ""));
+
             ((TextView) view.findViewById(R.id.tvEventDate))
                     .setText(args.getString("date", ""));
+
             ((TextView) view.findViewById(R.id.tvEventTime))
                     .setText(args.getString("time", ""));
+
             ((TextView) view.findViewById(R.id.tvEventLocation))
                     .setText(args.getString("location", ""));
+
             ((TextView) view.findViewById(R.id.tvEventDescription))
                     .setText(args.getString("desc", ""));
+
+            // ⭐ Load event poster image
+            String imageUrl = args.getString("imageUrl", null);
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Glide.with(requireContext())
+                        .load(imageUrl)
+                        .placeholder(R.drawable.placeholder_img)
+                        .error(R.drawable.placeholder_img)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(ivEventCover);
+            } else {
+                ivEventCover.setImageResource(R.drawable.placeholder_img);
+            }
         }
 
-        ImageView btnBack = view.findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v ->
+        // Back button
+        view.findViewById(R.id.btnBack).setOnClickListener(v ->
                 NavHostFragment.findNavController(this).popBackStack());
 
         checkIfAlreadyJoined();
@@ -124,19 +118,13 @@ public class EventDetailsFragment extends Fragment {
         });
     }
 
-    /**
-     * Adds the current user to the waiting list for this event in Firestore.
-     * Updates UI after a successful join.
-     *
-     * @param v The view that triggered this action
-     */
+    /** Add user to waiting list */
     private void addUserToWaitingList(View v) {
         if (currentUser == null) {
             Snackbar.make(v, "Please log in first.", Snackbar.LENGTH_LONG).show();
             return;
         }
         if (eventId == null || eventId.isEmpty()) {
-            Log.e(TAG, "Missing eventId — cannot join waiting list");
             Snackbar.make(v, "Error: Event not found.", Snackbar.LENGTH_LONG).show();
             return;
         }
@@ -156,10 +144,7 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Error joining waiting list", e));
     }
 
-    /**
-     * Checks if the current user has already joined this event’s waiting list.
-     * If so, disables the join button and updates the text.
-     */
+    /** Check if already joined */
     private void checkIfAlreadyJoined() {
         if (currentUser == null || eventId == null) return;
 
@@ -178,9 +163,7 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Error checking existing waiting list entry", e));
     }
 
-    /**
-     * Inner class representing attendee data to be uploaded to Firestore.
-     */
+    /** Firestore attendee model */
     private static class AttendeeData {
         private final String userId;
         private final String email;
@@ -190,18 +173,6 @@ public class EventDetailsFragment extends Fragment {
             this.userId = user.getUid();
             this.email = user.getEmail();
             this.joinedAt = Timestamp.now();
-        }
-
-        public String getUserId() {
-            return userId;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public Timestamp getJoinedAt() {
-            return joinedAt;
         }
     }
 }
