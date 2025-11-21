@@ -72,6 +72,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             bundle.putString("date", event.getDate());
             bundle.putString("time", event.getTime());
             bundle.putString("location", event.getLocation());
+            bundle.putString("organizerId", event.getOrganizerId());
+            bundle.putString("organizerEmail", event.getOrganizerEmail());
 
             try {
                 Navigation.findNavController(v).navigate(

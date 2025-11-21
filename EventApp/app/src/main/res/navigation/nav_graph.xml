@@ -57,6 +57,17 @@
         android:label="QR Code"
         tools:layout="@layout/fragment_qr_code">
 
+        <action
+            android:id="@+id/action_qrCodeFragment_to_organizerLandingFragment"
+            app:destination="@id/organizerLandingFragment"
+            app:popUpTo="@id/organizerLandingFragment"
+            app:popUpToInclusive="false" />
+
+        <argument
+            android:name="cameFromDetails"
+            app:argType="boolean"
+            android:defaultValue="false" />
+
         <argument
             android:name="qrData"
             app:argType="string"

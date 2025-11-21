@@ -1,5 +1,6 @@
 package com.example.eventapp;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,48 +16,29 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-/**
- * Displays detailed information about a selected event.
- * Allows users to join the waiting list and view a generated QR code.
- *
- * Retrieves event data passed through a Bundle, checks if the user
- * has already joined, and updates Firestore accordingly.
- */
 public class EventDetailsFragment extends Fragment {
 
-    /** Log tag for this class. */
     private static final String TAG = "EventDetailsFragment";
 
-    /** Button that allows the user to join the waiting list. */
     private MaterialButton joinBtn;
-
-    /** Button that navigates to the event QR code view. */
     private MaterialButton btnViewQr;
+    private MaterialButton btnDeleteEvent;
 
-    /** The Firestore document ID for the current event. */
     private String eventId;
+    private String organizerId;
 
-    /** Firestore database reference. */
     private FirebaseFirestore firestore;
-
-    /** Currently authenticated Firebase user. */
     private FirebaseUser currentUser;
 
-    /**
-     * Inflates the event details layout for this fragment.
-     *
-     * @param inflater LayoutInflater used to inflate the view
-     * @param container Parent view group
-     * @param savedInstanceState Saved state if available
-     * @return The inflated event details layout
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,13 +47,7 @@ public class EventDetailsFragment extends Fragment {
         return inflater.inflate(R.layout.event_details, container, false);
     }
 
-    /**
-     * Initializes the fragment, populates UI with event data,
-     * and sets up listeners for joining the waiting list and viewing QR codes.
-     *
-     * @param view The root view for this fragment
-     * @param savedInstanceState Saved instance state, if any
-     */
+    @SuppressLint("WrongViewCast")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -81,10 +57,14 @@ public class EventDetailsFragment extends Fragment {
 
         joinBtn = view.findViewById(R.id.btnJoinWaitingList);
         btnViewQr = view.findViewById(R.id.btnViewQr);
+        btnDeleteEvent = view.findViewById(R.id.btnDeleteEvent);
+        MaterialButton btnEditEvent = view.findViewById(R.id.btnEditEvent);
+
 
         Bundle args = getArguments();
         if (args != null) {
             eventId = args.getString("eventId");
+            organizerId = args.getString("organizerId", "");
 
             ((TextView) view.findViewById(R.id.tvEventTitle))
                     .setText(args.getString("title", ""));
@@ -98,10 +78,24 @@ public class EventDetailsFragment extends Fragment {
                     .setText(args.getString("desc", ""));
         }
 
+        // Back button
         ImageView btnBack = view.findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).popBackStack());
 
+        if (currentUser != null && organizerId != null && organizerId.equals(currentUser.getUid())) {
+            btnDeleteEvent.setVisibility(View.VISIBLE);
+            btnEditEvent.setVisibility(View.VISIBLE);
+            joinBtn.setVisibility(View.VISIBLE);  // Organizer can join too
+
+        } else {
+            btnDeleteEvent.setVisibility(View.GONE);
+            btnEditEvent.setVisibility(View.GONE);
+            joinBtn.setVisibility(View.VISIBLE);
+        }
+
+
+        // Check if already joined
         checkIfAlreadyJoined();
 
         joinBtn.setOnClickListener(this::addUserToWaitingList);
@@ -118,18 +112,15 @@ public class EventDetailsFragment extends Fragment {
 
             Bundle bundle = new Bundle();
             bundle.putString("qrData", qrPayload);
+            bundle.putBoolean("cameFromDetails", true);
 
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventDetailsFragment_to_qrCodeFragment, bundle);
         });
+
+        btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmation());
     }
 
-    /**
-     * Adds the current user to the waiting list for this event in Firestore.
-     * Updates UI after a successful join.
-     *
-     * @param v The view that triggered this action
-     */
     private void addUserToWaitingList(View v) {
         if (currentUser == null) {
             Snackbar.make(v, "Please log in first.", Snackbar.LENGTH_LONG).show();
@@ -149,17 +140,14 @@ public class EventDetailsFragment extends Fragment {
         attendeeRef.set(new AttendeeData(currentUser))
                 .addOnSuccessListener(aVoid -> {
                     joinBtn.setEnabled(false);
-                    joinBtn.setText("Added ✅");
+                    joinBtn.setText("Added \u2714");
+                    joinBtn.setAlpha(0.6f); // faded look
                     Snackbar.make(v, "Joined waiting list.", Snackbar.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error joining waiting list", e));
     }
 
-    /**
-     * Checks if the current user has already joined this event’s waiting list.
-     * If so, disables the join button and updates the text.
-     */
     private void checkIfAlreadyJoined() {
         if (currentUser == null || eventId == null) return;
 
@@ -171,16 +159,54 @@ public class EventDetailsFragment extends Fragment {
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
                         joinBtn.setEnabled(false);
-                        joinBtn.setText("Added ✅");
+                        joinBtn.setText("Added \u2714");
+                        joinBtn.setAlpha(0.6f);
                     }
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error checking existing waiting list entry", e));
     }
 
-    /**
-     * Inner class representing attendee data to be uploaded to Firestore.
-     */
+    private void showDeleteConfirmation() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Delete Event?")
+                .setMessage("This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteEvent())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteEvent() {
+        firestore.collection("events")
+                .document(eventId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    deleteAttendeesForEvent();
+
+                    Snackbar.make(requireView(), "Event deleted.", Snackbar.LENGTH_SHORT).show();
+
+                    NavHostFragment.findNavController(this)
+                            .popBackStack(R.id.organizerLandingFragment, false);
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error deleting event", e));
+    }
+
+    private void deleteAttendeesForEvent() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        doc.getReference().delete();
+                    }
+                    firestore.collection("eventAttendees").document(eventId).delete();
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error deleting attendees", e));
+    }
+
     private static class AttendeeData {
         private final String userId;
         private final String email;
@@ -190,18 +216,6 @@ public class EventDetailsFragment extends Fragment {
             this.userId = user.getUid();
             this.email = user.getEmail();
             this.joinedAt = Timestamp.now();
-        }
-
-        public String getUserId() {
-            return userId;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public Timestamp getJoinedAt() {
-            return joinedAt;
         }
     }
 }

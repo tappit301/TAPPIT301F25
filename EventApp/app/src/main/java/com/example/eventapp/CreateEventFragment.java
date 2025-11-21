@@ -26,40 +26,16 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * This is a fragment whichh allows an organizer to create a new event and publish it to Firestore.
- * Once an event is created, it also generates a QR payload with the event info.
- *
- *This screen collets details like title, date, time and location.
- * After submitting, the event data is stored under the "events" collection.
- *
- * @author tappit
- */
 public class CreateEventFragment extends Fragment {
 
-    /** Used for logging errors and event information. */
     private static final String TAG = "CreateEventFragment";
 
-    /** Date input field. */
-    private EditText etDate;
-
-    /** Time input field. */
-    private EditText etTime;
-
-    /** Firebase authentication instance. */
+    private EditText etDate, etTime;
     private FirebaseAuth auth;
-
-    /** Firestore database instance. */
     private FirebaseFirestore firestore;
 
-    /**
-     * Inflates the layout for creating a new event.
-     *
-     * @param inflater The LayoutInflater used to inflate the fragment's view.
-     * @param container The container that holds this fragment.
-     * @param savedInstanceState Saved instance state, if available.
-     * @return The inflated view for this fragment.
-     */
+    private String existingEventId = null;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -68,13 +44,6 @@ public class CreateEventFragment extends Fragment {
         return inflater.inflate(R.layout.create_event, container, false);
     }
 
-    /**
-     * Called when the view is created. Sets up click listeners for date, time,
-     * publish, and cancel buttons.
-     *
-     * @param view The root view of the fragment.
-     * @param savedInstanceState Previously saved state, if any.
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -84,22 +53,44 @@ public class CreateEventFragment extends Fragment {
 
         etDate = view.findViewById(R.id.etEventDate);
         etTime = view.findViewById(R.id.etEventTime);
+
+        EditText etTitle = view.findViewById(R.id.etEventTitle);
+        EditText etDesc = view.findViewById(R.id.etEventDescription);
+        EditText etLocation = view.findViewById(R.id.etEventLocation);
+
         MaterialButton btnPublish = view.findViewById(R.id.btnPublishEvent);
         MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
 
         etDate.setOnClickListener(v -> showDatePicker());
         etTime.setOnClickListener(v -> showTimePicker());
 
-        btnPublish.setOnClickListener(v -> publishEvent(view));
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("eventId")) {
+
+            existingEventId = args.getString("eventId");
+
+            etTitle.setText(args.getString("title", ""));
+            etDesc.setText(args.getString("desc", ""));
+            etDate.setText(args.getString("date", ""));
+            etTime.setText(args.getString("time", ""));
+            etLocation.setText(args.getString("location", ""));
+
+            btnPublish.setText("Save Changes");
+        }
+        // =====================================================================
+
+        btnPublish.setOnClickListener(v -> {
+            if (existingEventId == null) {
+                publishEvent(view);
+            } else {
+                updateEvent(existingEventId, view);
+            }
+        });
+
         btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
     }
 
-    /**
-     * Saves the event to Firestore after validating user input.
-     * Also navigates to the QR code screen if the event is published successfully.
-     *
-     * @param view The current fragment view, used for finding navigation controller.
-     */
+    // --------------------- CREATE NEW EVENT --------------------------------
     private void publishEvent(View view) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
@@ -150,9 +141,34 @@ public class CreateEventFragment extends Fragment {
                 });
     }
 
-    /**
-     * Opens a DatePicker dialog so the user can select a date for the event.
-     */
+    // ----------------------- UPDATE EXISTING EVENT --------------------------
+    private void updateEvent(String eventId, View view) {
+
+        String title = ((EditText) view.findViewById(R.id.etEventTitle)).getText().toString().trim();
+        String desc = ((EditText) view.findViewById(R.id.etEventDescription)).getText().toString().trim();
+        String date = etDate.getText().toString().trim();
+        String time = etTime.getText().toString().trim();
+        String location = ((EditText) view.findViewById(R.id.etEventLocation)).getText().toString().trim();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("title", title);
+        updates.put("description", desc);
+        updates.put("date", date);
+        updates.put("time", time);
+        updates.put("location", location);
+
+        firestore.collection("events")
+                .document(eventId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(view).popBackStack();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    // ---------------- DATE & TIME PICKERS ---------------------
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(requireContext(),
@@ -163,9 +179,6 @@ public class CreateEventFragment extends Fragment {
                 c.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    /**
-     * Opens a TimePicker dialog so the user can select a time for the event.
-     */
     private void showTimePicker() {
         Calendar c = Calendar.getInstance();
         new TimePickerDialog(requireContext(),
