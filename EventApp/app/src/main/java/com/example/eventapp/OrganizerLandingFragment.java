@@ -24,50 +24,29 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * This is the Landing screen for organizers that shows all events they created.
- * This fragment listens to Firestore for the current user's events
- * and displays them in a RecyclerView. Users can also navigate to
- * the Create Event screen from here.
- *
- * Data is ordered by creation time, with the newest events first.
- *
- * Author: tappit
- */
 public class OrganizerLandingFragment extends Fragment {
 
-    /** Tag used for logging messages. */
     private static final String TAG = "OrganizerLanding";
 
-    /** RecyclerView that lists the user's events. */
     private RecyclerView rvEvents;
-
-    /** Layout displayed when no events are found. */
     private LinearLayout emptyState;
 
-    /** Adapter that binds events to the RecyclerView. */
+    private final List<Event> allEvents = new ArrayList<>();
+    private final List<Event> upcomingEvents = new ArrayList<>();
+    private final List<Event> pastEvents = new ArrayList<>();
+
     private EventAdapter adapter;
 
-    /** List that stores all fetched events. */
-    private final List<Event> eventList = new ArrayList<>();
-
-    /** Firebase authentication instance. */
     private FirebaseAuth auth;
-
-    /** Firestore database instance. */
     private FirebaseFirestore firestore;
 
-    /**
-     * Inflates the layout for the organizer landing page.
-     *
-     * @param inflater LayoutInflater used to inflate the view
-     * @param container Parent container for the fragment
-     * @param savedInstanceState Saved state, if any
-     * @return The inflated landing page view
-     */
+    private MaterialButton btnUpcoming, btnPast;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -76,23 +55,17 @@ public class OrganizerLandingFragment extends Fragment {
         return inflater.inflate(R.layout.landing_page, container, false);
     }
 
-    /**
-     * Sets up the RecyclerView, initializes navigation buttons,
-     * and starts listening for the organizer's events in Firestore.
-     *
-     * @param view The fragment's root view
-     * @param savedInstanceState Previously saved state, if any
-     */
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         auth = FirebaseHelper.getAuth();
         firestore = FirebaseHelper.getFirestore();
 
         NavController navController = Navigation.findNavController(view);
-        View.OnClickListener createClick =
-                v -> navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
+        View.OnClickListener createClick = v ->
+                navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
         MaterialButton btnAddEventEmpty = view.findViewById(R.id.btnAddEventEmpty);
         FloatingActionButton btnAddEvent = view.findViewById(R.id.btnAddEvent);
@@ -102,20 +75,48 @@ public class OrganizerLandingFragment extends Fragment {
         if (btnAddEvent != null) btnAddEvent.setOnClickListener(createClick);
         if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createClick);
 
+        btnUpcoming = view.findViewById(R.id.btnUpcoming);
+        btnPast = view.findViewById(R.id.btnPast);
+
         rvEvents = view.findViewById(R.id.rvEvents);
         emptyState = view.findViewById(R.id.emptyStateLayout);
+
         rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new EventAdapter(eventList);
+        adapter = new EventAdapter(upcomingEvents);
         rvEvents.setAdapter(adapter);
 
+        setupFilters();
         loadOrganizerEvents();
     }
 
-    /**
-     * Loads the current organizer's events from Firestore and updates
-     * the list whenever data changes. Shows an empty state if there are no events.
-     */
+    // ----------------------------------------------------------
+    // FILTER BUTTON LOGIC (FIXED VERSION)
+    // ----------------------------------------------------------
+    private void setupFilters() {
+
+        btnUpcoming.setOnClickListener(v -> {
+            btnUpcoming.setChecked(true);
+            btnPast.setChecked(false);
+            adapter = new EventAdapter(upcomingEvents);
+            rvEvents.setAdapter(adapter);
+        });
+
+        btnPast.setOnClickListener(v -> {
+            btnPast.setChecked(true);
+            btnUpcoming.setChecked(false);
+            adapter = new EventAdapter(pastEvents);
+            rvEvents.setAdapter(adapter);
+        });
+
+        // Default selection = UPCOMING
+        btnUpcoming.setChecked(true);
+    }
+
+    // ----------------------------------------------------------
+    // FIRESTORE LOAD
+    // ----------------------------------------------------------
     private void loadOrganizerEvents() {
+
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
@@ -128,34 +129,68 @@ public class OrganizerLandingFragment extends Fragment {
                 .whereEqualTo("organizerId", organizerId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
+
                     if (error != null) {
-                        Log.e(TAG, "Firestore listen failed", error);
-                        Toast.makeText(getContext(),
-                                "Failed to load events: " + error.getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Firestore load failed", error);
                         return;
                     }
 
                     if (snapshots == null || snapshots.isEmpty()) {
-                        eventList.clear();
+                        allEvents.clear();
+                        upcomingEvents.clear();
+                        pastEvents.clear();
+
                         adapter.notifyDataSetChanged();
                         emptyState.setVisibility(View.VISIBLE);
                         rvEvents.setVisibility(View.GONE);
                         return;
                     }
 
-                    eventList.clear();
-                    snapshots.getDocuments().forEach(doc -> {
-                        Event event = doc.toObject(Event.class);
-                        if (event != null) {
-                            event.setId(doc.getId());
-                            eventList.add(event);
+                    allEvents.clear();
+                    for (var doc : snapshots) {
+                        Event e = doc.toObject(Event.class);
+                        if (e != null) {
+                            e.setId(doc.getId());
+                            allEvents.add(e);
                         }
-                    });
+                    }
+
+                    splitEventsByTime();
 
                     emptyState.setVisibility(View.GONE);
                     rvEvents.setVisibility(View.VISIBLE);
-                    adapter.notifyDataSetChanged();
+
+                    if (btnUpcoming.isChecked()) {
+                        adapter = new EventAdapter(upcomingEvents);
+                    } else {
+                        adapter = new EventAdapter(pastEvents);
+                    }
+
+                    rvEvents.setAdapter(adapter);
                 });
+    }
+
+    // ----------------------------------------------------------
+    // UPCOMING vs PAST SEPARATION
+    // ----------------------------------------------------------
+    private void splitEventsByTime() {
+        upcomingEvents.clear();
+        pastEvents.clear();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Date now = new Date();
+
+        for (Event e : allEvents) {
+            try {
+                Date eventDate = sdf.parse(e.getDate() + " " + e.getTime());
+                if (eventDate != null && eventDate.after(now)) {
+                    upcomingEvents.add(e);
+                } else {
+                    pastEvents.add(e);
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Date parse failed", ex);
+            }
+        }
     }
 }
