@@ -41,10 +41,15 @@
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
-        <!-- ✅ FIX: action needed for Edit/Manage button -->
+        <!-- ❌ Old action (Create Event) stays for Edit Event, not Manage -->
         <action
             android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
+
+        <!-- ✅ NEW ACTION: Manage Event -->
+        <action
+            android:id="@+id/action_eventDetailsFragment_to_manageEventsFragment"
+            app:destination="@id/manageEventsFragment" />
 
         <argument android:name="eventId" app:argType="string" android:defaultValue="" />
         <argument android:name="title" app:argType="string" android:defaultValue="" />
@@ -55,8 +60,6 @@
         <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
         <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
 
-        <!-- Poster -->
-        <argument android:name="imageUrl" app:argType="string" android:defaultValue="" />
     </fragment>
 
     <fragment
@@ -80,6 +83,19 @@
             android:name="qrData"
             app:argType="string"
             android:defaultValue="" />
+    </fragment>
+
+    <!-- ✅ MANAGE EVENTS DESTINATION -->
+    <fragment
+        android:id="@+id/manageEventsFragment"
+        android:name="com.example.eventapp.ManageEventsFragment"
+        android:label="Manage Events"
+        tools:layout="@layout/fragment_manage_events">
+
+        <action
+            android:id="@+id/action_manageEventsFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
+
     </fragment>
 
 </navigation>
