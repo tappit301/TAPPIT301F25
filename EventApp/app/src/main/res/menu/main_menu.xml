@@ -2,13 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Profile text button -->
     <item
         android:id="@+id/action_profile"
         android:title="Profile"
-        app:showAsAction="never" />
+        android:icon="@null"
+        app:showAsAction="always"
+        android:contentDescription="Profile" />
 
+    <!-- Sign In text button -->
     <item
-        android:id="@+id/action_settings"
-        android:title="Settings"
-        app:showAsAction="never" />
+        android:id="@+id/action_sign_in"
+        android:title="Sign In"
+        android:icon="@null"
+        app:showAsAction="always"
+        android:contentDescription="Sign In" />
+
 </menu>

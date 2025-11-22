@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    package="com.example.eventapp">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="EventApp"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EventApp"
-        tools:targetApi="31">
+        android:theme="@style/Theme.EventApp">
 
+        <!-- Launcher Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name=".LauncherActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,8 +25,28 @@
             </intent-filter>
         </activity>
 
-        <!-- Other activities, services, etc. go here -->
+        <!-- Login / Signup -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
 
-    </application> <!-- This is the closing tag that might be missing -->
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+
+        <!-- Host activity that contains NavHostFragment -->
+        <activity
+            android:name=".LandingHostActivity"
+            android:exported="false" />
+
+        <!-- Optional main activity (unused) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- DO NOT declare fragments as activities!
+             They belong ONLY in nav_graph.xml -->
+
+    </application>
 
 </manifest>

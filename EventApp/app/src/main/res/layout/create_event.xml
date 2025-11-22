@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Event Cover Image -->
+
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardEventImage"
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Event Title -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventTitle"
             android:layout_width="match_parent"
@@ -83,7 +83,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Event Description -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventDescription"
             android:layout_width="match_parent"
@@ -102,14 +102,14 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Date and Time Row -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
-            <!-- Date Picker -->
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEventDate"
                 android:layout_width="0dp"
@@ -129,7 +129,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Time Picker -->
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEventTime"
                 android:layout_width="0dp"
@@ -151,7 +151,7 @@
 
         </LinearLayout>
 
-        <!-- Location -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventLocation"
             android:layout_width="match_parent"
@@ -169,7 +169,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Max Attendees -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
@@ -187,7 +187,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Category -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
@@ -205,14 +205,14 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Action Buttons -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end">
 
-            <!-- Cancel Button -->
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
@@ -222,7 +222,7 @@
                 android:layout_marginEnd="12dp"
                 style="@style/Widget.Material3.Button.TextButton" />
 
-            <!-- Publish Event Button -->
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPublishEvent"
                 android:layout_width="wrap_content"

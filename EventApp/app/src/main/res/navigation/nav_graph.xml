@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/organizerLandingFragment">
+
+    <!-- Home / Organizer Landing Page -->
+    <fragment
+        android:id="@+id/organizerLandingFragment"
+        android:name="com.example.eventapp.OrganizerLandingFragment"
+        android:label="Landing">
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
+            app:destination="@id/exploreEventsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
+    </fragment>
+
+
+    <!-- Explore All Events Page -->
+    <fragment
+        android:id="@+id/exploreEventsFragment"
+        android:name="com.example.eventapp.ExploreEventsFragment"
+        android:label="Explore Events">
+
+        <action
+            android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+    </fragment>
+
+
+    <!-- Event Details Page -->
+    <fragment
+        android:id="@+id/eventDetailsFragment"
+        android:name="com.example.eventapp.EventDetailsFragment"
+        android:label="Event Details">
+
+        <action
+            android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
+            app:destination="@id/qrCodeFragment" />
+    </fragment>
+
+
+    <!-- QR Code Screen -->
+    <fragment
+        android:id="@+id/qrCodeFragment"
+        android:name="com.example.eventapp.QrCodeFragment"
+        android:label="QR Code">
+
+        <!-- ✅ MISSING ACTION ADDED -->
+        <action
+            android:id="@+id/action_qrCodeFragment_to_organizerLandingFragment"
+            app:destination="@id/organizerLandingFragment" />
+
+    </fragment>
+
+
+    <!-- Create Event Page -->
+    <fragment
+        android:id="@+id/createEventFragment"
+        android:name="com.example.eventapp.CreateEventFragment"
+        android:label="Create Event" />
+
+</navigation>

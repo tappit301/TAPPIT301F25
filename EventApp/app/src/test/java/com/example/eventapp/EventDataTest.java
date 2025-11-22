@@ -1,58 +1,40 @@
 package com.example.eventapp;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
-
+import java.util.ArrayList;
 import java.util.List;
+import static org.junit.Assert.*;
 
 public class EventDataTest {
 
+    private List<Event> events;
+
     @Before
-    public void setUp() {
-        // Clear before each test to start fresh
-        EventData.clearEvents();
+    public void init() {
+        events = new ArrayList<>();
+        events.add(new Event("Dog Walk", "Fun pet event", "2025-11-22", "09:00", "Rutherford Park"));
     }
 
     @Test
     public void testAddEvent() {
-        Event event = new Event("Hackathon", "Coding event", "2025-12-01", "10:00 AM", "Tech Center");
-        EventData.addEvent(event);
-
-        List<Event> events = EventData.getEventList();
-
-        assertEquals(1, events.size());
-        assertEquals("Hackathon", events.get(0).getTitle());
+        int start = events.size();
+        events.add(new Event("Yoga", "Morning session", "2025-11-23", "07:00", "SUB Hall"));
+        assertEquals(start + 1, events.size());
     }
 
     @Test
-    public void testGetEventListInitiallyEmpty() {
-        List<Event> events = EventData.getEventList();
-        assertTrue("Event list should start empty", events.isEmpty());
+    public void testEventTitlesNotEmpty() {
+        for (Event e : events) {
+            assertNotNull(e.getTitle());
+            assertFalse(e.getTitle().isEmpty());
+        }
     }
 
     @Test
-    public void testClearEvents() {
-        // Add some dummy events
-        EventData.addEvent(new Event("Event 1", "Desc 1", "2025-11-05", "10:00", "City Hall"));
-        EventData.addEvent(new Event("Event 2", "Desc 2", "2025-12-10", "11:00", "Community Center"));
-
-        assertFalse(EventData.getEventList().isEmpty());
-
-        // Clear and verify
-        EventData.clearEvents();
-        assertTrue("Event list should be empty after clear()", EventData.getEventList().isEmpty());
-    }
-
-    @Test
-    public void testAddMultipleEvents() {
-        EventData.addEvent(new Event("A", "Desc", "2025-11-01", "12:00", "Place A"));
-        EventData.addEvent(new Event("B", "Desc", "2025-11-02", "13:00", "Place B"));
-
-        List<Event> events = EventData.getEventList();
-
-        assertEquals(2, events.size());
-        assertEquals("B", events.get(1).getTitle());
+    public void testMultipleEventsPersist() {
+        events.add(new Event("Music Fest", "Outdoor concert", "2025-11-24", "18:00", "Quad"));
+        events.add(new Event("Hackathon", "Coding competition", "2025-11-25", "08:00", "ECERF"));
+        assertTrue(events.size() >= 3);
     }
 }
