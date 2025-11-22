@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "206062489217",
+    "project_id": "eventapp-f210a",
+    "storage_bucket": "eventapp-f210a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:206062489217:android:2a1543598afc09130f0780",
+        "android_client_info": {
+          "package_name": "com.example.eventapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBNnSuILwK0TxnoBScZ1oDH4WVo4Kuk9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
