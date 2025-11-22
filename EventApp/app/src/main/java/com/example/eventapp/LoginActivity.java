@@ -75,6 +75,15 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, SignUpActivity.class));
             finish();
         });
+
+        Button btnContinueAsGuest = findViewById(R.id.btnContinueAsGuest);
+
+        btnContinueAsGuest.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, LandingHostActivity.class);
+            intent.putExtra("isGuest", true);
+            startActivity(intent);
+            finish();
+        });
     }
 
     /**

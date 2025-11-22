@@ -1,11 +1,13 @@
 package com.example.eventapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -109,6 +111,13 @@ public class OrganizerLandingFragment extends Fragment {
         rvEvents.setAdapter(adapter);
 
         loadOrganizerEvents();
+
+        TextView GoHome = view.findViewById(R.id.AppName);
+        GoHome.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), HomeActivity.class);
+            startActivity(intent);
+        });
+
     }
 
     /**

@@ -72,7 +72,7 @@
                 android:textColor="#666666"
                 android:layout_marginBottom="24dp" />
 
-            <!-- Form -->
+            <!-- Email -->
             <EditText
                 android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
@@ -91,6 +91,7 @@
                 android:textSize="12sp"
                 android:layout_marginBottom="12dp" />
 
+            <!-- Password -->
             <EditText
                 android:id="@+id/editTextPassword"
                 android:layout_width="match_parent"
@@ -109,6 +110,7 @@
                 android:textSize="12sp"
                 android:layout_marginBottom="16dp" />
 
+            <!-- Sign In -->
             <Button
                 android:id="@+id/btnSignIn"
                 android:layout_width="match_parent"
@@ -116,6 +118,17 @@
                 android:backgroundTint="#708090"
                 android:text="Sign In"
                 android:textColor="#FFFFFF" />
+
+            <!-- 🔥 Continue as Guest Button -->
+            <Button
+                android:id="@+id/btnContinueAsGuest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#708090"
+                android:text="Continue as Guest"
+                android:textColor="#FFFFFF" />
+
         </LinearLayout>
     </ScrollView>
 

@@ -29,7 +29,10 @@
                 android:text="tappit"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"/>
 
             <ImageButton
                 android:id="@+id/btnExplore"
