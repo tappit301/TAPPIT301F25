@@ -47,6 +47,8 @@ public class CreateEventFragment extends Fragment {
 
     private static final String TAG = "CreateEventFragment";
 
+    /**Event Category*/
+    private EditText etEventCategory;
     /** Date input */
     private EditText etDate;
 
@@ -124,6 +126,9 @@ public class CreateEventFragment extends Fragment {
         // Image picker
         cardEventImage.setOnClickListener(v -> openImagePicker());
 
+        //Event Category
+        etEventCategory  = view.findViewById(R.id.etEventCategory);
+
         // Buttons
         btnPublish.setOnClickListener(v -> publishEvent(view));
         btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
@@ -150,7 +155,7 @@ public class CreateEventFragment extends Fragment {
         String date = etDate.getText().toString().trim();
         String time = etTime.getText().toString().trim();
         String location = ((EditText) view.findViewById(R.id.etEventLocation)).getText().toString().trim();
-        String category = ((EditText) view.findViewById(R.id.etEventCategory)).getText().toString().trim();
+        String category = etEventCategory.getText().toString().trim();
         String maxCapStr = ((EditText) view.findViewById(R.id.etEventCapacity)).getText().toString().trim();
 
         if (title.isEmpty() || date.isEmpty() || time.isEmpty()) {

@@ -13,32 +13,34 @@ public class Event {
     private String date;          // YYYY-MM-DD or user format
     private String time;          // HH:mm
     private String location;
+    private String category;
 
     private String organizerId;
     private String organizerEmail;
 
-    /** ⭐ Poster image URL (Firebase Storage) */
+    /** Poster image URL (Firebase Storage) */
     private String imageUrl;
 
-    /** ⭐ For upcoming / past filtering */
+    /** For upcoming / past filtering */
     private long timestamp;
 
-    /** ⭐ Optional: capacity if you use lotteries */
+    /** Optional: capacity if you use lotteries */
     private int capacity;
 
-    /** ⭐ Optional: attendees count (for waitlist UI) */
+    /** Optional: attendees count (for waitlist UI) */
     private int attendeeCount;
 
     // REQUIRED empty constructor for Firestore
     public Event() {}
 
     public Event(String title, String description, String date,
-                 String time, String location) {
+                 String time, String location, String category) {
         this.title = title;
         this.description = description;
         this.date = date;
         this.time = time;
         this.location = location;
+        this.category = category;
     }
 
     // --------------------
@@ -55,6 +57,7 @@ public class Event {
     public String getOrganizerId() { return organizerId; }
     public String getOrganizerEmail() { return organizerEmail; }
 
+    public String getCategory() { return category; }
     public String getImageUrl() { return imageUrl; }
     public long getTimestamp() { return timestamp; }
 
@@ -67,6 +70,7 @@ public class Event {
 
     public void setId(String id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
+    public void setCategory(String category) { this.category = category; }
     public void setDescription(String description) { this.description = description; }
     public void setDate(String date) { this.date = date; }
     public void setTime(String time) { this.time = time; }

@@ -18,9 +18,13 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private final List<Event> eventList;
+    /** Navigation action to use when a card is clicked */
+    private final int navActionId;
 
-    public EventAdapter(List<Event> eventList) {
+    //New constructor: list + action ID
+    public EventAdapter(List<Event> eventList, int navActionId) {
         this.eventList = eventList;
+        this.navActionId = navActionId;
     }
 
     @NonNull
@@ -38,20 +42,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.tvTitle.setText(event.getTitle());
         holder.tvDate.setText(event.getDate() + " • " + event.getTime());
 
-        // ⭐ Load event image if exists
+        // Load event image if exists
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(event.getImageUrl())
-                    .placeholder(R.drawable.placeholder_img)   // your grey box
+                    .placeholder(R.drawable.placeholder_img)
                     .into(holder.ivPoster);
         } else {
             holder.ivPoster.setImageResource(R.drawable.placeholder_img);
         }
 
-        // ⭐ Navigate to details
+        // Navigate to details (uses the action ID passed to the adapter)
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-
             bundle.putString("eventId", event.getId());
             bundle.putString("title", event.getTitle());
             bundle.putString("desc", event.getDescription());
@@ -60,14 +63,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             bundle.putString("location", event.getLocation());
             bundle.putString("organizerId", event.getOrganizerId());
             bundle.putString("organizerEmail", event.getOrganizerEmail());
+            bundle.putString("imageUrl", event.getImageUrl()); // poster url
 
-            // ⭐ IMPORTANT: poster image
-            bundle.putString("imageUrl", event.getImageUrl());
-
-            Navigation.findNavController(v).navigate(
-                    R.id.action_organizerLandingFragment_to_eventDetailsFragment,
-                    bundle
-            );
+            Navigation.findNavController(v).navigate(navActionId, bundle);
         });
     }
 
@@ -83,8 +81,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            ivPoster = itemView.findViewById(R.id.ivEventImage);  // make sure this ID exists
+            ivPoster = itemView.findViewById(R.id.ivEventImage);
             tvTitle = itemView.findViewById(R.id.tvEventTitle);
             tvDate = itemView.findViewById(R.id.tvEventDate);
         }

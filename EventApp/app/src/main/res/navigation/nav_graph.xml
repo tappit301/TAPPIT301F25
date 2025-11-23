@@ -18,6 +18,21 @@
         <action
             android:id="@+id/action_organizerLandingFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
+            app:destination="@id/exploreEventsFragment" />
+    </fragment>
+
+    <!-- Explore All Events Page -->
+    <fragment
+        android:id="@+id/exploreEventsFragment"
+        android:name="com.example.eventapp.ExploreEventsFragment"
+        android:label="Explore Events">
+
+        <action
+            android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
     </fragment>
 
     <fragment
@@ -41,7 +56,7 @@
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
-        <!-- ✅ FIX: action needed for Edit/Manage button -->
+
         <action
             android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
@@ -55,8 +70,6 @@
         <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
         <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
 
-        <!-- Poster -->
-        <argument android:name="imageUrl" app:argType="string" android:defaultValue="" />
     </fragment>
 
     <fragment
