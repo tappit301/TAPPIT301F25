@@ -183,6 +183,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- CATEGORY DROPDOWN (keeps id etEventCategory) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
@@ -191,12 +192,14 @@
             android:hint="Category"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
                 android:id="@+id/etEventCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:maxLines="1" />
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
+                android:hint="Select category" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

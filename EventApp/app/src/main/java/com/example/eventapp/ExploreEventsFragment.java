@@ -152,14 +152,14 @@ public class ExploreEventsFragment extends Fragment {
 
                 if (id == R.id.filter_all) {
                     filterEvents("ALL");
-                } else if (id == R.id.filter_music) {
-                    filterEvents("Music");
+                } else if (id == R.id.filter_entertainment) {
+                    filterEvents("Entertainment");
                 } else if (id == R.id.filter_sports) {
                     filterEvents("Sports");
                 } else if (id == R.id.filter_tech) {
-                    filterEvents("Tech");
-                } else if (id == R.id.filter_social) {
-                    filterEvents("Social");
+                    filterEvents("Technology");
+                } else if (id == R.id.filter_health) {
+                    filterEvents("Health");
                 }
 
                 return true;

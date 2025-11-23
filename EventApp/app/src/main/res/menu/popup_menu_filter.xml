@@ -6,8 +6,8 @@
         android:title="All" />
 
     <item
-        android:id="@+id/filter_music"
-        android:title="Music" />
+        android:id="@+id/filter_entertainment"
+        android:title="Entertainment" />
 
     <item
         android:id="@+id/filter_sports"
@@ -15,10 +15,10 @@
 
     <item
         android:id="@+id/filter_tech"
-        android:title="Tech" />
+        android:title="Technology" />
 
     <item
-        android:id="@+id/filter_social"
-        android:title="Social" />
+        android:id="@+id/filter_health"
+        android:title="Health" />
 
 </menu>

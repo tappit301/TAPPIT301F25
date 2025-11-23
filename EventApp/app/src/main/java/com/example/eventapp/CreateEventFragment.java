@@ -27,9 +27,10 @@ import com.bumptech.glide.Glide;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -42,17 +43,20 @@ public class CreateEventFragment extends Fragment {
 
     private static final String TAG = "CreateEventFragment";
 
-    // ✅ Edit Mode Variables
+    // Edit Mode Variables
     private String eventId = null;
     private boolean isEditMode = false;
 
-    // ✅ Views
+    // Views
     private EditText etDate, etTime;
     private ImageView ivEventImage;
     private LinearLayout placeholderLayout;
     private MaterialButton btnPublish;
 
-    // ✅ Firebase
+    // Category input (existing view, just wired up now)
+    private EditText etCategory; // uses R.id.etEventCategory
+
+    // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
@@ -96,7 +100,7 @@ public class CreateEventFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ✅ Init Views
+        // Init Views
         etDate = view.findViewById(R.id.etEventDate);
         etTime = view.findViewById(R.id.etEventTime);
         btnPublish = view.findViewById(R.id.btnPublishEvent);
@@ -105,21 +109,29 @@ public class CreateEventFragment extends Fragment {
         ivEventImage = view.findViewById(R.id.ivEventImage);
         placeholderLayout = view.findViewById(R.id.layoutAddCoverPlaceholder);
 
-        // ✅ Read Arguments
+        // ✅ Category field (existing EditText in XML)
+        etCategory = view.findViewById(R.id.etEventCategory);
+
+        // Make category not freely typed: user picks from list
+        etCategory.setFocusable(false);
+        etCategory.setClickable(true);
+        etCategory.setOnClickListener(v -> showCategoryPicker());
+
+        // Read Arguments (edit mode)
         Bundle args = getArguments();
         if (args != null && args.containsKey("eventId")) {
             isEditMode = true;
             eventId = args.getString("eventId");
             btnPublish.setText("Save Changes");
-            loadEventDetails(); // ✅ Fetch from Firestore
+            loadEventDetails(); // Fetch from Firestore
         }
 
-        // ✅ Inputs
+        // Inputs
         etDate.setOnClickListener(v -> showDatePicker());
         etTime.setOnClickListener(v -> showTimePicker());
         cardEventImage.setOnClickListener(v -> openImagePicker());
 
-        // ✅ Buttons
+        // Buttons
         btnPublish.setOnClickListener(v -> {
             if (isEditMode) {
                 updateEvent(view);
@@ -131,7 +143,37 @@ public class CreateEventFragment extends Fragment {
         btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
     }
 
-    /** ✅ Fetch Event from Firestore */
+    /** Shows the category picker dialog */
+    private void showCategoryPicker() {
+        // Fixed options
+        String[] categories = new String[] {
+                "Technology",
+                "Sports",
+                "Entertainment",
+                "Health"
+        };
+
+        // Pre-select current value if it matches one of them
+        int checkedItem = -1;
+        String current = etCategory.getText().toString().trim();
+        for (int i = 0; i < categories.length; i++) {
+            if (categories[i].equalsIgnoreCase(current)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Select category")
+                .setSingleChoiceItems(categories, checkedItem, (dialog, which) -> {
+                    etCategory.setText(categories[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /** Fetch Event from Firestore */
     private void loadEventDetails() {
         firestore.collection("events")
                 .document(eventId)
@@ -139,7 +181,6 @@ public class CreateEventFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (!doc.exists()) return;
 
-                    // ✅ Fill UI
                     ((EditText) getView().findViewById(R.id.etEventTitle))
                             .setText(doc.getString("title"));
                     ((EditText) getView().findViewById(R.id.etEventDescription))
@@ -160,14 +201,13 @@ public class CreateEventFragment extends Fragment {
                 });
     }
 
-    /** ✅ Update Existing Event */
+    /** Update Existing Event */
     private void updateEvent(View view) {
         if (eventId == null) return;
 
-        // ✅ If user picked a new image, upload it first
         if (selectedImageUri != null) {
             StorageReference imageRef = storage.getReference()
-                    .child("event_covers/" + eventId + ".jpg"); // ✅ Overwrite same file
+                    .child("event_covers/" + eventId + ".jpg");
 
             imageRef.putFile(selectedImageUri)
                     .continueWithTask(task -> {
@@ -175,7 +215,6 @@ public class CreateEventFragment extends Fragment {
                         return imageRef.getDownloadUrl();
                     })
                     .addOnSuccessListener(downloadUrl -> {
-                        // ✅ After image uploaded, update Firestore
                         Map<String, Object> updates = getUpdatedFields();
                         updates.put("imageUrl", downloadUrl.toString());
 
@@ -193,7 +232,6 @@ public class CreateEventFragment extends Fragment {
                             Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         } else {
-            // ✅ No new image → only update text fields
             Map<String, Object> updates = getUpdatedFields();
 
             firestore.collection("events")
@@ -207,6 +245,7 @@ public class CreateEventFragment extends Fragment {
                             Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
+
     private Map<String, Object> getUpdatedFields() {
         Map<String, Object> updates = new HashMap<>();
         updates.put("title", ((EditText) getView().findViewById(R.id.etEventTitle)).getText().toString().trim());
@@ -218,15 +257,71 @@ public class CreateEventFragment extends Fragment {
         return updates;
     }
 
-
-    /** ✅ Create New Event */
+    /** Create New Event (your original logic goes here) */
     private void publishEvent(View view) {
-        // (Same as your original code — unchanged)
-        // We only changed edit behavior, creation stays the same ✅
-        Toast.makeText(getContext(), "Create mode - event will be published.", Toast.LENGTH_SHORT).show();
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (getView() == null) return;
+
+        String title = ((EditText) getView().findViewById(R.id.etEventTitle))
+                .getText().toString().trim();
+        String desc = ((EditText) getView().findViewById(R.id.etEventDescription))
+                .getText().toString().trim();
+        String date = etDate.getText().toString().trim();
+        String time = etTime.getText().toString().trim();
+        String location = ((EditText) getView().findViewById(R.id.etEventLocation))
+                .getText().toString().trim();
+        String category = etCategory.getText().toString().trim();
+
+        if (title.isEmpty() || date.isEmpty() || time.isEmpty()) {
+            Toast.makeText(getContext(), "Please fill in required fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Optional: require category
+        if (category.isEmpty()) {
+            Toast.makeText(getContext(), "Please choose a category.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> event = new HashMap<>();
+        event.put("title", title);
+        event.put("description", desc);
+        event.put("date", date);
+        event.put("time", time);
+        event.put("location", location);
+        event.put("category", category);
+        event.put("createdAt", Timestamp.now());
+        event.put("organizerId", user.getUid());
+        event.put("organizerEmail", user.getEmail());
+
+        firestore.collection("events")
+                .add(event)
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(getContext(), "Event published successfully!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Event saved by " + user.getEmail());
+
+                    String qrPayload = "Event: " + title +
+                            "\nDate: " + date +
+                            "\nTime: " + time +
+                            "\nLocation: " + location +
+                            "\nOrganizer: " + user.getEmail();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("qrData", qrPayload);
+                    Navigation.findNavController(view).navigate(R.id.qrCodeFragment, bundle);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error adding event", e);
+                    Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
-    /** ✅ Pickers */
+    /** Pickers */
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(requireContext(),
