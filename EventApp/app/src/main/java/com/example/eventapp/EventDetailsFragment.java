@@ -26,6 +26,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 /**
  * Combined Event Details:
  * - Poster image
@@ -145,22 +149,15 @@ public class EventDetailsFragment extends Fragment {
                     .navigate(R.id.action_eventDetailsFragment_to_qrCodeFragment, bundle);
         });
 
-        // Manage/Edit click -> open CreateEventFragment prefilled
+        // Manage Event click -> Go to ManageEventsFragment with eventId
         btnManageEvent.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", eventId);
-            bundle.putString("title", ((TextView) view.findViewById(R.id.tvEventTitle)).getText().toString());
-            bundle.putString("desc", ((TextView) view.findViewById(R.id.tvEventDescription)).getText().toString());
-            bundle.putString("date", ((TextView) view.findViewById(R.id.tvEventDate)).getText().toString());
-            bundle.putString("time", ((TextView) view.findViewById(R.id.tvEventTime)).getText().toString());
-            bundle.putString("location", ((TextView) view.findViewById(R.id.tvEventLocation)).getText().toString());
-            bundle.putString("organizerId", organizerId);
-            bundle.putString("organizerEmail", organizerEmail);
-            bundle.putString("imageUrl", args != null ? args.getString("imageUrl", "") : "");
 
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_eventDetailsFragment_to_createEventFragment, bundle);
+                    .navigate(R.id.action_eventDetailsFragment_to_manageEventsFragment, bundle);
         });
+
 
         // Delete click
         btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmation());
@@ -181,8 +178,15 @@ public class EventDetailsFragment extends Fragment {
                 .document(eventId)
                 .collection("attendees")
                 .document(currentUser.getUid());
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", currentUser.getUid());
+        data.put("email", currentUser.getEmail());
+        data.put("joinedAt", Timestamp.now());
+        data.put("status", "waiting"); // ✅ NEW FIELD
 
-        attendeeRef.set(new AttendeeData(currentUser))
+        attendeeRef.set(data)
+
+
                 .addOnSuccessListener(aVoid -> {
                     joinBtn.setEnabled(false);
                     joinBtn.setText("Added ✅");
@@ -259,18 +263,20 @@ public class EventDetailsFragment extends Fragment {
     }
 
     /** Firestore attendee model */
-    private static class AttendeeData {
+    public static class AttendeeData {
         public String userId;
         public String email;
         public Timestamp joinedAt;
+        public String status;
 
-        // Needed for Firestore
         public AttendeeData() {}
 
         public AttendeeData(FirebaseUser user) {
             this.userId = user.getUid();
             this.email = user.getEmail();
             this.joinedAt = Timestamp.now();
+            this.status = "waiting"; // ✅ Default status
         }
     }
+
 }
