@@ -53,7 +53,6 @@ public class ManageEventsFragment extends Fragment {
         adapter = new AttendeeAdapter(attendees);
         recyclerView.setAdapter(adapter);
 
-        // ✅ Read args FIRST
         Bundle args = getArguments();
         if (args != null) {
             eventId = args.getString("eventId", "");
@@ -64,7 +63,7 @@ public class ManageEventsFragment extends Fragment {
             return;
         }
 
-        // ✅ EDIT EVENT BUTTON CLICK (args now AVAILABLE)
+        //EDIT EVENT BUTTON CLICK
         View btnEditEvent = view.findViewById(R.id.btnEditEvent);
 
         btnEditEvent.setOnClickListener(v -> {

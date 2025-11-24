@@ -57,4 +57,16 @@ public class EventRepository {
     public List<Event> getEvents() {
         return events;
     }
+
+    public List<Event> getEventsByCategory(String category) {
+        if (category.equals("All")) return events;
+
+        List<Event> filtered = new ArrayList<>();
+        for (Event e : events) {
+            if (e.getCategory().equalsIgnoreCase(category)) {
+                filtered.add(e);
+            }
+        }
+        return filtered;
+    }
 }

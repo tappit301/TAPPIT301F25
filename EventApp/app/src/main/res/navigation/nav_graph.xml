@@ -18,6 +18,21 @@
         <action
             android:id="@+id/action_organizerLandingFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
+            app:destination="@id/exploreEventsFragment" />
+    </fragment>
+
+    <!-- Explore All Events Page -->
+    <fragment
+        android:id="@+id/exploreEventsFragment"
+        android:name="com.example.eventapp.ExploreEventsFragment"
+        android:label="Explore Events">
+
+        <action
+            android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
     </fragment>
 
     <fragment
@@ -41,12 +56,12 @@
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
-        <!-- ❌ Old action (Create Event) stays for Edit Event, not Manage -->
+
         <action
             android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
-        <!-- ✅ NEW ACTION: Manage Event -->
+        <!--Manage Events-->
         <action
             android:id="@+id/action_eventDetailsFragment_to_manageEventsFragment"
             app:destination="@id/manageEventsFragment" />
@@ -85,7 +100,7 @@
             android:defaultValue="" />
     </fragment>
 
-    <!-- ✅ MANAGE EVENTS DESTINATION -->
+    <!--Manage Event Destination-->
     <fragment
         android:id="@+id/manageEventsFragment"
         android:name="com.example.eventapp.ManageEventsFragment"

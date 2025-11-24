@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.eventapp"
-    compileSdk = 34 // ✅ Use 34 (36 is not yet fully supported by Material)
+    compileSdk = 34 //Use 34 (36 is not yet fully supported by Material)
 
     defaultConfig {
         applicationId = "com.example.eventapp"
@@ -28,7 +28,7 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17 // ✅ Matches your new JDK
+        sourceCompatibility = JavaVersion.VERSION_17 //Matches your new JDK
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
@@ -65,7 +65,7 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.3")
 
-    // ⭐ Glide (Fixes your errors: Glide, bumptech, DiskCacheStrategy)
+    //Glide (Fixes your errors: Glide, bumptech, DiskCacheStrategy)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 

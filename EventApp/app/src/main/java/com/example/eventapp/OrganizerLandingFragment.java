@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -64,6 +65,12 @@ public class OrganizerLandingFragment extends Fragment {
         firestore = FirebaseHelper.getFirestore();
 
         NavController navController = Navigation.findNavController(view);
+
+        ImageButton btnExplore = view.findViewById(R.id.btnExplore);
+        btnExplore.setOnClickListener(v ->
+                navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
+        );
+
         View.OnClickListener createClick = v ->
                 navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
@@ -82,7 +89,12 @@ public class OrganizerLandingFragment extends Fragment {
         emptyState = view.findViewById(R.id.emptyStateLayout);
 
         rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new EventAdapter(upcomingEvents);
+
+        // 🔹 Initial adapter: UPCOMING events → details from organizerLanding
+        adapter = new EventAdapter(
+                upcomingEvents,
+                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+        );
         rvEvents.setAdapter(adapter);
 
         setupFilters();
@@ -90,21 +102,29 @@ public class OrganizerLandingFragment extends Fragment {
     }
 
     // ----------------------------------------------------------
-    // FILTER BUTTON LOGIC (FIXED VERSION)
+    // FILTER BUTTON LOGIC
     // ----------------------------------------------------------
     private void setupFilters() {
 
         btnUpcoming.setOnClickListener(v -> {
             btnUpcoming.setChecked(true);
             btnPast.setChecked(false);
-            adapter = new EventAdapter(upcomingEvents);
+
+            adapter = new EventAdapter(
+                    upcomingEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
+            );
             rvEvents.setAdapter(adapter);
         });
 
         btnPast.setOnClickListener(v -> {
             btnPast.setChecked(true);
             btnUpcoming.setChecked(false);
-            adapter = new EventAdapter(pastEvents);
+
+            adapter = new EventAdapter(
+                    pastEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
+            );
             rvEvents.setAdapter(adapter);
         });
 
@@ -160,10 +180,17 @@ public class OrganizerLandingFragment extends Fragment {
                     emptyState.setVisibility(View.GONE);
                     rvEvents.setVisibility(View.VISIBLE);
 
+                    // Recreate adapter based on which tab is active
                     if (btnUpcoming.isChecked()) {
-                        adapter = new EventAdapter(upcomingEvents);
+                        adapter = new EventAdapter(
+                                upcomingEvents,
+                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+                        );
                     } else {
-                        adapter = new EventAdapter(pastEvents);
+                        adapter = new EventAdapter(
+                                pastEvents,
+                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+                        );
                     }
 
                     rvEvents.setAdapter(adapter);
