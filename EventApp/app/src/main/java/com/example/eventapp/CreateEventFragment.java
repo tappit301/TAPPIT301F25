@@ -3,10 +3,13 @@ package com.example.eventapp;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,7 @@ import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -136,7 +140,7 @@ public class CreateEventFragment extends Fragment {
             if (isEditMode) {
                 updateEvent(view);
             } else {
-                publishEvent(view);
+                publishEvent(view);   // ✅ One method for normal + guest
             }
         });
 
@@ -257,16 +261,15 @@ public class CreateEventFragment extends Fragment {
         return updates;
     }
 
-    /** Create New Event (your original logic goes here) */
+    /**
+     * Publish event:
+     * - If Firebase user with email → use that
+     * - Else → show popup asking for name + email, then publish as "guest organizer"
+     */
     private void publishEvent(View view) {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (getView() == null) return;
 
+        // Common form fields
         String title = ((EditText) getView().findViewById(R.id.etEventTitle))
                 .getText().toString().trim();
         String desc = ((EditText) getView().findViewById(R.id.etEventDescription))
@@ -282,11 +285,94 @@ public class CreateEventFragment extends Fragment {
             return;
         }
 
-        // Optional: require category
         if (category.isEmpty()) {
             Toast.makeText(getContext(), "Please choose a category.", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        FirebaseUser user = auth.getCurrentUser();
+
+        // ✅ Normal signed-in user with email → publish directly
+        if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+            String organizerId = user.getUid();
+            String organizerEmail = user.getEmail();
+
+            doPublishEvent(view, title, desc, date, time, location, category,
+                    organizerId, organizerEmail);
+            return;
+        }
+
+        // ✅ Guest or missing email → show dialog to collect name + email, then publish
+        showGuestOrganizerDialog(view, title, desc, date, time, location, category);
+    }
+
+    /**
+     * Show popup asking guest for name + email, then publish with a stable guest ID
+     * remembered via SharedPreferences.
+     */
+    private void showGuestOrganizerDialog(View anchorView,
+                                          String title,
+                                          String desc,
+                                          String date,
+                                          String time,
+                                          String location,
+                                          String category) {
+
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_guest_organizer, null, false);
+
+        TextInputEditText etName = dialogView.findViewById(R.id.etGuestName);
+        TextInputEditText etEmail = dialogView.findViewById(R.id.etGuestEmail);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Enter your details")
+                .setView(dialogView)
+                .setPositiveButton("Continue", (dialog, which) -> {
+                    String guestName = etName.getText().toString().trim();
+                    String guestEmail = etEmail.getText().toString().trim();
+
+                    if (guestEmail.isEmpty()) {
+                        Toast.makeText(requireContext(),
+                                "Email is required to create an event.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Build a stable guest organizer ID using device id
+                    Context ctx = requireContext();
+                    SharedPreferences prefs =
+                            ctx.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+                    String guestId = prefs.getString("GUEST_ORGANIZER_ID", null);
+
+                    if (guestId == null) {
+                        String deviceId = Settings.Secure.getString(
+                                ctx.getContentResolver(),
+                                Settings.Secure.ANDROID_ID
+                        );
+                        guestId = "guest_" + deviceId;
+                        prefs.edit().putString("GUEST_ORGANIZER_ID", guestId).apply();
+                    }
+
+                    // You can optionally store guestName elsewhere if you want
+                    doPublishEvent(anchorView, title, desc, date, time, location, category,
+                            guestId, guestEmail);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Actually writes the event document to Firestore using the given organizerId/email.
+     */
+    private void doPublishEvent(View view,
+                                String title,
+                                String desc,
+                                String date,
+                                String time,
+                                String location,
+                                String category,
+                                String organizerId,
+                                String organizerEmail) {
 
         Map<String, Object> event = new HashMap<>();
         event.put("title", title);
@@ -296,20 +382,20 @@ public class CreateEventFragment extends Fragment {
         event.put("location", location);
         event.put("category", category);
         event.put("createdAt", Timestamp.now());
-        event.put("organizerId", user.getUid());
-        event.put("organizerEmail", user.getEmail());
+        event.put("organizerId", organizerId);
+        event.put("organizerEmail", organizerEmail);
 
         firestore.collection("events")
                 .add(event)
                 .addOnSuccessListener(doc -> {
                     Toast.makeText(getContext(), "Event published successfully!", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Event saved by " + user.getEmail());
+                    Log.d(TAG, "Event saved by " + organizerEmail);
 
                     String qrPayload = "Event: " + title +
                             "\nDate: " + date +
                             "\nTime: " + time +
                             "\nLocation: " + location +
-                            "\nOrganizer: " + user.getEmail();
+                            "\nOrganizer: " + organizerEmail;
 
                     Bundle bundle = new Bundle();
                     bundle.putString("qrData", qrPayload);

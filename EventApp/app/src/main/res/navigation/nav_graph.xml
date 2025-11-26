@@ -22,6 +22,11 @@
         <action
             android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
             app:destination="@id/exploreEventsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+
     </fragment>
 
     <!-- Explore All Events Page -->
@@ -111,6 +116,42 @@
             android:id="@+id/action_manageEventsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
+    </fragment>
+
+    <!-- PROFILE -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.eventapp.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/activity_profile">
+
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+
+        <!-- NEW: scan QR -->
+        <action
+            android:id="@+id/action_profileFragment_to_scanQrFragment"
+            app:destination="@id/scanQrFragment" />
+    </fragment>
+
+    <!-- EDIT PROFILE -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.eventapp.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <!-- NEW: SCAN QR FRAGMENT -->
+    <fragment
+        android:id="@+id/scanQrFragment"
+        android:name="com.example.eventapp.ScanQrFragment"
+        android:label="Scan QR"
+        tools:layout="@layout/fragment_scan_qr">
+
+        <action
+            android:id="@+id/action_scanQrFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
     </fragment>
 
 </navigation>

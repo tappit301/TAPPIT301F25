@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Profile text button -->
+    <!-- Profile button (icon on toolbar) -->
     <item
         android:id="@+id/action_profile"
         android:title="Profile"
-        android:icon="@null"
+        android:icon="@drawable/profile_icon"
         app:showAsAction="always"
         android:contentDescription="Profile" />
 
-    <!-- Sign In text button -->
+    <!-- Sign In (used on HomeActivity, hidden on LandingHostActivity) -->
     <item
         android:id="@+id/action_sign_in"
         android:title="Sign In"
