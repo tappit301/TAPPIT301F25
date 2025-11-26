@@ -29,19 +29,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * Combined Event Details:
- * - Poster image
- * - Join waiting list
- * - QR view
- * - Organizer-only: Manage(Edit) + Delete
- */
 public class EventDetailsFragment extends Fragment {
 
     private static final String TAG = "EventDetailsFragment";
 
     private MaterialButton joinBtn, btnViewQr, btnManageEvent, btnDeleteEvent;
+    private MaterialButton btnAccept, btnDecline;
     private ImageView ivEventCover;
 
     private String eventId;
@@ -66,34 +59,33 @@ public class EventDetailsFragment extends Fragment {
         firestore = FirebaseHelper.getFirestore();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        // UI references
         joinBtn = view.findViewById(R.id.btnJoinWaitingList);
         btnViewQr = view.findViewById(R.id.btnViewQr);
         btnManageEvent = view.findViewById(R.id.btnManageEvent);
         btnDeleteEvent = view.findViewById(R.id.btnDeleteEvent);
         ivEventCover = view.findViewById(R.id.ivEventCover);
 
-        // ----- Read args -----
+        // NEW — Accept / Decline buttons
+        btnAccept = view.findViewById(R.id.btnAccept);
+        btnDecline = view.findViewById(R.id.btnDecline);
+
+        // Read arguments
         Bundle args = getArguments();
         if (args != null) {
             eventId = args.getString("eventId", "");
             organizerId = args.getString("organizerId", "");
             organizerEmail = args.getString("organizerEmail", "");
 
-            ((TextView) view.findViewById(R.id.tvEventTitle))
-                    .setText(args.getString("title", ""));
-            ((TextView) view.findViewById(R.id.tvEventDate))
-                    .setText(args.getString("date", ""));
-            ((TextView) view.findViewById(R.id.tvEventTime))
-                    .setText(args.getString("time", ""));
-            ((TextView) view.findViewById(R.id.tvEventLocation))
-                    .setText(args.getString("location", ""));
-            ((TextView) view.findViewById(R.id.tvEventDescription))
-                    .setText(args.getString("desc", ""));
+            ((TextView) view.findViewById(R.id.tvEventTitle)).setText(args.getString("title", ""));
+            ((TextView) view.findViewById(R.id.tvEventDate)).setText(args.getString("date", ""));
+            ((TextView) view.findViewById(R.id.tvEventTime)).setText(args.getString("time", ""));
+            ((TextView) view.findViewById(R.id.tvEventLocation)).setText(args.getString("location", ""));
+            ((TextView) view.findViewById(R.id.tvEventDescription)).setText(args.getString("desc", ""));
 
             TextView tvOrg = view.findViewById(R.id.tvOrganizerName);
-            tvOrg.setText(organizerEmail == null ? "" : organizerEmail);
+            tvOrg.setText(organizerEmail != null ? organizerEmail : "");
 
-            // Poster
             String imageUrl = args.getString("imageUrl", "");
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(requireContext())
@@ -107,12 +99,12 @@ public class EventDetailsFragment extends Fragment {
             }
         }
 
-        // Back
+        // Back button
         view.findViewById(R.id.btnBack).setOnClickListener(v ->
                 NavHostFragment.findNavController(this).popBackStack()
         );
 
-        // Organizer-only button visibility
+        // Organizer-only controls
         boolean isOrganizer =
                 currentUser != null &&
                         organizerId != null &&
@@ -121,35 +113,28 @@ public class EventDetailsFragment extends Fragment {
         btnManageEvent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
         btnDeleteEvent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
 
-        // Join waiting list visible for everyone (organizer can join too)
-        joinBtn.setVisibility(View.VISIBLE);
-
-        // Disable join if already joined
+        // Disable Join if already joined
         checkIfAlreadyJoined();
 
-        // Join click
+        // Join event
         joinBtn.setOnClickListener(this::addUserToWaitingList);
 
-        // QR click
+        // View QR
         btnViewQr.setOnClickListener(v -> {
-            String qrPayload = "Event: " +
-                    ((TextView) view.findViewById(R.id.tvEventTitle)).getText() +
-                    "\nDate: " +
-                    ((TextView) view.findViewById(R.id.tvEventDate)).getText() +
-                    "\nTime: " +
-                    ((TextView) view.findViewById(R.id.tvEventTime)).getText() +
-                    "\nLocation: " +
-                    ((TextView) view.findViewById(R.id.tvEventLocation)).getText();
-
             Bundle bundle = new Bundle();
-            bundle.putString("qrData", qrPayload);
+            bundle.putString("qrData",
+                    "Event: " + ((TextView) view.findViewById(R.id.tvEventTitle)).getText() +
+                            "\nDate: " + ((TextView) view.findViewById(R.id.tvEventDate)).getText() +
+                            "\nTime: " + ((TextView) view.findViewById(R.id.tvEventTime)).getText() +
+                            "\nLocation: " + ((TextView) view.findViewById(R.id.tvEventLocation)).getText()
+            );
             bundle.putBoolean("cameFromDetails", true);
 
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventDetailsFragment_to_qrCodeFragment, bundle);
         });
 
-        // Manage Event click -> Go to ManageEventsFragment with eventId
+        // Manage event (organizer)
         btnManageEvent.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", eventId);
@@ -158,19 +143,19 @@ public class EventDetailsFragment extends Fragment {
                     .navigate(R.id.action_eventDetailsFragment_to_manageEventsFragment, bundle);
         });
 
-
-        // Delete click
         btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmation());
+
+        // NEW — Check if user is selected → show Accept/Decline
+        checkSelectionStatus();
     }
 
-    /** Add user to waiting list */
     private void addUserToWaitingList(View v) {
         if (currentUser == null) {
             Snackbar.make(v, "Please log in first.", Snackbar.LENGTH_LONG).show();
             return;
         }
         if (eventId == null || eventId.isEmpty()) {
-            Snackbar.make(v, "Error: Event not found.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(v, "Event not found.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
@@ -178,15 +163,14 @@ public class EventDetailsFragment extends Fragment {
                 .document(eventId)
                 .collection("attendees")
                 .document(currentUser.getUid());
+
         Map<String, Object> data = new HashMap<>();
         data.put("userId", currentUser.getUid());
         data.put("email", currentUser.getEmail());
         data.put("joinedAt", Timestamp.now());
-        data.put("status", "waiting"); // ✅ NEW FIELD
+        data.put("status", "waiting");
 
         attendeeRef.set(data)
-
-
                 .addOnSuccessListener(aVoid -> {
                     joinBtn.setEnabled(false);
                     joinBtn.setText("Added ✅");
@@ -194,13 +178,10 @@ public class EventDetailsFragment extends Fragment {
                     Snackbar.make(v, "Joined waiting list.", Snackbar.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error joining waiting list", e);
-                    Snackbar.make(v, "Failed to join: " + e.getMessage(),
-                            Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(v, "Failed: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                 });
     }
 
-    /** Check if already joined */
     private void checkIfAlreadyJoined() {
         if (currentUser == null || eventId == null || eventId.isEmpty()) return;
 
@@ -215,9 +196,86 @@ public class EventDetailsFragment extends Fragment {
                         joinBtn.setText("Added ✅");
                         joinBtn.setAlpha(0.6f);
                     }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking waiting list entry", e));
+                });
+    }
+
+    // NEW — Check selection status after lottery
+    private void checkSelectionStatus() {
+        if (currentUser == null || eventId == null) return;
+
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    String status = doc.getString("status");
+
+                    if ("selected".equals(status)) {
+                        btnAccept.setVisibility(View.VISIBLE);
+                        btnDecline.setVisibility(View.VISIBLE);
+                        joinBtn.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    // NEW — Accept Invitation
+    private void handleAccept() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(currentUser.getUid())
+                .update("status", "enrolled")
+                .addOnSuccessListener(unused -> {
+                    Snackbar.make(requireView(), "You are enrolled!", Snackbar.LENGTH_LONG).show();
+                    btnAccept.setVisibility(View.GONE);
+                    btnDecline.setVisibility(View.GONE);
+                });
+    }
+
+    // NEW — Decline Invitation
+    private void handleDecline() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(currentUser.getUid())
+                .update("status", "cancelled")
+                .addOnSuccessListener(unused -> {
+                    Snackbar.make(requireView(), "Invitation declined.", Snackbar.LENGTH_LONG).show();
+                    btnAccept.setVisibility(View.GONE);
+                    btnDecline.setVisibility(View.GONE);
+                    triggerReplacementDraw();
+                });
+    }
+
+    // NEW — Automatically select next user after someone declines
+    private void triggerReplacementDraw() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .whereEqualTo("status", "not_selected")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+
+                    if (snapshot.isEmpty()) {
+                        Log.d(TAG, "No replacement available.");
+                        return;
+                    }
+
+                    DocumentSnapshot next = snapshot.getDocuments()
+                            .get((int) (Math.random() * snapshot.size()));
+
+                    firestore.collection("eventAttendees")
+                            .document(eventId)
+                            .collection("attendees")
+                            .document(next.getId())
+                            .update("status", "selected")
+                            .addOnSuccessListener(unused ->
+                                    Log.d(TAG, "Replacement selected: " + next.getId())
+                            );
+                });
     }
 
     private void showDeleteConfirmation() {
@@ -230,15 +288,12 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void deleteEvent() {
-        if (eventId == null || eventId.isEmpty()) return;
-
         firestore.collection("events")
                 .document(eventId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     deleteAttendeesForEvent();
-                    Snackbar.make(requireView(), "Event deleted.",
-                            Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(requireView(), "Event deleted.", Snackbar.LENGTH_SHORT).show();
 
                     NavHostFragment.findNavController(this)
                             .popBackStack(R.id.organizerLandingFragment, false);
@@ -257,12 +312,9 @@ public class EventDetailsFragment extends Fragment {
                         doc.getReference().delete();
                     }
                     firestore.collection("eventAttendees").document(eventId).delete();
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error deleting attendees", e));
+                });
     }
 
-    /** Firestore attendee model */
     public static class AttendeeData {
         public String userId;
         public String email;
@@ -275,8 +327,7 @@ public class EventDetailsFragment extends Fragment {
             this.userId = user.getUid();
             this.email = user.getEmail();
             this.joinedAt = Timestamp.now();
-            this.status = "waiting"; // ✅ Default status
+            this.status = "waiting";
         }
     }
-
 }
