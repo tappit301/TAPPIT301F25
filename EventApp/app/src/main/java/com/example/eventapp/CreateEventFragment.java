@@ -207,25 +207,9 @@ public class CreateEventFragment extends Fragment {
                 });
     }
 
-    /** Update Existing Event */
-    /** Update Existing Event + notify all attendees that it was updated */
+
     private void updateEvent(View view) {
         if (eventId == null) return;
-
-        // Capture title now so we can reuse it in notifications
-        String updatedTitle = ((EditText) requireView().findViewById(R.id.etEventTitle))
-                .getText().toString().trim();
-
-        // Common code to run AFTER Firestore successfully updates the event
-        Runnable afterUpdate = () -> {
-            Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
-
-            // Send notifications to all attendees that this event was updated
-            sendEventUpdatedNotifications(updatedTitle);
-
-            // Go back to previous screen (same behavior as before)
-            Navigation.findNavController(view).popBackStack();
-        };
 
         if (selectedImageUri != null) {
             StorageReference imageRef = storage.getReference()
@@ -243,16 +227,15 @@ public class CreateEventFragment extends Fragment {
                         firestore.collection("events")
                                 .document(eventId)
                                 .update(updates)
-                                .addOnSuccessListener(unused -> afterUpdate.run())
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                                    Navigation.findNavController(view).popBackStack();
+                                })
                                 .addOnFailureListener(e ->
-                                        Toast.makeText(getContext(),
-                                                "Update failed: " + e.getMessage(),
-                                                Toast.LENGTH_SHORT).show());
+                                        Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(getContext(),
-                                    "Image upload failed: " + e.getMessage(),
-                                    Toast.LENGTH_SHORT).show());
+                            Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         } else {
             Map<String, Object> updates = getUpdatedFields();
@@ -260,50 +243,15 @@ public class CreateEventFragment extends Fragment {
             firestore.collection("events")
                     .document(eventId)
                     .update(updates)
-                    .addOnSuccessListener(unused -> afterUpdate.run())
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(view).popBackStack();
+                    })
                     .addOnFailureListener(e ->
-                            Toast.makeText(getContext(),
-                                    "Update failed: " + e.getMessage(),
-                                    Toast.LENGTH_SHORT).show());
+                            Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 
-    /** Notify all attendees that this event was updated. */
-    /**
-     * Notify every attendee on this event that the event details were updated.
-     */
-    private void sendEventUpdatedNotifications(String eventTitle) {
-        if (eventId == null || eventId.isEmpty()) return;
-
-        firestore.collection("eventAttendees")
-                .document(eventId)
-                .collection("attendees")
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    if (snapshot == null || snapshot.isEmpty()) {
-                        return;
-                    }
-
-                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                        String userId = doc.getString("userId");
-                        if (userId == null || userId.isEmpty()) continue;
-
-                        // Use a safe context so we do not crash if fragment is detached
-                        Context ctx = getContext();
-                        if (ctx != null) {
-                            NotificationHelper.notifyUser(
-                                    ctx,
-                                    userId,
-                                    "EVENT_UPDATED",
-                                    "Event updated",
-                                    "Details for \"" + eventTitle + "\" have been updated."
-                            );
-                        }
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Failed to send event updated notifications", e));
-    }
 
 
 
