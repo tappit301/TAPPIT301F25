@@ -19,6 +19,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.eventapp.utils.FirebaseHelper;
+import com.example.eventapp.utils.NotificationHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -52,6 +53,7 @@ public class EventDetailsFragment extends Fragment {
     private String eventId;
     private String organizerId;
     private String organizerEmail;
+    private String eventTitle;
 
     private FirebaseFirestore firestore;
     private FirebaseUser firebaseUser;
@@ -99,6 +101,7 @@ public class EventDetailsFragment extends Fragment {
             eventId = args.getString("eventId", "");
             organizerId = args.getString("organizerId", "");
             organizerEmail = args.getString("organizerEmail", "");
+            eventTitle = args.getString("title", "Event");
 
             ((TextView) view.findViewById(R.id.tvEventTitle))
                     .setText(args.getString("title", ""));
@@ -324,6 +327,26 @@ public class EventDetailsFragment extends Fragment {
                     joinBtn.setText("Added ✅");
                     joinBtn.setAlpha(0.6f);
                     Snackbar.make(v, "Joined waiting list.", Snackbar.LENGTH_SHORT).show();
+
+                    // ✅ Notification for the participant
+                    NotificationHelper.notifyUser(
+                            requireContext(),
+                            userId,
+                            "WAITLIST_ADDED",
+                            "Waiting list joined",
+                            "You were added to the waiting list for "+eventTitle
+                    );
+
+                    // ✅ Notification for the organizer (if we know them)
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_NEW_WAITLIST",
+                                "New waiting list participant",
+                                email + " joined waiting list for "+eventTitle
+                        );
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error joining waiting list", e);
@@ -389,7 +412,30 @@ public class EventDetailsFragment extends Fragment {
                         if (btnAccept != null) btnAccept.setVisibility(View.VISIBLE);
                         if (btnDecline != null) btnDecline.setVisibility(View.VISIBLE);
                         if (joinBtn != null) joinBtn.setVisibility(View.GONE);
+
+                        // 🔔 Notify the user they are selected
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                localUserId,
+                                "USER_SELECTED",
+                                "You were selected!",
+                                "Congratulations — you have been selected for "+eventTitle
+                        );
                     }
+
+                    else if ("not_selected".equals(status)) {
+                        // 🔔 Notify the user they were NOT selected
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                localUserId,
+                                "USER_NOT_SELECTED",
+                                "Not selected this time",
+                                "Unfortunately, you were not selected for "+eventTitle
+                        );
+                    }
+
+
+
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error checking selection status", e));
@@ -408,6 +454,20 @@ public class EventDetailsFragment extends Fragment {
                     Snackbar.make(requireView(), "You are enrolled!", Snackbar.LENGTH_LONG).show();
                     if (btnAccept != null) btnAccept.setVisibility(View.GONE);
                     if (btnDecline != null) btnDecline.setVisibility(View.GONE);
+
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        String who = (localUserEmail != null && !localUserEmail.isEmpty())
+                                ? localUserEmail
+                                : "A participant";
+
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_USER_ACCEPTED",
+                                "Invitation accepted",
+                                who + " accepted their spot for "+eventTitle
+                        );
+                    }
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error accepting invitation", e));
@@ -426,6 +486,20 @@ public class EventDetailsFragment extends Fragment {
                     Snackbar.make(requireView(), "Invitation declined.", Snackbar.LENGTH_LONG).show();
                     if (btnAccept != null) btnAccept.setVisibility(View.GONE);
                     if (btnDecline != null) btnDecline.setVisibility(View.GONE);
+
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        String who = (localUserEmail != null && !localUserEmail.isEmpty())
+                                ? localUserEmail
+                                : "A participant";
+
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_USER_DECLINED",
+                                "Invitation declined",
+                                who + " declined their spot for "+eventTitle
+                        );
+                    }
                     triggerReplacementDraw();
                 })
                 .addOnFailureListener(e ->
@@ -477,20 +551,47 @@ public class EventDetailsFragment extends Fragment {
     private void deleteEvent() {
         if (eventId == null || eventId.isEmpty()) return;
 
-        firestore.collection("events")
+        // 1) First fetch all attendees so we can notify them
+        firestore.collection("eventAttendees")
                 .document(eventId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    deleteAttendeesForEvent();
-                    Snackbar.make(requireView(), "Event deleted.",
-                            Snackbar.LENGTH_SHORT).show();
+                .collection("attendees")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    // Notify each attendee that the event was cancelled
+                    String safeTitle = (eventTitle == null || eventTitle.isEmpty())
+                            ? "this event"
+                            : ("\"" + eventTitle + "\"");
 
-                    NavHostFragment.findNavController(this)
-                            .popBackStack(R.id.organizerLandingFragment, false);
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String attendeeUserId = doc.getString("userId");
+
+                        if (attendeeUserId != null && !attendeeUserId.isEmpty()) {
+                            NotificationHelper.notifyUser(
+                                    requireContext(),
+                                    attendeeUserId,
+                                    "EVENT_CANCELLED",
+                                    "Event cancelled",
+                                    "The event " + safeTitle +
+                                            " was cancelled and you have been removed from the list."
+                            );
+                        }
+                    }
+
+                    // 2) Now delete the event itself
+                    firestore.collection("events")
+                            .document(eventId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // 3) Delete attendees docs + eventAttendees/{eventId}
+                                deleteAttendeesForEvent();
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Error deleting event", e));
                 })
                 .addOnFailureListener(e ->
-                        Log.e(TAG, "Error deleting event", e));
+                        Log.e(TAG, "Failed to load attendees before delete", e));
     }
+
 
     private void deleteAttendeesForEvent() {
         firestore.collection("eventAttendees")
@@ -501,12 +602,24 @@ public class EventDetailsFragment extends Fragment {
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         doc.getReference().delete();
                     }
-                    firestore.collection("eventAttendees").document(eventId).delete();
+                    // Delete the eventAttendees root doc for this event
+                    firestore.collection("eventAttendees")
+                            .document(eventId)
+                            .delete()
+                            .addOnSuccessListener(unused -> {
+                                // Finally, give feedback + go back to landing
+                                Snackbar.make(requireView(), "Event deleted.",
+                                        Snackbar.LENGTH_SHORT).show();
+
+                                NavHostFragment.findNavController(this)
+                                        .popBackStack(R.id.organizerLandingFragment, false);
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Error deleting eventAttendees root doc", e));
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error deleting attendees", e));
     }
-
     /** Firestore attendee model (you can still use this elsewhere if needed). */
     public static class AttendeeData {
         public String userId;

@@ -3,13 +3,10 @@ package com.example.eventapp;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,10 +25,10 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.eventapp.utils.FirebaseHelper;
+import com.example.eventapp.utils.NotificationHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -100,7 +97,7 @@ public class CreateEventFragment extends Fragment {
         etDate = view.findViewById(R.id.etEventDate);
         etTime = view.findViewById(R.id.etEventTime);
         etCategory = view.findViewById(R.id.etEventCategory);
-        etMaxAttendees = view.findViewById(R.id.etEventCapacity); // FIXED
+        etMaxAttendees = view.findViewById(R.id.etEventCapacity);
 
         btnPublish = view.findViewById(R.id.btnPublishEvent);
         MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
@@ -174,6 +171,65 @@ public class CreateEventFragment extends Fragment {
                 });
     }
 
+    /* --------------------- VASU’S UPDATE EVENT FEATURE --------------------- */
+
+    private void updateEvent(View view) {
+        if (eventId == null) return;
+
+        if (selectedImageUri != null) {
+            StorageReference imageRef = storage.getReference()
+                    .child("event_covers/" + eventId + ".jpg");
+
+            imageRef.putFile(selectedImageUri)
+                    .continueWithTask(task -> {
+                        if (!task.isSuccessful()) throw task.getException();
+                        return imageRef.getDownloadUrl();
+                    })
+                    .addOnSuccessListener(downloadUrl -> {
+                        Map<String, Object> updates = getUpdatedFields();
+                        updates.put("imageUrl", downloadUrl.toString());
+
+                        firestore.collection("events")
+                                .document(eventId)
+                                .update(updates)
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                                    Navigation.findNavController(view).popBackStack();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+        } else {
+            Map<String, Object> updates = getUpdatedFields();
+
+            firestore.collection("events")
+                    .document(eventId)
+                    .update(updates)
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(view).popBackStack();
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private Map<String, Object> getUpdatedFields() {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("title", ((EditText) getView().findViewById(R.id.etEventTitle)).getText().toString().trim());
+        updates.put("description", ((EditText) getView().findViewById(R.id.etEventDescription)).getText().toString().trim());
+        updates.put("date", etDate.getText().toString().trim());
+        updates.put("time", etTime.getText().toString().trim());
+        updates.put("location", ((EditText) getView().findViewById(R.id.etEventLocation)).getText().toString().trim());
+        updates.put("category", ((EditText) getView().findViewById(R.id.etEventCategory)).getText().toString().trim());
+        return updates;
+    }
+
+    /* ---------------------------------------------------------------------- */
+
     private void publishEvent(View view) {
         if (getView() == null) return;
 
@@ -233,7 +289,6 @@ public class CreateEventFragment extends Fragment {
         event.put("createdAt", Timestamp.now());
         event.put("organizerId", organizerId);
         event.put("organizerEmail", organizerEmail);
-
         event.put("capacity", maxAttendees);
 
         firestore.collection("events")
