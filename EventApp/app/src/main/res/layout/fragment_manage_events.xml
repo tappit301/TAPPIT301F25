@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#F3E5F5"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/manageEventsTitle"
+        android:text="Manage Event"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#4A148C"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- Edit Event (PURPLE) -->
+    <Button
+        android:id="@+id/btnEditEvent"
+        android:text="Edit Event"
+        android:layout_marginTop="28dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
+
+    <!-- Tabs -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="26dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Waiting List (LIGHT PURPLE) -->
+        <Button
+            android:id="@+id/btnWaiting"
+            android:text="Waiting List"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:textColor="#4A148C"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
+            android:layout_height="42dp"/>
+
+        <!-- Selected (LIGHT PURPLE) -->
+        <Button
+            android:id="@+id/btnSelected"
+            android:text="Selected"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:textColor="#4A148C"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
+            android:layout_height="42dp"/>
+
+        <!-- Enrolled (LIGHT PURPLE) -->
+        <Button
+            android:id="@+id/btnEnrolled"
+            android:text="Enrolled"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:textColor="#4A148C"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
+            android:layout_height="42dp"/>
+
+        <!-- Cancelled (LIGHT PURPLE) -->
+        <Button
+            android:id="@+id/btnCancelled"
+            android:text="Cancelled"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:textColor="#4A148C"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
+            android:layout_height="42dp"/>
+    </LinearLayout>
+
+    <!-- Run Lottery (PURPLE) -->
+    <Button
+        android:id="@+id/btnRunLottery"
+        android:text="Run Lottery"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
+
+    <!-- Delete Event (PURPLE) -->
+    <Button
+        android:id="@+id/btnDeleteEvent"
+        android:text="Delete Event"
+        android:layout_marginTop="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
+
+    <!-- List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewList"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+</LinearLayout>

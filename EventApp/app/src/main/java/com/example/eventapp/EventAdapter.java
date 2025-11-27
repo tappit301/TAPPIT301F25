@@ -4,44 +4,29 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
-/**
- *  THis is the adapter class that connects a list of {@link Event} objects
- * to a RecyclerView so each event can be displayed in the UI.
- *
- * Each list item shows the event title and date/time,
- * and lets the user tap to open full event details.</p>
- *
- * @author tappit
- */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
-    /** List of events to display. */
     private final List<Event> eventList;
+    /** Navigation action to use when a card is clicked */
+    private final int navActionId;
 
-    /**
-     * Constructs the adapter with a given list of events.
-     *
-     * @param eventList list of {@link Event} objects to show
-     */
-    public EventAdapter(List<Event> eventList) {
+    //New constructor: list + action ID
+    public EventAdapter(List<Event> eventList, int navActionId) {
         this.eventList = eventList;
+        this.navActionId = navActionId;
     }
 
-    /**
-     * Inflates the layout for each event item when a new ViewHolder is created.
-     *
-     * @param parent   parent ViewGroup where the new view will be added
-     * @param viewType type of view (unused here)
-     * @return a new {@link EventViewHolder} for the list item
-     */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -50,13 +35,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return new EventViewHolder(view);
     }
 
-    /**
-     * Binds event data (title and date/time) to the list item and
-     * handles the click action to navigate to the Event Details screen.
-     *
-     * @param holder   the {@link EventViewHolder} that holds the views
-     * @param position the index of the current event in the list
-     */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = eventList.get(position);
@@ -64,6 +42,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.tvTitle.setText(event.getTitle());
         holder.tvDate.setText(event.getDate() + " • " + event.getTime());
 
+        // Load event image if exists
+        if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(event.getImageUrl())
+                    .placeholder(R.drawable.placeholder_img)
+                    .into(holder.ivPoster);
+        } else {
+            holder.ivPoster.setImageResource(R.drawable.placeholder_img);
+        }
+
+        // Navigate to details (uses the action ID passed to the adapter)
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", event.getId());
@@ -72,45 +61,27 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             bundle.putString("date", event.getDate());
             bundle.putString("time", event.getTime());
             bundle.putString("location", event.getLocation());
+            bundle.putString("organizerId", event.getOrganizerId());
+            bundle.putString("organizerEmail", event.getOrganizerEmail());
+            bundle.putString("imageUrl", event.getImageUrl()); // poster url
 
-            try {
-                Navigation.findNavController(v).navigate(
-                        R.id.action_organizerLandingFragment_to_eventDetailsFragment,
-                        bundle
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Navigation.findNavController(v).navigate(navActionId, bundle);
         });
     }
 
-    /**
-     * @return the number of events in the list
-     */
     @Override
     public int getItemCount() {
         return eventList != null ? eventList.size() : 0;
     }
 
-    /**
-     * ViewHolder that stores references to the views inside each
-     * event list item for quick access during scrolling.
-     */
     static class EventViewHolder extends RecyclerView.ViewHolder {
 
-        /** TextView that shows the event title. */
-        TextView tvTitle;
+        ImageView ivPoster;
+        TextView tvTitle, tvDate;
 
-        /** TextView that shows the event date and time. */
-        TextView tvDate;
-
-        /**
-         * Creates a new ViewHolder for one event list item.
-         *
-         * @param itemView the inflated layout for the item
-         */
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivPoster = itemView.findViewById(R.id.ivEventImage);
             tvTitle = itemView.findViewById(R.id.tvEventTitle);
             tvDate = itemView.findViewById(R.id.tvEventDate);
         }

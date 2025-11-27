@@ -1,6 +1,9 @@
 package com.example.eventapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,50 +16,53 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.eventapp.utils.FirebaseHelper;
+import com.example.eventapp.utils.NotificationHelper;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Displays detailed information about a selected event.
- * Allows users to join the waiting list and view a generated QR code.
- *
- * Retrieves event data passed through a Bundle, checks if the user
- * has already joined, and updates Firestore accordingly.
+ * Combined Event Details:
+ * - Poster image
+ * - Join waiting list (Firebase user or guest)
+ * - QR view
+ * - Organizer-only: Manage(Edit) + Delete
+ * - NEW: Accept / Decline invitation if user is selected
  */
 public class EventDetailsFragment extends Fragment {
 
-    /** Log tag for this class. */
     private static final String TAG = "EventDetailsFragment";
 
-    /** Button that allows the user to join the waiting list. */
-    private MaterialButton joinBtn;
+    private MaterialButton joinBtn, btnViewQr, btnManageEvent, btnDeleteEvent;
+    private MaterialButton btnAccept, btnDecline; // ✅ NEW
+    private ImageView ivEventCover;
 
-    /** Button that navigates to the event QR code view. */
-    private MaterialButton btnViewQr;
-
-    /** The Firestore document ID for the current event. */
     private String eventId;
+    private String organizerId;
+    private String organizerEmail;
+    private String eventTitle;
 
-    /** Firestore database reference. */
     private FirebaseFirestore firestore;
+    private FirebaseUser firebaseUser;
 
-    /** Currently authenticated Firebase user. */
-    private FirebaseUser currentUser;
+    // Local identity (can be Firebase user or guest user)
+    private String localUserId;
+    private String localUserEmail;
+    private String localUserName;
 
-    /**
-     * Inflates the event details layout for this fragment.
-     *
-     * @param inflater LayoutInflater used to inflate the view
-     * @param container Parent view group
-     * @param savedInstanceState Saved state if available
-     * @return The inflated event details layout
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,26 +71,37 @@ public class EventDetailsFragment extends Fragment {
         return inflater.inflate(R.layout.event_details, container, false);
     }
 
-    /**
-     * Initializes the fragment, populates UI with event data,
-     * and sets up listeners for joining the waiting list and viewing QR codes.
-     *
-     * @param view The root view for this fragment
-     * @param savedInstanceState Saved instance state, if any
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         firestore = FirebaseHelper.getFirestore();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        // Resolve identity (Firebase user or previously-saved guest)
+        resolveLocalIdentity();
+
+        // ----- UI references -----
         joinBtn = view.findViewById(R.id.btnJoinWaitingList);
         btnViewQr = view.findViewById(R.id.btnViewQr);
+        btnManageEvent = view.findViewById(R.id.btnManageEvent);
+        btnDeleteEvent = view.findViewById(R.id.btnDeleteEvent);
+        ivEventCover = view.findViewById(R.id.ivEventCover);
 
+        // ✅ NEW: Accept / Decline buttons
+        btnAccept = view.findViewById(R.id.btnAccept);
+        btnDecline = view.findViewById(R.id.btnDecline);
+
+        if (btnAccept != null) btnAccept.setVisibility(View.GONE);
+        if (btnDecline != null) btnDecline.setVisibility(View.GONE);
+
+        // ----- Read args -----
         Bundle args = getArguments();
         if (args != null) {
-            eventId = args.getString("eventId");
+            eventId = args.getString("eventId", "");
+            organizerId = args.getString("organizerId", "");
+            organizerEmail = args.getString("organizerEmail", "");
+            eventTitle = args.getString("title", "Event");
 
             ((TextView) view.findViewById(R.id.tvEventTitle))
                     .setText(args.getString("title", ""));
@@ -96,47 +113,199 @@ public class EventDetailsFragment extends Fragment {
                     .setText(args.getString("location", ""));
             ((TextView) view.findViewById(R.id.tvEventDescription))
                     .setText(args.getString("desc", ""));
+
+            TextView tvOrg = view.findViewById(R.id.tvOrganizerName);
+            tvOrg.setText(organizerEmail == null ? "" : organizerEmail);
+
+            // Poster
+            String imageUrl = args.getString("imageUrl", "");
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Glide.with(requireContext())
+                        .load(imageUrl)
+                        .placeholder(R.drawable.placeholder_img)
+                        .error(R.drawable.placeholder_img)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(ivEventCover);
+            } else {
+                ivEventCover.setImageResource(R.drawable.placeholder_img);
+            }
         }
 
-        ImageView btnBack = view.findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v ->
-                NavHostFragment.findNavController(this).popBackStack());
+        // Back
+        view.findViewById(R.id.btnBack).setOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack()
+        );
 
+        // Organizer-only button visibility
+        boolean isOrganizer =
+                firebaseUser != null &&
+                        organizerId != null &&
+                        organizerId.equals(firebaseUser.getUid());
+
+        btnManageEvent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
+        btnDeleteEvent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
+
+        // Join waiting list visible for everyone (organizer can join too)
+        joinBtn.setVisibility(View.VISIBLE);
+
+        // Disable join if already joined (for Firebase user or guest)
         checkIfAlreadyJoined();
 
-        joinBtn.setOnClickListener(this::addUserToWaitingList);
+        // Join click (handles Firebase user or guest)
+        joinBtn.setOnClickListener(this::handleJoinClick);
 
+        // ✅ NEW: Accept / Decline handlers
+        if (btnAccept != null) {
+            btnAccept.setOnClickListener(v -> handleAccept());
+        }
+        if (btnDecline != null) {
+            btnDecline.setOnClickListener(v -> handleDecline());
+        }
+
+        // ------------------------------------------------------------------
+        // QR click: encodes ONLY eventId so ScanQrFragment can look it up
+        // ------------------------------------------------------------------
         btnViewQr.setOnClickListener(v -> {
-            String qrPayload = "Event: " +
-                    ((TextView) view.findViewById(R.id.tvEventTitle)).getText() +
-                    "\nDate: " +
-                    ((TextView) view.findViewById(R.id.tvEventDate)).getText() +
-                    "\nTime: " +
-                    ((TextView) view.findViewById(R.id.tvEventTime)).getText() +
-                    "\nLocation: " +
-                    ((TextView) view.findViewById(R.id.tvEventLocation)).getText();
+            if (eventId == null || eventId.isEmpty()) {
+                Snackbar.make(v, "Error: Missing event ID for QR.", Snackbar.LENGTH_LONG).show();
+                Log.e(TAG, "btnViewQr clicked but eventId is null/empty");
+                return;
+            }
 
             Bundle bundle = new Bundle();
-            bundle.putString("qrData", qrPayload);
+            bundle.putString("qrData", eventId);        // QR contains eventId
+            bundle.putBoolean("cameFromDetails", true);
 
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventDetailsFragment_to_qrCodeFragment, bundle);
         });
+
+        // Manage Event click -> Go to ManageEventsFragment with eventId
+        btnManageEvent.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", eventId);
+
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_eventDetailsFragment_to_manageEventsFragment, bundle);
+        });
+
+        // Delete click
+        btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmation());
+
+        // ✅ NEW: check if user is selected and show Accept/Decline
+        checkSelectionStatus();
     }
 
-    /**
-     * Adds the current user to the waiting list for this event in Firestore.
-     * Updates UI after a successful join.
-     *
-     * @param v The view that triggered this action
-     */
-    private void addUserToWaitingList(View v) {
-        if (currentUser == null) {
-            Snackbar.make(v, "Please log in first.", Snackbar.LENGTH_LONG).show();
+    // -----------------------------------------------------------------------
+    // IDENTITY RESOLUTION (Firebase user OR guest user stored in preferences)
+    // -----------------------------------------------------------------------
+    private void resolveLocalIdentity() {
+        if (firebaseUser != null) {
+            localUserId = firebaseUser.getUid();
+            localUserEmail = firebaseUser.getEmail();
+            localUserName = firebaseUser.getDisplayName();
             return;
         }
+
+        SharedPreferences prefs =
+                requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+        localUserId = prefs.getString("GUEST_USER_ID", null);
+        localUserEmail = prefs.getString("GUEST_USER_EMAIL", null);
+        localUserName = prefs.getString("GUEST_USER_NAME", null);
+    }
+
+    // -----------------------------------------------------------------------
+    // JOIN BUTTON CLICK
+    // -----------------------------------------------------------------------
+    private void handleJoinClick(View v) {
         if (eventId == null || eventId.isEmpty()) {
-            Log.e(TAG, "Missing eventId — cannot join waiting list");
+            Snackbar.make(v, "Error: Event not found.", Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
+        // If we already have an identity (Firebase user or saved guest), just join
+        if (localUserId != null && localUserEmail != null) {
+            addUserToWaitingListWithIdentity(v, localUserId, localUserEmail);
+            return;
+        }
+
+        // No Firebase user and no saved guest identity -> ask for details
+        showGuestInfoDialog(v);
+    }
+
+    // -----------------------------------------------------------------------
+    // GUEST DIALOG: ASK NAME + EMAIL, CREATE GUEST USER, THEN JOIN
+    // -----------------------------------------------------------------------
+    private void showGuestInfoDialog(View anchorView) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_guest_info, null);
+
+        TextInputEditText etName = dialogView.findViewById(R.id.etGuestName);
+        TextInputEditText etEmail = dialogView.findViewById(R.id.etGuestEmail);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Your details")
+                .setMessage("Enter your name and email so we can add you to the waiting list.")
+                .setView(dialogView)
+                .setPositiveButton("Continue", (dialog, which) -> {
+                    String name = etName.getText() != null
+                            ? etName.getText().toString().trim()
+                            : "";
+                    String email = etEmail.getText() != null
+                            ? etEmail.getText().toString().trim()
+                            : "";
+
+                    if (name.isEmpty() || email.isEmpty()) {
+                        Snackbar.make(anchorView,
+                                "Name and email are required.",
+                                Snackbar.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    // Build a stable guest ID based on device id
+                    String androidId = Settings.Secure.getString(
+                            requireContext().getContentResolver(),
+                            Settings.Secure.ANDROID_ID
+                    );
+                    localUserId = "guest_" + androidId;
+                    localUserEmail = email;
+                    localUserName = name;
+
+                    // Save locally
+                    SharedPreferences prefs =
+                            requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+                    prefs.edit()
+                            .putString("GUEST_USER_ID", localUserId)
+                            .putString("GUEST_USER_EMAIL", localUserEmail)
+                            .putString("GUEST_USER_NAME", localUserName)
+                            .apply();
+
+                    // Save guest user to Firestore like a normal user document
+                    Map<String, Object> userDoc = new HashMap<>();
+                    userDoc.put("userId", localUserId);
+                    userDoc.put("name", localUserName);
+                    userDoc.put("email", localUserEmail);
+                    userDoc.put("type", "guest");
+                    userDoc.put("createdAt", Timestamp.now());
+
+                    firestore.collection("users")
+                            .document(localUserId)
+                            .set(userDoc)
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Failed to save guest user document", e));
+
+                    // Now actually join the waiting list using this guest identity
+                    addUserToWaitingListWithIdentity(anchorView, localUserId, localUserEmail);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // -----------------------------------------------------------------------
+    // ACTUAL JOIN LOGIC (REUSED FOR FIREBASE USER OR GUEST USER)
+    // -----------------------------------------------------------------------
+    private void addUserToWaitingListWithIdentity(View v, String userId, String email) {
+        if (eventId == null || eventId.isEmpty()) {
             Snackbar.make(v, "Error: Event not found.", Snackbar.LENGTH_LONG).show();
             return;
         }
@@ -144,64 +313,327 @@ public class EventDetailsFragment extends Fragment {
         DocumentReference attendeeRef = firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
-                .document(currentUser.getUid());
+                .document(userId);
 
-        attendeeRef.set(new AttendeeData(currentUser))
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("email", email);
+        data.put("joinedAt", Timestamp.now());
+        data.put("status", "waiting");
+
+        attendeeRef.set(data)
                 .addOnSuccessListener(aVoid -> {
                     joinBtn.setEnabled(false);
                     joinBtn.setText("Added ✅");
+                    joinBtn.setAlpha(0.6f);
                     Snackbar.make(v, "Joined waiting list.", Snackbar.LENGTH_SHORT).show();
+
+                    // ✅ Notification for the participant
+                    NotificationHelper.notifyUser(
+                            requireContext(),
+                            userId,
+                            "WAITLIST_ADDED",
+                            "Waiting list joined",
+                            "You were added to the waiting list for "+eventTitle
+                    );
+
+                    // ✅ Notification for the organizer (if we know them)
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_NEW_WAITLIST",
+                                "New waiting list participant",
+                                email + " joined waiting list for "+eventTitle
+                        );
+                    }
                 })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error joining waiting list", e));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error joining waiting list", e);
+                    Snackbar.make(v, "Failed to join: " + e.getMessage(),
+                            Snackbar.LENGTH_LONG).show();
+                });
     }
 
-    /**
-     * Checks if the current user has already joined this event’s waiting list.
-     * If so, disables the join button and updates the text.
-     */
+    /** Old signature kept but now routes through unified logic. */
+    private void addUserToWaitingList(View v) {
+        handleJoinClick(v);
+    }
+
+    /** Check if already joined (works for Firebase user or guest user). */
     private void checkIfAlreadyJoined() {
-        if (currentUser == null || eventId == null) return;
+        if (eventId == null || eventId.isEmpty()) return;
+
+        // Use Firebase uid if present; otherwise, check guest id from prefs
+        String idToCheck;
+        if (firebaseUser != null) {
+            idToCheck = firebaseUser.getUid();
+        } else {
+            SharedPreferences prefs =
+                    requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+            idToCheck = prefs.getString("GUEST_USER_ID", null);
+        }
+
+        if (idToCheck == null) {
+            return;
+        }
 
         firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
-                .document(currentUser.getUid())
+                .document(idToCheck)
                 .get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
                         joinBtn.setEnabled(false);
-                        joinBtn.setText("Added ✅");
+                        joinBtn.setText("Added");
+                        joinBtn.setAlpha(0.6f);
                     }
                 })
                 .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking existing waiting list entry", e));
+                        Log.e(TAG, "Error checking waiting list entry", e));
     }
 
-    /**
-     * Inner class representing attendee data to be uploaded to Firestore.
-     */
-    private static class AttendeeData {
-        private final String userId;
-        private final String email;
-        private final Timestamp joinedAt;
+    // ✅ NEW — Check selection status after lottery and show Accept/Decline
+    private void checkSelectionStatus() {
+        if (eventId == null || eventId.isEmpty()) return;
+        if (localUserId == null) return;
+
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(localUserId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    String status = doc.getString("status");
+                    if ("selected".equals(status)) {
+                        if (btnAccept != null) btnAccept.setVisibility(View.VISIBLE);
+                        if (btnDecline != null) btnDecline.setVisibility(View.VISIBLE);
+                        if (joinBtn != null) joinBtn.setVisibility(View.GONE);
+
+                        // 🔔 Notify the user they are selected
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                localUserId,
+                                "USER_SELECTED",
+                                "You were selected!",
+                                "Congratulations — you have been selected for "+eventTitle
+                        );
+                    }
+
+                    else if ("not_selected".equals(status)) {
+                        // 🔔 Notify the user they were NOT selected
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                localUserId,
+                                "USER_NOT_SELECTED",
+                                "Not selected this time",
+                                "Unfortunately, you were not selected for "+eventTitle
+                        );
+                    }
+
+
+
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error checking selection status", e));
+    }
+
+    // ✅ NEW — Accept Invitation
+    private void handleAccept() {
+        if (eventId == null || eventId.isEmpty() || localUserId == null) return;
+
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(localUserId)
+                .update("status", "enrolled")
+                .addOnSuccessListener(unused -> {
+                    Snackbar.make(requireView(), "You are enrolled!", Snackbar.LENGTH_LONG).show();
+                    if (btnAccept != null) btnAccept.setVisibility(View.GONE);
+                    if (btnDecline != null) btnDecline.setVisibility(View.GONE);
+
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        String who = (localUserEmail != null && !localUserEmail.isEmpty())
+                                ? localUserEmail
+                                : "A participant";
+
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_USER_ACCEPTED",
+                                "Invitation accepted",
+                                who + " accepted their spot for "+eventTitle
+                        );
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error accepting invitation", e));
+    }
+
+    // ✅ NEW — Decline Invitation
+    private void handleDecline() {
+        if (eventId == null || eventId.isEmpty() || localUserId == null) return;
+
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .document(localUserId)
+                .update("status", "cancelled")
+                .addOnSuccessListener(unused -> {
+                    Snackbar.make(requireView(), "Invitation declined.", Snackbar.LENGTH_LONG).show();
+                    if (btnAccept != null) btnAccept.setVisibility(View.GONE);
+                    if (btnDecline != null) btnDecline.setVisibility(View.GONE);
+
+                    if (organizerId != null && !organizerId.isEmpty()) {
+                        String who = (localUserEmail != null && !localUserEmail.isEmpty())
+                                ? localUserEmail
+                                : "A participant";
+
+                        NotificationHelper.notifyUser(
+                                requireContext(),
+                                organizerId,
+                                "ORGANIZER_USER_DECLINED",
+                                "Invitation declined",
+                                who + " declined their spot for "+eventTitle
+                        );
+                    }
+                    triggerReplacementDraw();
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error declining invitation", e));
+    }
+
+    // ✅ NEW — Automatically select next user after someone declines
+    private void triggerReplacementDraw() {
+        if (eventId == null || eventId.isEmpty()) return;
+
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .whereEqualTo("status", "not_selected")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.isEmpty()) {
+                        Log.d(TAG, "No replacement available.");
+                        return;
+                    }
+
+                    DocumentSnapshot next = snapshot.getDocuments()
+                            .get((int) (Math.random() * snapshot.size()));
+
+                    firestore.collection("eventAttendees")
+                            .document(eventId)
+                            .collection("attendees")
+                            .document(next.getId())
+                            .update("status", "selected")
+                            .addOnSuccessListener(unused ->
+                                    Log.d(TAG, "Replacement selected: " + next.getId())
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Failed to update replacement attendee", e));
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error running replacement draw", e));
+    }
+
+    private void showDeleteConfirmation() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Delete Event?")
+                .setMessage("This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteEvent())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteEvent() {
+        if (eventId == null || eventId.isEmpty()) return;
+
+        // 1) First fetch all attendees so we can notify them
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    // Notify each attendee that the event was cancelled
+                    String safeTitle = (eventTitle == null || eventTitle.isEmpty())
+                            ? "this event"
+                            : ("\"" + eventTitle + "\"");
+
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String attendeeUserId = doc.getString("userId");
+
+                        if (attendeeUserId != null && !attendeeUserId.isEmpty()) {
+                            NotificationHelper.notifyUser(
+                                    requireContext(),
+                                    attendeeUserId,
+                                    "EVENT_CANCELLED",
+                                    "Event cancelled",
+                                    "The event " + safeTitle +
+                                            " was cancelled and you have been removed from the list."
+                            );
+                        }
+                    }
+
+                    // 2) Now delete the event itself
+                    firestore.collection("events")
+                            .document(eventId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // 3) Delete attendees docs + eventAttendees/{eventId}
+                                deleteAttendeesForEvent();
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Error deleting event", e));
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Failed to load attendees before delete", e));
+    }
+
+
+    private void deleteAttendeesForEvent() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        doc.getReference().delete();
+                    }
+                    // Delete the eventAttendees root doc for this event
+                    firestore.collection("eventAttendees")
+                            .document(eventId)
+                            .delete()
+                            .addOnSuccessListener(unused -> {
+                                // Finally, give feedback + go back to landing
+                                Snackbar.make(requireView(), "Event deleted.",
+                                        Snackbar.LENGTH_SHORT).show();
+
+                                NavHostFragment.findNavController(this)
+                                        .popBackStack(R.id.organizerLandingFragment, false);
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.e(TAG, "Error deleting eventAttendees root doc", e));
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error deleting attendees", e));
+    }
+    /** Firestore attendee model (you can still use this elsewhere if needed). */
+    public static class AttendeeData {
+        public String userId;
+        public String email;
+        public Timestamp joinedAt;
+        public String status;
+
+        public AttendeeData() {}
 
         public AttendeeData(FirebaseUser user) {
             this.userId = user.getUid();
             this.email = user.getEmail();
             this.joinedAt = Timestamp.now();
-        }
-
-        public String getUserId() {
-            return userId;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public Timestamp getJoinedAt() {
-            return joinedAt;
+            this.status = "waiting";
         }
     }
 }
