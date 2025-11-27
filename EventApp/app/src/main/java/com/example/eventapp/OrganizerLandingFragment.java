@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,7 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -77,13 +81,15 @@ public class OrganizerLandingFragment extends Fragment {
 
         NavController navController = Navigation.findNavController(view);
 
-        // Explore button
+        // ---------------- EXPLORE BUTTON ----------------
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
-        btnExplore.setOnClickListener(v ->
-                navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
-        );
+        if (btnExplore != null) {
+            btnExplore.setOnClickListener(v ->
+                    navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
+            );
+        }
 
-        // Create event buttons
+        // ---------------- CREATE EVENT BUTTONS ----------------
         View.OnClickListener createClick = v ->
                 navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
@@ -95,18 +101,23 @@ public class OrganizerLandingFragment extends Fragment {
         if (btnAddEvent != null) btnAddEvent.setOnClickListener(createClick);
         if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createClick);
 
-        // ---------- PROFILE ICON IN TOOLBAR ----------
+        // ---------------- PROFILE ICON (if present) ----------------
         ImageView btnProfile = view.findViewById(R.id.btnProfile);
         if (btnProfile != null) {
-            // navigate to profile when tapped
             btnProfile.setOnClickListener(v ->
-                    navController.navigate(R.id.action_organizerLandingFragment_to_profileFragment));
-
-            // load the user's profile picture into the small icon
-            loadProfileAvatarIntoToolbar(btnProfile);
+                    navController.navigate(R.id.action_organizerLandingFragment_to_profileFragment)
+            );
+            // If you had a method to load avatar into toolbar:
+            // loadProfileAvatarIntoToolbar(btnProfile);
         }
 
-        // Filters
+        // ---------------- NOTIFICATIONS BUTTON (IN-APP DROPDOWN) ----------------
+        View btnNotifications = view.findViewById(R.id.btnNotifications);
+        if (btnNotifications != null) {
+            btnNotifications.setOnClickListener(v -> showNotificationsDialog());
+        }
+
+        // ---------------- RV + FILTERS (your existing logic) ----------------
         btnUpcoming = view.findViewById(R.id.btnUpcoming);
         btnPast = view.findViewById(R.id.btnPast);
 
@@ -115,7 +126,7 @@ public class OrganizerLandingFragment extends Fragment {
 
         rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Default adapter = upcoming list
+        // Default adapter = upcoming events
         adapter = new EventAdapter(
                 upcomingEvents,
                 R.id.action_organizerLandingFragment_to_eventDetailsFragment
@@ -123,8 +134,6 @@ public class OrganizerLandingFragment extends Fragment {
         rvEvents.setAdapter(adapter);
 
         setupFilters();
-
-        // FINAL FIX: THIS loads EVERYTHING
         loadAllEventsForUser();
     }
 
@@ -322,4 +331,78 @@ public class OrganizerLandingFragment extends Fragment {
             }
         }
     }
+
+    // ----------------------------------------------------------
+// NOTIFICATIONS: FETCH ALL FOR CURRENT USER & SHOW DIALOG
+// ----------------------------------------------------------
+    /**
+     * Fetch all notifications for this user from Firestore and show them in a dialog.
+     * No filtering, just a simple list. If none, show “No notifications yet”.
+     */
+    private void showNotificationsDialog() {
+        // 1) Determine which userId to use: Firebase user or guest
+        String userId = null;
+
+        FirebaseUser firebaseUser = auth != null ? auth.getCurrentUser()
+                : FirebaseAuth.getInstance().getCurrentUser();
+
+        if (firebaseUser != null) {
+            userId = firebaseUser.getUid();
+        } else {
+            // Fallback to guest ID (same prefs you used in EventDetailsFragment)
+            SharedPreferences prefs =
+                    requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+            userId = prefs.getString("GUEST_USER_ID", null);
+        }
+
+        if (userId == null) {
+            Toast.makeText(getContext(),
+                    "No user found. Please sign in or join an event first.",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2) Query Firestore for this user's notifications
+        firestore.collection("notifications")
+                .whereEqualTo("userId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(30)  // just to keep it small
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot == null || snapshot.isEmpty()) {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Notifications")
+                                .setMessage("No notifications yet.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                        return;
+                    }
+
+                    List<String> messages = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String msg = doc.getString("message");
+                        if (msg == null || msg.trim().isEmpty()) {
+                            msg = "(no message)";
+                        }
+                        messages.add(msg);
+                    }
+
+                    CharSequence[] items = messages.toArray(new CharSequence[0]);
+
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Notifications")
+                            .setItems(items, null)    // just display, no click actions
+                            .setPositiveButton("Close", null)
+                            .show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to load notifications", e);
+                    Toast.makeText(getContext(),
+                            "Failed to load notifications: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+
 }
