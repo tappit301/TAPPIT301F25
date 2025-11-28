@@ -1,5 +1,6 @@
 package com.example.eventapp.utils;
 
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -8,7 +9,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.eventapp.App;
 import com.example.eventapp.R;
-import com.example.eventapp.utils.FirebaseHelper;
+import com.example.eventapp.utils.FirebaseHelper;   // ✅ ADD THIS
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -16,11 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Central place for:
- *  - Saving notifications in Firestore
- *  - Optionally showing a local system notification
- */
 public class NotificationHelper {
 
     private static final AtomicInteger COUNTER = new AtomicInteger(1);
@@ -32,7 +28,7 @@ public class NotificationHelper {
     ) {
         if (userId == null || userId.isEmpty()) return;
 
-        FirebaseFirestore db = FirebaseHelper.getFirestore();
+        FirebaseFirestore db = FirebaseHelper.getFirestore();  // now resolves correctly
 
         Map<String, Object> doc = new HashMap<>();
         doc.put("userId", userId);
@@ -74,8 +70,10 @@ public class NotificationHelper {
             String title,
             String message
     ) {
+        // Save notification in Firestore
         logNotificationToFirestore(userId, type, message);
 
+        // Show popup notification locally
         if (context != null) {
             showLocalNotification(context, title, message);
         }

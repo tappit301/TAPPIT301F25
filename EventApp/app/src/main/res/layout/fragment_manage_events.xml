@@ -29,64 +29,78 @@
         android:textStyle="bold"
         android:background="@drawable/btn_purple"/>
 
-    <!-- Tabs -->
+    <!-- STATUS BUTTONS: TWO ROWS SO TEXT DOESN'T GET CUT -->
     <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="26dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp">
 
-        <!-- Waiting List (LIGHT PURPLE) -->
-        <Button
-            android:id="@+id/btnWaiting"
-            android:text="Waiting List"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:textColor="#4A148C"
-            android:textStyle="bold"
-            android:background="@drawable/btn_light_purple"
-            android:layout_height="42dp"/>
+        <!-- Row 1: Waiting + Selected -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
 
-        <!-- Selected (LIGHT PURPLE) -->
-        <Button
-            android:id="@+id/btnSelected"
-            android:text="Selected"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:textColor="#4A148C"
-            android:textStyle="bold"
-            android:background="@drawable/btn_light_purple"
-            android:layout_height="42dp"/>
+            <Button
+                android:id="@+id/btnWaiting"
+                android:text="Waiting"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="6dp"
+                android:textColor="#4A148C"
+                android:textStyle="bold"
+                android:background="@drawable/btn_light_purple"
+                android:layout_height="44dp"/>
 
-        <!-- Enrolled (LIGHT PURPLE) -->
-        <Button
-            android:id="@+id/btnEnrolled"
-            android:text="Enrolled"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:textColor="#4A148C"
-            android:textStyle="bold"
-            android:background="@drawable/btn_light_purple"
-            android:layout_height="42dp"/>
+            <Button
+                android:id="@+id/btnSelected"
+                android:text="Selected"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="6dp"
+                android:textColor="#4A148C"
+                android:textStyle="bold"
+                android:background="@drawable/btn_light_purple"
+                android:layout_height="44dp"/>
 
-        <!-- Cancelled (LIGHT PURPLE) -->
-        <Button
-            android:id="@+id/btnCancelled"
-            android:text="Cancelled"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:textColor="#4A148C"
-            android:textStyle="bold"
-            android:background="@drawable/btn_light_purple"
-            android:layout_height="42dp"/>
+        </LinearLayout>
+
+        <!-- Row 2: Enrolled + Cancelled -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnEnrolled"
+                android:text="Enrolled"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="6dp"
+                android:textColor="#4A148C"
+                android:textStyle="bold"
+                android:background="@drawable/btn_light_purple"
+                android:layout_height="44dp"/>
+
+            <Button
+                android:id="@+id/btnCancelled"
+                android:text="Cancelled"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_margin="6dp"
+                android:textColor="#4A148C"
+                android:textStyle="bold"
+                android:background="@drawable/btn_light_purple"
+                android:layout_height="44dp"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <!-- Run Lottery (PURPLE) -->
+    <!-- Run Lottery -->
     <Button
         android:id="@+id/btnRunLottery"
         android:text="Run Lottery"
@@ -97,23 +111,52 @@
         android:textStyle="bold"
         android:background="@drawable/btn_purple"/>
 
-    <!-- Delete Event (PURPLE) -->
-    <Button
-        android:id="@+id/btnDeleteEvent"
-        android:text="Delete Event"
-        android:layout_marginTop="14dp"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:background="@drawable/btn_purple"/>
-
-    <!-- List -->
+    <!-- RECYCLER LIST -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewList"
         android:layout_marginTop="24dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
+
+    <!-- NOTIFICATIONS SECTION -->
+    <LinearLayout
+        android:id="@+id/layoutNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNotifyWaiting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notify Waiting List"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNotifySelected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notify Selected Entrants"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNotifyCancelled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notify Cancelled Entrants"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    </LinearLayout>
+
+    <!-- EXPORT CSV BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnExportCsv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Export Enrolled (CSV)"
+        android:layout_marginTop="12dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
 </LinearLayout>
