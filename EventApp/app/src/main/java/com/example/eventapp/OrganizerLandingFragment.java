@@ -1,12 +1,11 @@
 package com.example.eventapp;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -26,19 +25,28 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OrganizerLandingFragment extends Fragment {
 
+    private static final String TAG = "OrganizerLanding";
+
     private RecyclerView rvEvents;
     private LinearLayout emptyState;
 
-    private final List<Event> eventList = new ArrayList<>();
+    private final List<Event> allEvents = new ArrayList<>();
+    private final List<Event> upcomingEvents = new ArrayList<>();
+    private final List<Event> pastEvents = new ArrayList<>();
+
     private EventAdapter adapter;
 
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
+
+    private MaterialButton btnUpcoming, btnPast;
 
     @Nullable
     @Override
@@ -58,84 +66,158 @@ public class OrganizerLandingFragment extends Fragment {
 
         NavController navController = Navigation.findNavController(view);
 
-        // ============================
-        //       TOP TOOLBAR
-        // ============================
-
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
         btnExplore.setOnClickListener(v ->
                 navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
         );
 
-        MaterialButton btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
-        btnCreateEvent.setOnClickListener(v ->
-                navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment)
-        );
+        View.OnClickListener createClick = v ->
+                navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
-        ImageButton btnNotifications = view.findViewById(R.id.btnNotifications);
-        btnNotifications.setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show()
-        );
+        MaterialButton btnAddEventEmpty = view.findViewById(R.id.btnAddEventEmpty);
+        FloatingActionButton btnAddEvent = view.findViewById(R.id.btnAddEvent);
+        MaterialButton btnCreateEventTop = view.findViewById(R.id.btnCreateEventTop);
 
-        ImageView btnProfile = view.findViewById(R.id.btnProfile);
-        btnProfile.setOnClickListener(v -> {
-            FirebaseUser user = auth.getCurrentUser();
-            if (user == null)
-                startActivity(new Intent(requireContext(), SignInActivity.class));
-            else
-                Toast.makeText(requireContext(), "Signed in as " + user.getEmail(), Toast.LENGTH_SHORT).show();
-        });
+        if (btnAddEventEmpty != null) btnAddEventEmpty.setOnClickListener(createClick);
+        if (btnAddEvent != null) btnAddEvent.setOnClickListener(createClick);
+        if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createClick);
 
-        // ============================
-        //      LIST + EMPTY STATE
-        // ============================
+        btnUpcoming = view.findViewById(R.id.btnUpcoming);
+        btnPast = view.findViewById(R.id.btnPast);
 
         rvEvents = view.findViewById(R.id.rvEvents);
         emptyState = view.findViewById(R.id.emptyStateLayout);
 
         rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new EventAdapter(eventList,
-                R.id.action_organizerLandingFragment_to_eventDetailsFragment);
+
+        // 🔹 Initial adapter: UPCOMING events → details from organizerLanding
+        adapter = new EventAdapter(
+                upcomingEvents,
+                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+        );
         rvEvents.setAdapter(adapter);
 
-        // ============================
-        //     FLOATING ADD BUTTON
-        // ============================
-
-        FloatingActionButton btnAddEvent = view.findViewById(R.id.btnAddEvent);
-        btnAddEvent.setOnClickListener(v ->
-                navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment)
-        );
-
-        loadEvents();
+        setupFilters();
+        loadOrganizerEvents();
     }
 
-    private void loadEvents() {
+    // ----------------------------------------------------------
+    // FILTER BUTTON LOGIC
+    // ----------------------------------------------------------
+    private void setupFilters() {
+
+        btnUpcoming.setOnClickListener(v -> {
+            btnUpcoming.setChecked(true);
+            btnPast.setChecked(false);
+
+            adapter = new EventAdapter(
+                    upcomingEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
+            );
+            rvEvents.setAdapter(adapter);
+        });
+
+        btnPast.setOnClickListener(v -> {
+            btnPast.setChecked(true);
+            btnUpcoming.setChecked(false);
+
+            adapter = new EventAdapter(
+                    pastEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
+            );
+            rvEvents.setAdapter(adapter);
+        });
+
+        // Default selection = UPCOMING
+        btnUpcoming.setChecked(true);
+    }
+
+    // ----------------------------------------------------------
+    // FIRESTORE LOAD
+    // ----------------------------------------------------------
+    private void loadOrganizerEvents() {
+
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) return;
+        if (user == null) {
+            Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String organizerId = user.getUid();
 
         firestore.collection("events")
-                .whereEqualTo("organizerId", user.getUid())
+                .whereEqualTo("organizerId", organizerId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .addSnapshotListener((snapshots, e) -> {
+                .addSnapshotListener((snapshots, error) -> {
 
-                    eventList.clear();
-
-                    if (snapshots != null) {
-                        snapshots.forEach(doc -> {
-                            Event event = doc.toObject(Event.class);
-                            if (event != null) {
-                                event.setId(doc.getId());
-                                eventList.add(event);
-                            }
-                        });
+                    if (error != null) {
+                        Log.e(TAG, "Firestore load failed", error);
+                        return;
                     }
 
-                    boolean hasEvents = !eventList.isEmpty();
-                    emptyState.setVisibility(hasEvents ? View.GONE : View.VISIBLE);
-                    rvEvents.setVisibility(hasEvents ? View.VISIBLE : View.GONE);
+                    if (snapshots == null || snapshots.isEmpty()) {
+                        allEvents.clear();
+                        upcomingEvents.clear();
+                        pastEvents.clear();
 
-                    adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
+                        emptyState.setVisibility(View.VISIBLE);
+                        rvEvents.setVisibility(View.GONE);
+                        return;
+                    }
+
+                    allEvents.clear();
+                    for (var doc : snapshots) {
+                        Event e = doc.toObject(Event.class);
+                        if (e != null) {
+                            e.setId(doc.getId());
+                            allEvents.add(e);
+                        }
+                    }
+
+                    splitEventsByTime();
+
+                    emptyState.setVisibility(View.GONE);
+                    rvEvents.setVisibility(View.VISIBLE);
+
+                    // Recreate adapter based on which tab is active
+                    if (btnUpcoming.isChecked()) {
+                        adapter = new EventAdapter(
+                                upcomingEvents,
+                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+                        );
+                    } else {
+                        adapter = new EventAdapter(
+                                pastEvents,
+                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
+                        );
+                    }
+
+                    rvEvents.setAdapter(adapter);
                 });
+    }
+
+    // ----------------------------------------------------------
+    // UPCOMING vs PAST SEPARATION
+    // ----------------------------------------------------------
+    private void splitEventsByTime() {
+        upcomingEvents.clear();
+        pastEvents.clear();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Date now = new Date();
+
+        for (Event e : allEvents) {
+            try {
+                Date eventDate = sdf.parse(e.getDate() + " " + e.getTime());
+                if (eventDate != null && eventDate.after(now)) {
+                    upcomingEvents.add(e);
+                } else {
+                    pastEvents.add(e);
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Date parse failed", ex);
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@
         android:id="@+id/cbMusic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Music" />
+        android:text="Entertainment" />
 
     <CheckBox
         android:id="@+id/cbSports"
@@ -34,13 +34,13 @@
         android:id="@+id/cbArts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Arts" />
+        android:text="Health" />
 
     <CheckBox
         android:id="@+id/cbTech"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tech" />
+        android:text="Technology" />
 
     <CheckBox
         android:id="@+id/cbFood"

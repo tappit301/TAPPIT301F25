@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/admin_nav_graph"
+    app:startDestination="@id/adminLoginFragment">
+
+    <!-- LOGIN -->
+    <fragment
+        android:id="@+id/adminLoginFragment"
+        android:name="com.example.eventapp.admin.AdminLoginFragment"
+        android:label="Admin Login"
+        tools:layout="@layout/admin_login">
+
+        <action
+            android:id="@+id/action_adminLogin_to_adminDashboard"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/adminLoginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- DASHBOARD -->
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.example.eventapp.admin.AdminDashboardFragment"
+        android:label="Admin Dashboard"
+        tools:layout="@layout/admin_dashboard">
+
+        <action
+            android:id="@+id/action_dashboard_to_browseEvents"
+            app:destination="@id/adminBrowseEventsFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_browseUsers"
+            app:destination="@id/adminBrowseUsersFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_browseImages"
+            app:destination="@id/adminBrowseImagesFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_removeOrganizers"
+            app:destination="@id/adminBrowseOrganizersFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_notificationLogs"
+            app:destination="@id/adminNotificationLogsFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_systemConfig"
+            app:destination="@id/adminSystemConfigFragment" />
+    </fragment>
+
+    <!-- BROWSE EVENTS -->
+    <fragment
+        android:id="@+id/adminBrowseEventsFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseEventsFragment"
+        android:label="Browse Events"
+        tools:layout="@layout/admin_browse_events" />
+
+    <!-- BROWSE USERS -->
+    <fragment
+        android:id="@+id/adminBrowseUsersFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseUsersFragment"
+        android:label="Browse Profiles"
+        tools:layout="@layout/admin_browse_users" />
+
+    <!-- BROWSE IMAGES -->
+    <fragment
+        android:id="@+id/adminBrowseImagesFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseImagesFragment"
+        android:label="Browse Images"
+        tools:layout="@layout/admin_browse_images" />
+
+    <!-- REMOVE ORGANIZERS -->
+    <fragment
+        android:id="@+id/adminBrowseOrganizersFragment"
+        android:name="com.example.eventapp.admin.AdminRemoveOrganizersFragment"
+        android:label="Remove Organizers"
+        tools:layout="@layout/admin_browse_organizers" />
+
+    <!-- NOTIFICATION LOGS -->
+    <fragment
+        android:id="@+id/adminNotificationLogsFragment"
+        android:name="com.example.eventapp.admin.AdminNotificationLogsFragment"
+        android:label="Notification Logs"
+        tools:layout="@layout/admin_notification_logs" />
+
+    <!-- SYSTEM CONFIG -->
+    <fragment
+        android:id="@+id/adminSystemConfigFragment"
+        android:name="com.example.eventapp.admin.AdminSystemConfigFragment"
+        android:label="System Config"
+        tools:layout="@layout/admin_system_config" />
+
+</navigation>

@@ -10,17 +10,22 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;   // ✅ FIXED IMPORT
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-
+import java.util.Locale;
 
 public class ExploreEventsFragment extends Fragment {
 
@@ -57,6 +62,7 @@ public class ExploreEventsFragment extends Fragment {
 
         rvExploreEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Use the explore → details nav action here
         adapter = new EventAdapter(
                 filteredList,
                 R.id.action_exploreEventsFragment_to_eventDetailsFragment
@@ -65,10 +71,15 @@ public class ExploreEventsFragment extends Fragment {
 
         setupFilterMenu();
         loadEventsFromFirestore();
+
+        ImageButton btnBack = view.findViewById(R.id.btnBackExplore);
+        btnBack.setOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack()
+        );
     }
 
     // -----------------------------------------
-    // LOAD EVENTS FROM FIRESTORE
+    // LOAD EVENTS FROM FIRESTORE (ONLY TODAY + FUTURE)
     // -----------------------------------------
     private void loadEventsFromFirestore() {
         firestore.collection("events")
@@ -82,15 +93,48 @@ public class ExploreEventsFragment extends Fragment {
                             Event ev = doc.toObject(Event.class);
                             if (ev != null) {
                                 ev.setId(doc.getId());
-                                fullList.add(ev);
+
+                                //Only keep events that are today or in the future
+                                if (isTodayOrFuture(ev)) {
+                                    fullList.add(ev);
+                                }
                             }
                         });
                     }
 
+                    // Default: show all upcoming events
                     filteredList.addAll(fullList);
                     adapter.notifyDataSetChanged();
                     updateEmptyState();
                 });
+    }
+
+    /**
+     * Returns true if the event is today or in the future.
+     * Uses the same date/time pattern as your organizer screen: "dd/MM/yyyy HH:mm".
+     */
+    private boolean isTodayOrFuture(Event e) {
+        if (e.getDate() == null || e.getTime() == null) return false;
+
+        try {
+            // Example expected: "21/11/2025 18:30"
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            Date eventDateTime = sdf.parse(e.getDate() + " " + e.getTime());
+            if (eventDateTime == null) return false;
+
+            // Today at 00:00 -> everything from today and after counts as upcoming
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date todayStart = cal.getTime();
+
+            return !eventDateTime.before(todayStart);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     // -----------------------------------------
@@ -106,21 +150,16 @@ public class ExploreEventsFragment extends Fragment {
 
                 int id = item.getItemId();
 
-                // ---- OPTION 1: IF–ELSE ----
                 if (id == R.id.filter_all) {
                     filterEvents("ALL");
-
-                } else if (id == R.id.filter_music) {
-                    filterEvents("Music");
-
+                } else if (id == R.id.filter_entertainment) {
+                    filterEvents("Entertainment");
                 } else if (id == R.id.filter_sports) {
                     filterEvents("Sports");
-
                 } else if (id == R.id.filter_tech) {
-                    filterEvents("Tech");
-
-                } else if (id == R.id.filter_social) {
-                    filterEvents("Social");
+                    filterEvents("Technology");
+                } else if (id == R.id.filter_health) {
+                    filterEvents("Health");
                 }
 
                 return true;
@@ -131,7 +170,7 @@ public class ExploreEventsFragment extends Fragment {
     }
 
     // -----------------------------------------
-    // FILTERING
+    // FILTERING (now only among upcoming events)
     // -----------------------------------------
     private void filterEvents(String category) {
         filteredList.clear();

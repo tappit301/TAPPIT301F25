@@ -1,193 +1,207 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F5F5F5"
+    tools:context=".OrganizerLandingFragment">
 
-    <!-- Purple Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="#7C6AC7"
-        android:gravity="bottom"
-        android:padding="20dp">
 
-        <TextView
-            android:id="@+id/tvLandingTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Landing"
-            android:textSize="28sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- White Toolbar -->
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@android:color/white"
-        android:elevation="4dp">
+        android:background="#F5F5F5"
+        app:elevation="4dp">
 
-        <!-- tappit text -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="tappit"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="#000000" />
-
-        <!-- Explore -->
-        <ImageButton
-            android:id="@+id/btnExplore"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/explore_events" />
-
-        <!-- Create Event Center Button -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/btnCreateEvent"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Create Event"
-                android:textColor="#000000"
-                android:backgroundTint="#E7DDF9"
-                android:paddingHorizontal="20dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_pill_button" />
-        </LinearLayout>
-
-        <!-- Notifications -->
-        <ImageButton
-            android:id="@+id/btnNotifications"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/notification_icon" />
-
-        <!-- Profile -->
-        <ImageView
-            android:id="@+id/btnProfile"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/profile_icon" />
-    </LinearLayout>
-
-    <!-- Scroll Content -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="20dp">
-
-        <LinearLayout
-            android:orientation="vertical"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-            <!-- Section title -->
             <TextView
+                android:id="@+id/AppName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Events"
-                android:textColor="#000000"
-                android:textSize="22sp"
+                android:text="tappit"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="20dp" />
+                android:textColor="@android:color/black" />
 
-            <!-- Upcoming / Past Buttons -->
+            <!-- Explore -->
+            <ImageButton
+                android:id="@+id/btnExplore"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/explore_events" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:background="@drawable/white_box"
-                android:gravity="center"
-                android:padding="4dp"
-                android:layout_marginBottom="24dp">
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btnUpcoming"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:text="Upcoming"
-                    android:textColor="#000000"
-                    android:backgroundTint="#E7DDF9"
-                    android:background="@drawable/rounded_left_tab" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateEventTop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create Event"
+                    android:textSize="13sp"
+                    style="@style/Widget.Material3.Button.TonalButton" />
 
-                <Button
-                    android:id="@+id/btnPast"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:text="Past"
-                    android:textColor="#000000"
-                    android:background="@drawable/rounded_right_tab" />
-            </LinearLayout>
-
-            <!-- RecyclerView for Events -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvEvents"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
-
-            <!-- Empty State -->
-            <LinearLayout
-                android:id="@+id/emptyStateLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="20dp"
-                android:visibility="gone">
+                <ImageButton
+                    android:id="@+id/btnNotifications"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/notification_icon"
+                    android:contentDescription="Notifications" />
 
                 <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:src="@drawable/empty_calender"
-                    android:alpha="0.4" />
+                    android:id="@+id/btnProfile"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/profile_icon"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Profile" />
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="75dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="No Events"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#777777"
-                    android:layout_marginTop="16dp" />
+                    android:layout_weight="1"
+                    android:text="Events"
+                    android:textColor="@android:color/black"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
-                <TextView
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toggleEventType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This calendar has no upcoming events."
-                    android:textSize="14sp"
-                    android:textColor="#999999"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginEnd="16dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpcoming"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Upcoming"
+                        android:textSize="12sp"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPast"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Past"
+                        android:textSize="12sp"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
             </LinearLayout>
 
-        </LinearLayout>
-    </ScrollView>
 
-    <!-- Floating Add Event Button -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="35dp">
+
+
+                <LinearLayout
+                    android:id="@+id/emptyStateLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="48dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:src="@drawable/empty_calender"
+                        android:alpha="0.3"
+                        android:contentDescription="No events" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="No Events"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/darker_gray" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="This calendar has no upcoming events."
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddEventEmpty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="+ Add Event"
+                        android:textAllCaps="false"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                </LinearLayout>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+            </FrameLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddEvent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="20dp"
-        app:srcCompat="@drawable/ic_add" />
+        android:layout_margin="24dp"
+        android:contentDescription="Add Event"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="@color/purple_500"
+        app:tint="@android:color/white"
+        app:layout_anchor="@id/appBarLayout" />
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
