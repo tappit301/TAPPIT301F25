@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -62,10 +63,17 @@ public class QrCodeFragment extends Fragment {
         ImageButton btnBack = view.findViewById(R.id.btnBack);
 
 
-        btnBack.setOnClickListener(v ->
-                requireActivity().getOnBackPressedDispatcher().onBackPressed()
-        );
+        boolean cameFromDetails =
+                getArguments() != null && getArguments().getBoolean("cameFromDetails", false);
 
+        btnBack.setOnClickListener(v -> {
+            if (cameFromDetails) {
+                requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            } else {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_qrCodeFragment_to_organizerLandingFragment);
+            }
+        });
         String qrData = "";
         if (getArguments() != null) {
             qrData = getArguments().getString("qrData", "");

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.AttendeeViewHolder> {
 
-    private List<Attendee> attendeeList;
+    private final List<Attendee> attendeeList;
 
     public AttendeeAdapter(List<Attendee> attendeeList) {
         this.attendeeList = attendeeList;
@@ -37,10 +37,11 @@ public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.Attend
 
     @Override
     public int getItemCount() {
-        return attendeeList.size();
+        return attendeeList != null ? attendeeList.size() : 0;
     }
 
     public static class AttendeeViewHolder extends RecyclerView.ViewHolder {
+
         TextView tvName, tvEmail, tvStatus;
 
         public AttendeeViewHolder(@NonNull View itemView) {

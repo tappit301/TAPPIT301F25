@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,26 +42,19 @@ public class CreateEventFragment extends Fragment {
 
     private static final String TAG = "CreateEventFragment";
 
-    // Edit Mode Variables
     private String eventId = null;
     private boolean isEditMode = false;
 
-    // Views
-    private EditText etDate, etTime;
+    private EditText etDate, etTime, etCategory, etMaxAttendees;
     private ImageView ivEventImage;
     private LinearLayout placeholderLayout;
     private MaterialButton btnPublish;
 
-    // Category input (existing view, just wired up now)
-    private EditText etCategory; // uses R.id.etEventCategory
-
-    // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
 
     private Uri selectedImageUri = null;
-
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Nullable
@@ -100,80 +92,51 @@ public class CreateEventFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Init Views
         etDate = view.findViewById(R.id.etEventDate);
         etTime = view.findViewById(R.id.etEventTime);
+        etCategory = view.findViewById(R.id.etEventCategory);
+        etMaxAttendees = view.findViewById(R.id.etEventCapacity);
+
         btnPublish = view.findViewById(R.id.btnPublishEvent);
         MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
         MaterialCardView cardEventImage = view.findViewById(R.id.cardEventImage);
         ivEventImage = view.findViewById(R.id.ivEventImage);
         placeholderLayout = view.findViewById(R.id.layoutAddCoverPlaceholder);
 
-        // ✅ Category field (existing EditText in XML)
-        etCategory = view.findViewById(R.id.etEventCategory);
-
-        // Make category not freely typed: user picks from list
         etCategory.setFocusable(false);
         etCategory.setClickable(true);
         etCategory.setOnClickListener(v -> showCategoryPicker());
 
-        // Read Arguments (edit mode)
+        cardEventImage.setOnClickListener(v -> openImagePicker());
+        etDate.setOnClickListener(v -> showDatePicker());
+        etTime.setOnClickListener(v -> showTimePicker());
+
+        btnPublish.setOnClickListener(v -> publishEvent(v));
+        btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
+
         Bundle args = getArguments();
         if (args != null && args.containsKey("eventId")) {
             isEditMode = true;
             eventId = args.getString("eventId");
             btnPublish.setText("Save Changes");
-            loadEventDetails(); // Fetch from Firestore
+            loadEventDetails();
         }
-
-        // Inputs
-        etDate.setOnClickListener(v -> showDatePicker());
-        etTime.setOnClickListener(v -> showTimePicker());
-        cardEventImage.setOnClickListener(v -> openImagePicker());
-
-        // Buttons
-        btnPublish.setOnClickListener(v -> {
-            if (isEditMode) {
-                updateEvent(view);
-            } else {
-                publishEvent(view);
-            }
-        });
-
-        btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
     }
 
-    /** Shows the category picker dialog */
     private void showCategoryPicker() {
-        // Fixed options
-        String[] categories = new String[] {
+        String[] categories = new String[]{
                 "Technology",
                 "Sports",
                 "Entertainment",
                 "Health"
         };
 
-        // Pre-select current value if it matches one of them
-        int checkedItem = -1;
-        String current = etCategory.getText().toString().trim();
-        for (int i = 0; i < categories.length; i++) {
-            if (categories[i].equalsIgnoreCase(current)) {
-                checkedItem = i;
-                break;
-            }
-        }
-
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Select category")
-                .setSingleChoiceItems(categories, checkedItem, (dialog, which) -> {
-                    etCategory.setText(categories[which]);
-                    dialog.dismiss();
-                })
-                .setNegativeButton("Cancel", null)
+                .setItems(categories, (dialog, which) -> etCategory.setText(categories[which]))
                 .show();
     }
 
-    /** Fetch Event from Firestore */
     private void loadEventDetails() {
         firestore.collection("events")
                 .document(eventId)
@@ -185,12 +148,17 @@ public class CreateEventFragment extends Fragment {
                             .setText(doc.getString("title"));
                     ((EditText) getView().findViewById(R.id.etEventDescription))
                             .setText(doc.getString("description"));
-                    etDate.setText(doc.getString("date"));
-                    etTime.setText(doc.getString("time"));
                     ((EditText) getView().findViewById(R.id.etEventLocation))
                             .setText(doc.getString("location"));
-                    ((EditText) getView().findViewById(R.id.etEventCategory))
-                            .setText(doc.getString("category"));
+
+                    etDate.setText(doc.getString("date"));
+                    etTime.setText(doc.getString("time"));
+                    etCategory.setText(doc.getString("category"));
+
+                    Long capacity = doc.getLong("capacity");
+                    if (capacity != null) {
+                        etMaxAttendees.setText(String.valueOf(capacity));
+                    }
 
                     String imageUrl = doc.getString("imageUrl");
                     if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -201,7 +169,8 @@ public class CreateEventFragment extends Fragment {
                 });
     }
 
-    /** Update Existing Event */
+    /* --------------------- VASU’S UPDATE EVENT FEATURE --------------------- */
+
     private void updateEvent(View view) {
         if (eventId == null) return;
 
@@ -257,14 +226,9 @@ public class CreateEventFragment extends Fragment {
         return updates;
     }
 
-    /** Create New Event (your original logic goes here) */
-    private void publishEvent(View view) {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    /* ---------------------------------------------------------------------- */
 
+    private void publishEvent(View view) {
         if (getView() == null) return;
 
         String title = ((EditText) getView().findViewById(R.id.etEventTitle))
@@ -276,17 +240,42 @@ public class CreateEventFragment extends Fragment {
         String location = ((EditText) getView().findViewById(R.id.etEventLocation))
                 .getText().toString().trim();
         String category = etCategory.getText().toString().trim();
+        String maxStr = etMaxAttendees.getText().toString().trim();
 
         if (title.isEmpty() || date.isEmpty() || time.isEmpty()) {
-            Toast.makeText(getContext(), "Please fill in required fields.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please fill all required fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Optional: require category
         if (category.isEmpty()) {
             Toast.makeText(getContext(), "Please choose a category.", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if (maxStr.isEmpty()) {
+            Toast.makeText(getContext(), "Enter maximum attendees.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int maxAttendees = Integer.parseInt(maxStr);
+
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+            doPublishEvent(view, title, desc, date, time, location,
+                    category, user.getUid(), user.getEmail(), maxAttendees);
+        }
+    }
+
+    private void doPublishEvent(View view,
+                                String title,
+                                String desc,
+                                String date,
+                                String time,
+                                String location,
+                                String category,
+                                String organizerId,
+                                String organizerEmail,
+                                int maxAttendees) {
 
         Map<String, Object> event = new HashMap<>();
         event.put("title", title);
@@ -296,32 +285,23 @@ public class CreateEventFragment extends Fragment {
         event.put("location", location);
         event.put("category", category);
         event.put("createdAt", Timestamp.now());
-        event.put("organizerId", user.getUid());
-        event.put("organizerEmail", user.getEmail());
+        event.put("organizerId", organizerId);
+        event.put("organizerEmail", organizerEmail);
+        event.put("capacity", maxAttendees);
 
         firestore.collection("events")
                 .add(event)
                 .addOnSuccessListener(doc -> {
-                    Toast.makeText(getContext(), "Event published successfully!", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Event saved by " + user.getEmail());
-
-                    String qrPayload = "Event: " + title +
-                            "\nDate: " + date +
-                            "\nTime: " + time +
-                            "\nLocation: " + location +
-                            "\nOrganizer: " + user.getEmail();
+                    Toast.makeText(getContext(), "Event Published!", Toast.LENGTH_SHORT).show();
 
                     Bundle bundle = new Bundle();
-                    bundle.putString("qrData", qrPayload);
+                    bundle.putString("qrData", doc.getId());
                     Navigation.findNavController(view).navigate(R.id.qrCodeFragment, bundle);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error adding event", e);
-                    Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    /** Pickers */
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(requireContext(),

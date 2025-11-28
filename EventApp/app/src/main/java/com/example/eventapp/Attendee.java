@@ -1,17 +1,48 @@
 package com.example.eventapp;
 
 public class Attendee {
-    private String name;
+
+    private String userId;
     private String email;
+    private String name;
     private String status;
 
-    public Attendee(String name, String email, String status) {
-        this.name = name;
+    // Required empty constructor for Firestore
+    public Attendee() {}
+
+    // Constructor used by ManageEventsFragment (UID, email, status)
+    public Attendee(String userId, String email, String status) {
+        this.userId = userId;
         this.email = email;
         this.status = status;
+        this.name = ""; // optional, can be empty
     }
 
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-    public String getStatus() { return status; }
+    // Full constructor (if needed later)
+    public Attendee(String userId, String name, String email, String status) {
+        this.userId = userId;
+        this.email = email;
+        this.status = status;
+        this.name = name;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getEmail() {
+        return email != null ? email : "No email";
+    }
+
+    public String getStatus() {
+        return status != null ? status : "unknown";
+    }
+
+    public String getName() {
+        return name != null && !name.isEmpty() ? name : "Unknown";
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

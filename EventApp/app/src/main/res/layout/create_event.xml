@@ -28,7 +28,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!-- Cover image preview (hidden until user selects one) -->
                 <ImageView
                     android:id="@+id/ivEventImage"
                     android:layout_width="match_parent"
@@ -38,7 +37,6 @@
                     android:contentDescription="Event cover image"
                     android:visibility="gone" />
 
-                <!-- Placeholder shown before image is picked -->
                 <LinearLayout
                     android:id="@+id/layoutAddCoverPlaceholder"
                     android:layout_width="wrap_content"
@@ -166,12 +164,13 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- FIXED: Removed Optional -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="Max Attendees (Optional)"
+            android:hint="Max Attendees"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -183,7 +182,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- CATEGORY DROPDOWN (keeps id etEventCategory) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
