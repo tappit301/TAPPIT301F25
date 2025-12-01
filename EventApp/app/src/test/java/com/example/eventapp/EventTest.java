@@ -2,7 +2,6 @@ package com.example.eventapp;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 public class EventTest {
@@ -11,7 +10,14 @@ public class EventTest {
 
     @Before
     public void setUp() {
-        event = new Event("Music Fest", "Live concert", "2025-12-10", "19:30", "UofA Hall");
+        event = new Event(
+                "Music Fest",
+                "Live concert",
+                "2025-12-10",
+                "19:30",
+                "UofA Hall",
+                "Entertainment"
+        );
     }
 
     @Test
@@ -21,6 +27,7 @@ public class EventTest {
         assertEquals("2025-12-10", event.getDate());
         assertEquals("19:30", event.getTime());
         assertEquals("UofA Hall", event.getLocation());
+        assertEquals("Entertainment", event.getCategory());
     }
 
     @Test

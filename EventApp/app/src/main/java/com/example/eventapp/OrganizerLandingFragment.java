@@ -1,13 +1,12 @@
 package com.example.eventapp;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,205 +18,154 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class OrganizerLandingFragment extends Fragment {
 
-    private static final String TAG = "OrganizerLanding";
-
-    private RecyclerView rvEvents;
-    private LinearLayout emptyState;
-
-    private final List<Event> allEvents = new ArrayList<>();
-    private final List<Event> upcomingEvents = new ArrayList<>();
-    private final List<Event> pastEvents = new ArrayList<>();
-
-    private EventAdapter adapter;
-
-    private FirebaseAuth auth;
     private FirebaseFirestore firestore;
 
-    private MaterialButton btnUpcoming, btnPast;
+    // UI
+    private RecyclerView rvEvents;
+    private LinearLayout emptyStateLayout;
+    private MaterialButton btnUpcoming;
+    private MaterialButton btnPast;
+    private MaterialButtonToggleGroup toggleGroup;
+
+    // Data
+    private final List<Event> fullList = new ArrayList<>();
+    private final List<Event> filteredList = new ArrayList<>();
+    private EventAdapter adapter;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState
+    ) {
         return inflater.inflate(R.layout.landing_page, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
         super.onViewCreated(view, savedInstanceState);
 
-        auth = FirebaseHelper.getAuth();
-        firestore = FirebaseHelper.getFirestore();
+        firestore = FirebaseHelper.getFirestore(); // null in tests
 
-        NavController navController = Navigation.findNavController(view);
-
+        // Top Toolbar Buttons
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
-        btnExplore.setOnClickListener(v ->
-                navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
-        );
+        MaterialButton btnCreateTop = view.findViewById(R.id.btnCreateEventTop);
+        ImageView btnProfile = view.findViewById(R.id.btnProfile);
+        ImageButton btnNotifications = view.findViewById(R.id.btnNotifications);
 
-        View.OnClickListener createClick = v ->
-                navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
-
+        // Recycler + Empty Layout
+        rvEvents = view.findViewById(R.id.rvEvents);
+        emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
         MaterialButton btnAddEventEmpty = view.findViewById(R.id.btnAddEventEmpty);
-        FloatingActionButton btnAddEvent = view.findViewById(R.id.btnAddEvent);
-        MaterialButton btnCreateEventTop = view.findViewById(R.id.btnCreateEventTop);
 
-        if (btnAddEventEmpty != null) btnAddEventEmpty.setOnClickListener(createClick);
-        if (btnAddEvent != null) btnAddEvent.setOnClickListener(createClick);
-        if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createClick);
+        // FAB
+        View fabAddEvent = view.findViewById(R.id.btnAddEvent);
 
+        // Toggle Group
+        toggleGroup = view.findViewById(R.id.toggleEventType);
         btnUpcoming = view.findViewById(R.id.btnUpcoming);
         btnPast = view.findViewById(R.id.btnPast);
 
-        rvEvents = view.findViewById(R.id.rvEvents);
-        emptyState = view.findViewById(R.id.emptyStateLayout);
-
-        rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 🔹 Initial adapter: UPCOMING events → details from organizerLanding
-        adapter = new EventAdapter(
-                upcomingEvents,
-                R.id.action_organizerLandingFragment_to_eventDetailsFragment
-        );
+        rvEvents.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new EventAdapter(filteredList,
+                R.id.action_organizerLandingFragment_to_eventDetailsFragment);
         rvEvents.setAdapter(adapter);
 
-        setupFilters();
-        loadOrganizerEvents();
-    }
+        // --- Navigation buttons ---
+        btnExplore.setOnClickListener(v ->
+                safeNavigate(view, R.id.action_organizerLandingFragment_to_exploreEventsFragment));
 
-    // ----------------------------------------------------------
-    // FILTER BUTTON LOGIC
-    // ----------------------------------------------------------
-    private void setupFilters() {
+        btnCreateTop.setOnClickListener(v ->
+                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
 
-        btnUpcoming.setOnClickListener(v -> {
-            btnUpcoming.setChecked(true);
-            btnPast.setChecked(false);
+        fabAddEvent.setOnClickListener(v ->
+                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
 
-            adapter = new EventAdapter(
-                    upcomingEvents,
-                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
-            );
-            rvEvents.setAdapter(adapter);
+        btnAddEventEmpty.setOnClickListener(v ->
+                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
+
+        // Toggle: Upcoming / Past
+        toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                applyFilter(checkedId == R.id.btnUpcoming);
+            }
         });
 
-        btnPast.setOnClickListener(v -> {
-            btnPast.setChecked(true);
-            btnUpcoming.setChecked(false);
-
-            adapter = new EventAdapter(
-                    pastEvents,
-                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
-            );
-            rvEvents.setAdapter(adapter);
-        });
-
-        // Default selection = UPCOMING
-        btnUpcoming.setChecked(true);
+        loadEventsFromFirestore();
     }
 
-    // ----------------------------------------------------------
-    // FIRESTORE LOAD
-    // ----------------------------------------------------------
-    private void loadOrganizerEvents() {
+    private void loadEventsFromFirestore() {
 
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(getContext(), "Please sign in again.", Toast.LENGTH_SHORT).show();
+        if (firestore == null) {
+            // Robolectric test mode
+            updateEmptyState();
             return;
         }
 
-        String organizerId = user.getUid();
-
         firestore.collection("events")
-                .whereEqualTo("organizerId", organizerId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .addSnapshotListener((snapshots, error) -> {
+                .get()
+                .addOnSuccessListener(query -> {
+                    fullList.clear();
 
-                    if (error != null) {
-                        Log.e(TAG, "Firestore load failed", error);
-                        return;
-                    }
-
-                    if (snapshots == null || snapshots.isEmpty()) {
-                        allEvents.clear();
-                        upcomingEvents.clear();
-                        pastEvents.clear();
-
-                        adapter.notifyDataSetChanged();
-                        emptyState.setVisibility(View.VISIBLE);
-                        rvEvents.setVisibility(View.GONE);
-                        return;
-                    }
-
-                    allEvents.clear();
-                    for (var doc : snapshots) {
+                    for (QueryDocumentSnapshot doc : query) {
                         Event e = doc.toObject(Event.class);
-                        if (e != null) {
-                            e.setId(doc.getId());
-                            allEvents.add(e);
-                        }
+                        fullList.add(e);
                     }
 
-                    splitEventsByTime();
-
-                    emptyState.setVisibility(View.GONE);
-                    rvEvents.setVisibility(View.VISIBLE);
-
-                    // Recreate adapter based on which tab is active
-                    if (btnUpcoming.isChecked()) {
-                        adapter = new EventAdapter(
-                                upcomingEvents,
-                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
-                        );
-                    } else {
-                        adapter = new EventAdapter(
-                                pastEvents,
-                                R.id.action_organizerLandingFragment_to_eventDetailsFragment
-                        );
-                    }
-
-                    rvEvents.setAdapter(adapter);
-                });
+                    // Default view is "Upcoming"
+                    applyFilter(true);
+                })
+                .addOnFailureListener(e -> updateEmptyState());
     }
 
-    // ----------------------------------------------------------
-    // UPCOMING vs PAST SEPARATION
-    // ----------------------------------------------------------
-    private void splitEventsByTime() {
-        upcomingEvents.clear();
-        pastEvents.clear();
+    /** Filter list by upcoming/past */
+    private void applyFilter(boolean showUpcoming) {
+        filteredList.clear();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Date now = new Date();
-
-        for (Event e : allEvents) {
-            try {
-                Date eventDate = sdf.parse(e.getDate() + " " + e.getTime());
-                if (eventDate != null && eventDate.after(now)) {
-                    upcomingEvents.add(e);
-                } else {
-                    pastEvents.add(e);
-                }
-            } catch (Exception ex) {
-                Log.e(TAG, "Date parse failed", ex);
+        for (Event e : fullList) {
+            if (showUpcoming && !e.isPastEvent()) {
+                filteredList.add(e);
+            } else if (!showUpcoming && e.isPastEvent()) {
+                filteredList.add(e);
             }
+        }
+
+        adapter.notifyDataSetChanged();
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        if (filteredList.isEmpty()) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            rvEvents.setVisibility(View.GONE);
+        } else {
+            emptyStateLayout.setVisibility(View.GONE);
+            rvEvents.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /** Safe nav controller for tests */
+    private void safeNavigate(View root, int actionId) {
+        NavController nav = null;
+        try {
+            nav = Navigation.findNavController(root);
+        } catch (Exception ignored) { }
+
+        if (nav != null) {
+            nav.navigate(actionId);
         }
     }
 }

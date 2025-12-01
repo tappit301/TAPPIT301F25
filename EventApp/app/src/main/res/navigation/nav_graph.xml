@@ -5,105 +5,110 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/organizerLandingFragment">
 
-    <!-- ORGANIZER LANDING -->
+    <!-- Organizer Landing -->
     <fragment
         android:id="@+id/organizerLandingFragment"
         android:name="com.example.eventapp.OrganizerLandingFragment"
         android:label="Organizer Landing"
         tools:layout="@layout/landing_page">
 
+        <!-- Explore -->
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
+            app:destination="@id/exploreEventsFragment" />
+
+        <!-- Create event -->
         <action
             android:id="@+id/action_organizerLandingFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
+        <!-- Event Details -->
         <action
             android:id="@+id/action_organizerLandingFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
 
-        <action
-            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
-            app:destination="@id/exploreEventsFragment" />
     </fragment>
 
-    <!-- EXPLORE EVENTS -->
+
+    <!-- Explore Events -->
     <fragment
         android:id="@+id/exploreEventsFragment"
         android:name="com.example.eventapp.ExploreEventsFragment"
-        android:label="Explore Events">
+        android:label="Explore Events"
+        tools:layout="@layout/fragment_explore_events">
+
+        <!-- Event Details -->
         <action
             android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
     </fragment>
 
-    <!-- CREATE EVENT -->
+
+    <!-- Create / Edit Event -->
     <fragment
         android:id="@+id/createEventFragment"
         android:name="com.example.eventapp.CreateEventFragment"
         android:label="Create Event"
-        tools:layout="@layout/create_event">
+        tools:layout="@layout/fragment_create_event" />
 
-        <action
-            android:id="@+id/action_createEventFragment_to_eventDetailsFragment"
-            app:destination="@id/eventDetailsFragment" />
-    </fragment>
 
-    <!-- EVENT DETAILS -->
+
+    <!-- Event Details -->
     <fragment
         android:id="@+id/eventDetailsFragment"
         android:name="com.example.eventapp.EventDetailsFragment"
         android:label="Event Details"
         tools:layout="@layout/event_details">
 
+        <!-- Open QR view -->
         <action
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
-        <action
-            android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
-            app:destination="@id/createEventFragment" />
-
+        <!-- Manage event -->
         <action
             android:id="@+id/action_eventDetailsFragment_to_manageEventsFragment"
             app:destination="@id/manageEventsFragment" />
 
-        <!-- EVENT ARGUMENTS -->
-        <argument android:name="eventId" app:argType="string" android:defaultValue="" />
-        <argument android:name="title" app:argType="string" android:defaultValue="" />
-        <argument android:name="desc" app:argType="string" android:defaultValue="" />
-        <argument android:name="date" app:argType="string" android:defaultValue="" />
-        <argument android:name="time" app:argType="string" android:defaultValue="" />
-        <argument android:name="location" app:argType="string" android:defaultValue="" />
-        <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
-        <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
     </fragment>
 
-    <!-- QR CODE SCREEN -->
+
+
+    <!-- QR Code -->
     <fragment
         android:id="@+id/qrCodeFragment"
         android:name="com.example.eventapp.QrCodeFragment"
         android:label="QR Code"
         tools:layout="@layout/fragment_qr_code">
 
+        <!-- Back to landing if not from details -->
         <action
             android:id="@+id/action_qrCodeFragment_to_organizerLandingFragment"
-            app:destination="@id/organizerLandingFragment"
-            app:popUpTo="@id/organizerLandingFragment"
-            app:popUpToInclusive="false" />
-
-        <argument android:name="cameFromDetails" app:argType="boolean" android:defaultValue="false" />
-        <argument android:name="qrData" app:argType="string" android:defaultValue="" />
+            app:destination="@id/organizerLandingFragment" />
     </fragment>
 
-    <!-- MANAGE EVENTS -->
+
+
+    <!-- Manage Event -->
     <fragment
         android:id="@+id/manageEventsFragment"
         android:name="com.example.eventapp.ManageEventsFragment"
-        android:label="Manage Events"
+        android:label="Manage Event"
         tools:layout="@layout/fragment_manage_events">
 
+        <!-- Edit event -->
         <action
             android:id="@+id/action_manageEventsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
     </fragment>
+
+
+
+    <!-- Admin Placeholder -->
+    <fragment
+        android:id="@+id/adminManageEventsFragment"
+        android:name="com.example.eventapp.AdminManageEventsFragment"
+        android:label="Admin Manage Events"
+        tools:layout="@layout/fragment_admin_manage_events" />
 
 </navigation>

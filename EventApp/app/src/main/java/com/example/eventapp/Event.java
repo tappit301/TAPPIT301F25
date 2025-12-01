@@ -84,4 +84,18 @@ public class Event {
 
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public void setAttendeeCount(int attendeeCount) { this.attendeeCount = attendeeCount; }
+
+    // --------------------
+    // Derived helper methods
+    // --------------------
+
+    /**
+     * Returns true if this event's timestamp is in the past.
+     * If timestamp = 0 (not set), treat event as upcoming.
+     */
+    public boolean isPastEvent() {
+        if (timestamp == 0) return false;
+        long now = System.currentTimeMillis();
+        return timestamp < now;
+    }
 }
