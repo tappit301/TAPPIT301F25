@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -11,19 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp"
+        android:paddingBottom="40dp">
 
         <!-- EVENT IMAGE -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardEventImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="2dp"
-            app:strokeColor="#DDDDDD"
-            android:clickable="true"
-            android:focusable="true">
+            android:layout_height="120dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="8dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#CCCCCC">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -34,139 +32,131 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:background="#F0F0F0"
-                    android:contentDescription="Event cover image"
                     android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/layoutAddCoverPlaceholder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:layout_gravity="center">
 
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/add_photo"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:alpha="0.5"
-                        android:contentDescription="Add photo" />
+                        android:src="@drawable/add_photo" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Add Cover Image"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         android:textColor="@android:color/darker_gray"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
+
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
+        <!-- END CARDVIEW ✔✔✔ -->
+
 
         <!-- TITLE -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Event Title"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- DESCRIPTION -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Description"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine|textCapSentences"
-                android:minLines="4"
-                android:gravity="top|start" />
+                android:minLines="1"
+                android:maxLines="3"
+                android:gravity="top" />
         </com.google.android.material.textfield.TextInputLayout>
+
 
         <!-- DATE + TIME -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="10dp">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilEventDate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="6dp"
                 android:hint="Date"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEventDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:inputType="none" />
+                    android:focusable="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilEventTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:hint="Time"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEventTime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:inputType="none" />
+                    android:focusable="false" />
             </com.google.android.material.textfield.TextInputLayout>
+
         </LinearLayout>
+
 
         <!-- LOCATION -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Location"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventLocation"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="2" />
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
+
 
         <!-- PRICE -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Price ($)"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventPrice"
@@ -175,14 +165,14 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
+
         <!-- CAPACITY -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Max Attendees"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventCapacity"
@@ -191,30 +181,31 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
+
         <!-- CATEGORY -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="10dp"
             android:hint="Select Category"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <AutoCompleteTextView
                 android:id="@+id/etEventCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false"
-                android:clickable="true" />
+                android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- REQUIRE GEOLOCATION -->
+
+        <!-- REQUIRE GEO -->
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switchRequireGeo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Require geolocation to join waiting list"
-            android:layout_marginBottom="24dp" />
+            android:text="Require geolocation"
+            android:layout_marginBottom="20dp" />
+
 
         <!-- BUTTONS -->
         <LinearLayout
@@ -226,20 +217,19 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:text="Cancel"
-                android:layout_marginEnd="12dp" />
+                android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPublishEvent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Publish Event"
-                android:paddingLeft="24dp"
-                android:paddingRight="24dp" />
+                android:layout_height="40dp"
+                android:text="Publish"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@color/purple_500" />
         </LinearLayout>
 
     </LinearLayout>
-
 </ScrollView>
 

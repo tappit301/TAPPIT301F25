@@ -139,29 +139,31 @@ public class ExploreEventsFragment extends Fragment {
             inflater.inflate(R.menu.popup_menu_filter, popup.getMenu());
 
             popup.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.filter_all:
-                        filterEvents("ALL");
-                        break;
-                    case R.id.filter_entertainment:
-                        filterEvents("Entertainment");
-                        break;
-                    case R.id.filter_sports:
-                        filterEvents("Sports");
-                        break;
-                    case R.id.filter_tech:
-                        filterEvents("Technology");
-                        break;
-                    case R.id.filter_health:
-                        filterEvents("Health");
-                        break;
+                int id = item.getItemId();
+
+                if (id == R.id.filter_all) {
+                    filterEvents("ALL");
                 }
+                else if (id == R.id.filter_entertainment) {
+                    filterEvents("Entertainment");
+                }
+                else if (id == R.id.filter_sports) {
+                    filterEvents("Sports");
+                }
+                else if (id == R.id.filter_tech) {
+                    filterEvents("Technology");
+                }
+                else if (id == R.id.filter_health) {
+                    filterEvents("Health");
+                }
+
                 return true;
             });
 
             popup.show();
         });
     }
+
 
     private void filterEvents(String category) {
         filteredList.clear();

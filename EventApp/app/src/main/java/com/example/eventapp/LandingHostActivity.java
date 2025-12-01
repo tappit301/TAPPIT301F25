@@ -24,72 +24,65 @@ public class LandingHostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing_host);
 
+        // Ask for notification permission on Android 13+
         requestNotificationPermissionIfNeeded();
 
+        // Toolbar setup
         Toolbar toolbar = findViewById(R.id.topAppBar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
 
+        // Navigation setup
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
 
+            // If redirected to explore
             if (getIntent().getBooleanExtra("openExplore", false)) {
                 navController.navigate(R.id.exploreEventsFragment);
             }
 
+            // Configure ActionBar for navigation
             if (getSupportActionBar() != null) {
                 NavigationUI.setupActionBarWithNavController(this, navController);
             }
+
+            // Guest mode handling
             SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
             boolean guestMode = prefs.getBoolean("GUEST_MODE", false);
             boolean fromGuest = getIntent().getBooleanExtra("FROM_GUEST", false);
 
             if (guestMode || fromGuest) {
-                // send guest straight to ExploreEvents
                 navController.navigate(R.id.exploreEventsFragment);
             }
         }
     }
 
-<<<<<<< HEAD
-    /**
-     * Inflate the toolbar menu for the landing page.
-     */
+    /** Inflate toolbar menu */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.landing_menu, menu);
         return true;
     }
 
-    /**
-     * Handle clicks on toolbar menu items.
-     */
+    /** Handle toolbar menu icons */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.action_profile) {
-            // Open profile screen
-            // startActivity(new Intent(LandingHostActivity.this, ProfileActivity.class));
+            // TODO: Navigate to profile fragment
+            // NavHostFragment.findNavController(...)
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-
-    /**
-     * Handles the back navigation when the user presses
-     * the ActionBar’s back button.
-     *
-     * @return true if navigation is handled by the NavController
-     */
-=======
->>>>>>> origin/yashit_new
+    /** Handle navigation up */
     @Override
     public boolean onSupportNavigateUp() {
         NavHostFragment navHostFragment =
@@ -102,6 +95,7 @@ public class LandingHostActivity extends AppCompatActivity {
         return super.onSupportNavigateUp();
     }
 
+    /** Request notification permission if needed (Android 13+) */
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
