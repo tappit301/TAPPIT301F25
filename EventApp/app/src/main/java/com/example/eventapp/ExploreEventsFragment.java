@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Final merged ExploreEventsFragment.
- * Includes filtering, back button, category popup, and Firestore loading.
+ * Final fixed ExploreEventsFragment with working filters,
+ * Firestore load, and AGP 8+ compatibility.
  */
 public class ExploreEventsFragment extends Fragment {
 
@@ -42,7 +42,8 @@ public class ExploreEventsFragment extends Fragment {
 
     // Full list from Firestore
     private final List<Event> fullList = new ArrayList<>();
-    // List shown after filtering
+
+    // Filtered list displayed to the user
     private final List<Event> filteredList = new ArrayList<>();
 
     public ExploreEventsFragment() {}
@@ -98,7 +99,7 @@ public class ExploreEventsFragment extends Fragment {
                             if (ev != null) {
                                 ev.setId(doc.getId());
 
-                                // Only load today and future events
+                                // Only include future/today
                                 if (isTodayOrFuture(ev)) {
                                     fullList.add(ev);
                                 }
@@ -107,6 +108,7 @@ public class ExploreEventsFragment extends Fragment {
                     }
 
                     filteredList.addAll(fullList);
+
                     adapter.notifyDataSetChanged();
                     updateEmptyState();
                 });
@@ -116,10 +118,9 @@ public class ExploreEventsFragment extends Fragment {
         if (e.getDate() == null || e.getTime() == null) return false;
 
         try {
-            SimpleDateFormat sdf =
-                    new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
             Date eventDateTime = sdf.parse(e.getDate() + " " + e.getTime());
+
             if (eventDateTime == null) return false;
 
             Calendar cal = Calendar.getInstance();
@@ -129,11 +130,9 @@ public class ExploreEventsFragment extends Fragment {
             cal.set(Calendar.MILLISECOND, 0);
 
             Date todayStart = cal.getTime();
-
             return !eventDateTime.before(todayStart);
 
         } catch (ParseException ex) {
-            ex.printStackTrace();
             return false;
         }
     }
@@ -146,23 +145,20 @@ public class ExploreEventsFragment extends Fragment {
             inflater.inflate(R.menu.popup_menu_filter, popup.getMenu());
 
             popup.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.filter_all:
-                        filterEvents("ALL");
-                        break;
-                    case R.id.filter_entertainment:
-                        filterEvents("Entertainment");
-                        break;
-                    case R.id.filter_sports:
-                        filterEvents("Sports");
-                        break;
-                    case R.id.filter_tech:
-                        filterEvents("Technology");
-                        break;
-                    case R.id.filter_health:
-                        filterEvents("Health");
-                        break;
+                int id = item.getItemId();
+
+                if (id == R.id.filter_all) {
+                    filterEvents("ALL");
+                } else if (id == R.id.filter_entertainment) {
+                    filterEvents("Entertainment");
+                } else if (id == R.id.filter_sports) {
+                    filterEvents("Sports");
+                } else if (id == R.id.filter_tech) {
+                    filterEvents("Technology");
+                } else if (id == R.id.filter_health) {
+                    filterEvents("Health");
                 }
+
                 return true;
             });
 

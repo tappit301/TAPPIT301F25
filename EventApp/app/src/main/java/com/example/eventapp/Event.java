@@ -1,7 +1,6 @@
 package com.example.eventapp;
 
 import com.google.firebase.Timestamp;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,13 +9,10 @@ import java.util.Locale;
 
 /**
  * Unified Event model used across organizer/explorer/admin.
- * Supports:
- *  - date/time strings (your UI)
- *  - Timestamp dateTime (Pavan)
- *  - geolocation
- *  - price, capacity, attendeeCount
- *  - imageUrl
- *  - admin/organizer filters
+ * FINAL FIXED VERSION:
+ *  - price is now Object to handle Firestore number or string
+ *  - safe conversion helpers added
+ *  - crash-proof
  */
 public class Event {
 
@@ -33,18 +29,27 @@ public class Event {
     private String organizerEmail;
 
     private String imageUrl;
-    private long timestamp;      // Used by your screens
+    private long timestamp;
 
     private int capacity;
     private int attendeeCount;
 
     private boolean requireGeolocation;
-    private double price;
 
-    // Optional — used by admin side
-    private Timestamp dateTime;
+    /**
+     * Firestore may store:
+     *  - "Free"
+     *  - "10"
+     *  - 10
+     *  - 10.0
+     *  - null
+     * Using Object prevents ALL deserialization crashes.
+     */
+    private Object price;
 
-    // Firebase requires empty constructor
+    private Timestamp dateTime;  // admin timestamp
+
+    // Firebase empty constructor
     public Event() {}
 
     public Event(String title, String description, String date, String time,
@@ -78,7 +83,39 @@ public class Event {
     public int getAttendeeCount() { return attendeeCount; }
 
     public boolean isRequireGeolocation() { return requireGeolocation; }
-    public double getPrice() { return price; }
+
+    /**
+     * Safely return price as a string.
+     * Works for both numbers and text.
+     */
+    public String getPrice() {
+        if (price == null) return "Free";
+
+        if (price instanceof String) {
+            return (String) price;
+        }
+        if (price instanceof Number) {
+            return String.valueOf(price);
+        }
+
+        return "Free";
+    }
+
+    /**
+     * Safe double conversion for organizer pages.
+     */
+    public double getPriceAsDouble() {
+        if (price == null) return 0.0;
+
+        try {
+            if (price instanceof Number) {
+                return ((Number) price).doubleValue();
+            }
+            return Double.parseDouble(price.toString());
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
 
     public Timestamp getDateTime() { return dateTime; }
 
@@ -106,26 +143,30 @@ public class Event {
         this.requireGeolocation = requireGeolocation;
     }
 
-    public void setPrice(double price) { this.price = price; }
-    public void setDateTime(Timestamp dateTime) { this.dateTime = dateTime; }
+    public void setPrice(Object price) {
+        this.price = price;
+    }
+
+    public void setDateTime(Timestamp dateTime) {
+        this.dateTime = dateTime;
+    }
 
     // ----------------------------
     // LOGIC — Check Past Event
     // ----------------------------
     public boolean isPastEvent() {
 
-        // Case 1: Admin timestamp
+        // Admin case
         if (dateTime != null) {
             return dateTime.toDate().before(new Date());
         }
 
-        // Case 2: Organizer UI date + time
+        // UI date + time case
         if (date != null && time != null) {
             try {
                 String raw = date + " " + time;
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US);
                 Date eventDate = sdf.parse(raw);
-
                 return eventDate != null && eventDate.before(new Date());
             } catch (ParseException ignored) {}
         }

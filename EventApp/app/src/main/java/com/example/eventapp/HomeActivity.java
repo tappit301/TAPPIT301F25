@@ -14,17 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.eventapp.admin.AdminHostActivity;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * Home screen where user chooses:
- * - Login
- * - Create Account
- * - View Events as Guest
- *
- * If already logged in → directly open LandingHostActivity.
- */
 public class HomeActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -36,10 +29,8 @@ public class HomeActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Determine if user explicitly returned from Explore
         boolean fromExplore = getIntent().getBooleanExtra("fromExplore", false);
 
-        // === AUTO LOGIN HANDLING ===
         if (!fromExplore) {
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser != null) {
@@ -76,15 +67,14 @@ public class HomeActivity extends AppCompatActivity {
         Button btnViewEvents = findViewById(R.id.button_view_events);
         btnViewEvents.setOnClickListener(v -> continueAsGuest());
 
-        // === ADMIN LOGIN ===
-        Button btnAdmin = findViewById(R.id.btnAdminLogin);
+        // === ADMIN LOGIN (FloatingActionButton) ===
+        FloatingActionButton btnAdmin = findViewById(R.id.btnAdminLogin);
         btnAdmin.setOnClickListener(v -> {
             Intent adminIntent = new Intent(HomeActivity.this, AdminHostActivity.class);
             startActivity(adminIntent);
         });
     }
 
-    /** Guest mode logic */
     private void continueAsGuest() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", true).apply();
@@ -92,12 +82,11 @@ public class HomeActivity extends AppCompatActivity {
         Toast.makeText(this, "Continuing as guest...", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
-        intent.putExtra("openExplore", true);  // opens Explore tab automatically
+        intent.putExtra("openExplore", true);
         startActivity(intent);
         finish();
     }
 
-    /** Logged-in navigation */
     private void goToLandingAsUser() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", false).apply();
@@ -107,14 +96,12 @@ public class HomeActivity extends AppCompatActivity {
         finish();
     }
 
-    // Toolbar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(this).inflate(R.menu.main_menu, menu);
         return true;
     }
 
-    // Toolbar item click handling
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_profile) {
@@ -128,4 +115,3 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
-
