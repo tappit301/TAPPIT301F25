@@ -13,6 +13,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- EVENT IMAGE -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardEventImage"
             android:layout_width="match_parent"
@@ -59,13 +60,11 @@
                         android:textSize="14sp"
                         android:textColor="@android:color/darker_gray"
                         android:layout_marginTop="8dp" />
-
                 </LinearLayout>
-
             </FrameLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- TITLE -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventTitle"
             android:layout_width="match_parent"
@@ -80,9 +79,9 @@
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
                 android:maxLines="1" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- DESCRIPTION -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventDescription"
             android:layout_width="match_parent"
@@ -98,9 +97,9 @@
                 android:inputType="textMultiLine|textCapSentences"
                 android:minLines="4"
                 android:gravity="top|start" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- DATE + TIME -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -123,7 +122,6 @@
                     android:focusable="false"
                     android:clickable="true"
                     android:inputType="none" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -142,11 +140,10 @@
                     android:focusable="false"
                     android:clickable="true"
                     android:inputType="none" />
-
             </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
 
+        <!-- LOCATION -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventLocation"
             android:layout_width="match_parent"
@@ -159,12 +156,26 @@
                 android:id="@+id/etEventLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
                 android:maxLines="2" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- FIXED: Removed Optional -->
+        <!-- PRICE -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEventPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Price ($)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEventPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- CAPACITY -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
@@ -177,30 +188,35 @@
                 android:id="@+id/etEventCapacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLines="1" />
-
+                android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- CATEGORY -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:hint="Category"
+            android:layout_marginBottom="16dp"
+            android:hint="Select Category"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <AutoCompleteTextView
                 android:id="@+id/etEventCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"
                 android:focusable="false"
-                android:clickable="true"
-                android:hint="Select category" />
-
+                android:clickable="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- REQUIRE GEOLOCATION -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchRequireGeo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Require geolocation to join waiting list"
+            android:layout_marginBottom="24dp" />
+
+        <!-- BUTTONS -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -212,22 +228,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel"
-                android:textSize="16sp"
-                android:layout_marginEnd="12dp"
-                style="@style/Widget.Material3.Button.TextButton" />
+                android:layout_marginEnd="12dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPublishEvent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Publish Event"
-                android:textSize="16sp"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                app:cornerRadius="8dp" />
-
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp" />
         </LinearLayout>
 
     </LinearLayout>
 
 </ScrollView>
+

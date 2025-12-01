@@ -62,7 +62,6 @@ public class ExploreEventsFragment extends Fragment {
 
         rvExploreEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Use the explore → details nav action here
         adapter = new EventAdapter(
                 filteredList,
                 R.id.action_exploreEventsFragment_to_eventDetailsFragment
@@ -72,15 +71,14 @@ public class ExploreEventsFragment extends Fragment {
         setupFilterMenu();
         loadEventsFromFirestore();
 
+        // back button
         ImageButton btnBack = view.findViewById(R.id.btnBackExplore);
         btnBack.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).popBackStack()
         );
     }
 
-    // -----------------------------------------
-    // LOAD EVENTS FROM FIRESTORE (ONLY TODAY + FUTURE)
-    // -----------------------------------------
+    // ---------------- FIRESTORE LOAD ----------------
     private void loadEventsFromFirestore() {
         firestore.collection("events")
                 .addSnapshotListener((snap, e) -> {
@@ -94,7 +92,6 @@ public class ExploreEventsFragment extends Fragment {
                             if (ev != null) {
                                 ev.setId(doc.getId());
 
-                                //Only keep events that are today or in the future
                                 if (isTodayOrFuture(ev)) {
                                     fullList.add(ev);
                                 }
@@ -102,44 +99,39 @@ public class ExploreEventsFragment extends Fragment {
                         });
                     }
 
-                    // Default: show all upcoming events
                     filteredList.addAll(fullList);
                     adapter.notifyDataSetChanged();
                     updateEmptyState();
                 });
     }
 
-    /**
-     * Returns true if the event is today or in the future.
-     * Uses the same date/time pattern as your organizer screen: "dd/MM/yyyy HH:mm".
-     */
     private boolean isTodayOrFuture(Event e) {
         if (e.getDate() == null || e.getTime() == null) return false;
 
         try {
-            // Example expected: "21/11/2025 18:30"
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            SimpleDateFormat sdf =
+                    new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+
             Date eventDateTime = sdf.parse(e.getDate() + " " + e.getTime());
             if (eventDateTime == null) return false;
 
-            // Today at 00:00 -> everything from today and after counts as upcoming
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
+
             Date todayStart = cal.getTime();
 
             return !eventDateTime.before(todayStart);
+
         } catch (ParseException ex) {
             ex.printStackTrace();
             return false;
         }
     }
 
-    // -----------------------------------------
-    // FILTER MENU (POPUP)
-    // -----------------------------------------
+    // ---------------- FILTER MENU ----------------
     private void setupFilterMenu() {
         btnFilter.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(requireContext(), btnFilter);
@@ -147,21 +139,23 @@ public class ExploreEventsFragment extends Fragment {
             inflater.inflate(R.menu.popup_menu_filter, popup.getMenu());
 
             popup.setOnMenuItemClickListener(item -> {
-
-                int id = item.getItemId();
-
-                if (id == R.id.filter_all) {
-                    filterEvents("ALL");
-                } else if (id == R.id.filter_entertainment) {
-                    filterEvents("Entertainment");
-                } else if (id == R.id.filter_sports) {
-                    filterEvents("Sports");
-                } else if (id == R.id.filter_tech) {
-                    filterEvents("Technology");
-                } else if (id == R.id.filter_health) {
-                    filterEvents("Health");
+                switch (item.getItemId()) {
+                    case R.id.filter_all:
+                        filterEvents("ALL");
+                        break;
+                    case R.id.filter_entertainment:
+                        filterEvents("Entertainment");
+                        break;
+                    case R.id.filter_sports:
+                        filterEvents("Sports");
+                        break;
+                    case R.id.filter_tech:
+                        filterEvents("Technology");
+                        break;
+                    case R.id.filter_health:
+                        filterEvents("Health");
+                        break;
                 }
-
                 return true;
             });
 
@@ -169,9 +163,6 @@ public class ExploreEventsFragment extends Fragment {
         });
     }
 
-    // -----------------------------------------
-    // FILTERING (now only among upcoming events)
-    // -----------------------------------------
     private void filterEvents(String category) {
         filteredList.clear();
 
@@ -196,3 +187,4 @@ public class ExploreEventsFragment extends Fragment {
         rvExploreEvents.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 }
+

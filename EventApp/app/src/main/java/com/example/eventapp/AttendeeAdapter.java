@@ -12,6 +12,7 @@ import java.util.List;
 
 public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.AttendeeViewHolder> {
 
+    // Keep YOUR version — final + safe
     private final List<Attendee> attendeeList;
 
     public AttendeeAdapter(List<Attendee> attendeeList) {

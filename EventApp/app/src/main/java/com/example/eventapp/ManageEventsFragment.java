@@ -5,9 +5,8 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,10 +39,11 @@ public class ManageEventsFragment extends Fragment {
     private FirebaseFirestore firestore;
     private String eventId;
 
-    // UI
+    // UI Buttons
     private View btnWaiting, btnSelected, btnEnrolled, btnCancelled;
     private View btnEditEvent, btnRunLottery;
     private View btnNotifyWaiting, btnNotifySelected, btnNotifyCancelled, btnExportCsv;
+    private View btnViewMap;
 
     public ManageEventsFragment() {}
 
@@ -56,7 +56,8 @@ public class ManageEventsFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         firestore = FirebaseHelper.getFirestore();
@@ -66,7 +67,7 @@ public class ManageEventsFragment extends Fragment {
         adapter = new AttendeeAdapter(attendees);
         recyclerView.setAdapter(adapter);
 
-        // buttons
+        // Buttons
         btnEditEvent = view.findViewById(R.id.btnEditEvent);
         btnRunLottery = view.findViewById(R.id.btnRunLottery);
 
@@ -80,17 +81,19 @@ public class ManageEventsFragment extends Fragment {
         btnNotifyCancelled = view.findViewById(R.id.btnNotifyCancelled);
         btnExportCsv = view.findViewById(R.id.btnExportCsv);
 
+        btnViewMap = view.findViewById(R.id.btnViewMap);
+
         // Get event ID
         Bundle args = getArguments();
-        if (args != null) eventId = args.getString("eventId", "");
+        if (args != null)
+            eventId = args.getString("eventId", "");
 
         if (eventId == null || eventId.isEmpty()) {
             Log.e(TAG, "No eventId received");
             return;
         }
 
-        // ------------------ BUTTON LISTENERS ------------------
-
+        // OPEN EDIT EVENT
         btnEditEvent.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", eventId);
@@ -98,24 +101,36 @@ public class ManageEventsFragment extends Fragment {
                     .navigate(R.id.action_manageEventsFragment_to_createEventFragment, bundle);
         });
 
-        btnRunLottery.setOnClickListener(v -> showSampleSizeDialog());
+        // VIEW MAP
+        btnViewMap.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", eventId);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_manageEventsFragment_to_eventMapFragment, bundle);
+        });
 
+        // FILTER BUTTONS
         btnWaiting.setOnClickListener(v -> loadList("waiting"));
         btnSelected.setOnClickListener(v -> loadList("selected"));
         btnEnrolled.setOnClickListener(v -> loadList("enrolled"));
         btnCancelled.setOnClickListener(v -> loadList("cancelled"));
 
-        btnNotifyWaiting.setOnClickListener(v -> sendNotificationToGroup("waiting"));
-        btnNotifySelected.setOnClickListener(v -> sendNotificationToGroup("selected"));
-        btnNotifyCancelled.setOnClickListener(v -> sendNotificationToGroup("cancelled"));
+        // RUN LOTTERY
+        btnRunLottery.setOnClickListener(v -> showSampleSizeDialog());
 
-        btnExportCsv.setOnClickListener(v -> exportEnrolledCsv());
+        // NOTIFICATIONS
+        btnNotifyWaiting.setOnClickListener(v -> notifyGroup("waiting"));
+        btnNotifySelected.setOnClickListener(v -> notifyGroup("selected"));
+        btnNotifyCancelled.setOnClickListener(v -> notifyGroup("cancelled"));
 
+        // CSV EXPORT
+        btnExportCsv.setOnClickListener(v -> exportCsv());
+
+        // default list
         loadList("waiting");
     }
 
-    // ------------------------- LOAD LIST ----------------------------
-
+    // ---------------- LOAD LIST ----------------
     private void loadList(String status) {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -125,34 +140,28 @@ public class ManageEventsFragment extends Fragment {
                 .addOnSuccessListener(snapshot -> {
                     attendees.clear();
                     snapshot.getDocuments().forEach(doc -> {
-                        String uid = doc.getString("userId");
-                        String email = doc.getString("email");
-                        attendees.add(new Attendee(uid, email, status));
+                        attendees.add(new Attendee(
+                                doc.getString("userId"),
+                                doc.getString("email"),
+                                status
+                        ));
                     });
                     adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error loading list", e));
+                });
     }
 
-    // ------------------------- LOTTERY ----------------------------
-
+    // ---------------- LOTTERY ----------------
     private void showSampleSizeDialog() {
         final EditText input = new EditText(requireContext());
+        input.setHint("How many people?");
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setHint("How many people to sample?");
 
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Lottery")
-                .setMessage("Enter the number of people to select:")
+                .setTitle("Run Lottery")
                 .setView(input)
                 .setPositiveButton("Run", (dialog, which) -> {
-                    String text = input.getText().toString().trim();
-                    if (text.isEmpty()) {
-                        Toast.makeText(getContext(), "Enter a valid number", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    runLottery(Integer.parseInt(text));
+                    String n = input.getText().toString().trim();
+                    if (!n.isEmpty()) runLottery(Integer.parseInt(n));
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -165,35 +174,30 @@ public class ManageEventsFragment extends Fragment {
                 .whereEqualTo("status", "waiting")
                 .get()
                 .addOnSuccessListener(snapshot -> {
-                    List<String> waitingList = new ArrayList<>();
-                    snapshot.getDocuments().forEach(doc -> waitingList.add(doc.getId()));
+                    List<String> list = new ArrayList<>();
+                    snapshot.forEach(doc -> list.add(doc.getId()));
 
-                    if (waitingList.isEmpty()) {
-                        Snackbar.make(requireView(), "No users in waiting list.", Snackbar.LENGTH_LONG).show();
+                    if (list.isEmpty()) {
+                        Snackbar.make(requireView(), "No users waiting.", Snackbar.LENGTH_LONG).show();
                         return;
                     }
 
-                    Collections.shuffle(waitingList, new Random());
-                    int pick = Math.min(sampleSize, waitingList.size());
+                    Collections.shuffle(list, new Random());
+                    List<String> selected = list.subList(0, Math.min(sampleSize, list.size()));
 
-                    List<String> selected = waitingList.subList(0, pick);
+                    selected.forEach(uid -> firestore.collection("eventAttendees")
+                            .document(eventId)
+                            .collection("attendees")
+                            .document(uid)
+                            .update("status", "selected"));
 
-                    for (String uid : selected) {
-                        firestore.collection("eventAttendees")
-                                .document(eventId)
-                                .collection("attendees")
-                                .document(uid)
-                                .update("status", "selected");
-                    }
-
-                    Snackbar.make(requireView(), pick + " users selected!", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(requireView(), "Selected " + selected.size() + " users", Snackbar.LENGTH_LONG).show();
                     loadList("selected");
                 });
     }
 
-    // ------------------------- NOTIFICATION ----------------------------
-
-    private void sendNotificationToGroup(String status) {
+    // ---------------- NOTIFICATIONS ----------------
+    private void notifyGroup(String status) {
         firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
@@ -202,81 +206,60 @@ public class ManageEventsFragment extends Fragment {
                 .addOnSuccessListener(snapshot -> {
 
                     if (snapshot.isEmpty()) {
-                        Snackbar.make(requireView(), "No users in this list.", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(requireView(), "No users found.", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // Corrected messages
-                    String message;
-                    switch (status) {
-                        case "waiting":
-                            message = "You are still on the waiting list for this event.";
-                            break;
-                        case "selected":
-                            message = "You have been selected! Please accept or decline your spot.";
-                            break;
-                        case "cancelled":
-                            message = "Your spot has been cancelled. Contact the organizer for help.";
-                            break;
-                        default:
-                            message = "You have an update regarding the event.";
-                            break;
-                    }
+                    String message = switch (status) {
+                        case "waiting" -> "You are still on the waiting list.";
+                        case "selected" -> "You were selected! Please accept or decline.";
+                        case "cancelled" -> "Your spot has been cancelled.";
+                        default -> "Event update.";
+                    };
 
-                    String title = "Event Update";
+                    snapshot.forEach(doc ->
+                            NotificationHelper.notifyUser(
+                                    getContext(),
+                                    doc.getId(),
+                                    "event_update",
+                                    "Event Update",
+                                    message
+                            ));
 
-                    // Send notification to each user
-                    snapshot.getDocuments().forEach(doc -> {
-                        String uid = doc.getString("userId");
-
-                        NotificationHelper.notifyUser(
-                                getContext(),
-                                uid,
-                                "group_notify",
-                                title,
-                                message
-                        );
-                    });
-
-                    Snackbar.make(requireView(), "Notifications sent!", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(requireView(), "Notifications sent.", Snackbar.LENGTH_LONG).show();
                 });
     }
 
-    // ------------------------- CSV EXPORT ----------------------------
-
-    private void exportEnrolledCsv() {
+    // ---------------- CSV EXPORT ----------------
+    private void exportCsv() {
         firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
                 .whereEqualTo("status", "enrolled")
                 .get()
                 .addOnSuccessListener(snapshot -> {
-
                     if (snapshot.isEmpty()) {
                         Snackbar.make(requireView(), "No enrolled users.", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
 
                     StringBuilder csv = new StringBuilder("UserId,Email,Status\n");
-
-                    snapshot.getDocuments().forEach(doc -> {
+                    snapshot.forEach(doc -> {
                         csv.append(doc.getString("userId")).append(",");
                         csv.append(doc.getString("email")).append(",");
                         csv.append("enrolled").append("\n");
                     });
 
                     try {
-                        File file = new File(
-                                requireContext().getExternalFilesDir(null),
-                                "enrolled_list.csv"
-                        );
+                        File file = new File(requireContext().getExternalFilesDir(null),
+                                "enrolled_list.csv");
 
                         FileOutputStream fos = new FileOutputStream(file);
                         fos.write(csv.toString().getBytes());
                         fos.close();
 
                         Snackbar.make(requireView(),
-                                "CSV saved: " + file.getAbsolutePath(),
+                                "CSV saved:\n" + file.getAbsolutePath(),
                                 Snackbar.LENGTH_LONG).show();
 
                     } catch (Exception e) {

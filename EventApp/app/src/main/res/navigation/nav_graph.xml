@@ -22,18 +22,27 @@
         <action
             android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
             app:destination="@id/exploreEventsFragment" />
+<<<<<<< HEAD
 
         <action
             android:id="@+id/action_organizerLandingFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
 
+=======
+>>>>>>> origin/yashit_new
     </fragment>
 
     <!-- Explore All Events Page -->
     <fragment
         android:id="@+id/exploreEventsFragment"
         android:name="com.example.eventapp.ExploreEventsFragment"
+<<<<<<< HEAD
         android:label="Explore Events">
+=======
+        android:label="Explore Events"
+        tools:ignore="ExtraText">
+        tools:layout="@layout/fragment_explore_events">
+>>>>>>> origin/yashit_new
 
         <action
             android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
@@ -116,6 +125,7 @@
             android:id="@+id/action_manageEventsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
+<<<<<<< HEAD
     </fragment>
 
     <!-- PROFILE -->
@@ -154,5 +164,42 @@
             app:destination="@id/eventDetailsFragment" />
     </fragment>
 
+=======
+        <action
+            android:id="@+id/action_manageEventsFragment_to_eventMapFragment"
+            app:destination="@id/eventMapFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/eventMapFragment"
+        android:name="com.example.eventapp.EventMapFragment"
+        android:label="View Map"
+        tools:layout="@layout/fragment_event_map">
+
+        <argument
+            android:name="eventId"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryEventsFragment"
+        android:name="com.example.eventapp.CategoryEventsFragment"
+        android:label="Category Events">
+
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_categoryEventsFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_exploreEventsFragment_to_categoryEventsFragment"
+        app:destination="@id/categoryEventsFragment" />
+>>>>>>> origin/yashit_new
 </navigation>
 

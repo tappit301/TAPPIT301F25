@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -11,9 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -24,37 +26,48 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.eventapp.utils.FirebaseHelper;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CreateEventFragment extends Fragment {
 
     private static final String TAG = "CreateEventFragment";
 
+    // Edit mode
     private String eventId = null;
     private boolean isEditMode = false;
 
-    private EditText etDate, etTime, etCategory, etMaxAttendees;
+    // Views
+    private EditText etDate, etTime, etCategory, etPrice, etCapacity;
+    private EditText etTitle, etDescription, etLocation;
     private ImageView ivEventImage;
     private LinearLayout placeholderLayout;
     private MaterialButton btnPublish;
+    private SwitchMaterial switchRequireGeo;
 
+    // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
 
     private Uri selectedImageUri = null;
+    private String existingImageUrl = null;
+
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Nullable
@@ -89,31 +102,46 @@ public class CreateEventFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        etDate = view.findViewById(R.id.etEventDate);
-        etTime = view.findViewById(R.id.etEventTime);
-        etCategory = view.findViewById(R.id.etEventCategory);
-        etMaxAttendees = view.findViewById(R.id.etEventCapacity);
+        // Init views
+        etDate       = view.findViewById(R.id.etEventDate);
+        etTime       = view.findViewById(R.id.etEventTime);
+        etTitle      = view.findViewById(R.id.etEventTitle);
+        etDescription= view.findViewById(R.id.etEventDescription);
+        etLocation   = view.findViewById(R.id.etEventLocation);
+        etCategory   = view.findViewById(R.id.etEventCategory);
+        etPrice      = view.findViewById(R.id.etEventPrice);
+        etCapacity   = view.findViewById(R.id.etEventCapacity);
 
-        btnPublish = view.findViewById(R.id.btnPublishEvent);
+        switchRequireGeo   = view.findViewById(R.id.switchRequireGeo);
+        ivEventImage       = view.findViewById(R.id.ivEventImage);
+        placeholderLayout  = view.findViewById(R.id.layoutAddCoverPlaceholder);
+        MaterialCardView cardImage = view.findViewById(R.id.cardEventImage);
+        btnPublish         = view.findViewById(R.id.btnPublishEvent);
         MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
-        MaterialCardView cardEventImage = view.findViewById(R.id.cardEventImage);
-        ivEventImage = view.findViewById(R.id.ivEventImage);
-        placeholderLayout = view.findViewById(R.id.layoutAddCoverPlaceholder);
 
+        // Category picker
         etCategory.setFocusable(false);
         etCategory.setClickable(true);
         etCategory.setOnClickListener(v -> showCategoryPicker());
 
-        cardEventImage.setOnClickListener(v -> openImagePicker());
+        // Click listeners
         etDate.setOnClickListener(v -> showDatePicker());
         etTime.setOnClickListener(v -> showTimePicker());
+        cardImage.setOnClickListener(v -> openImagePicker());
 
-        btnPublish.setOnClickListener(v -> publishEvent(v));
-        btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
+        btnPublish.setOnClickListener(v -> {
+            if (isEditMode) updateEvent(view);
+            else publishNewEvent(view);
+        });
 
+        btnCancel.setOnClickListener(v ->
+                Navigation.findNavController(view).popBackStack());
+
+        // Edit mode data
         Bundle args = getArguments();
         if (args != null && args.containsKey("eventId")) {
             isEditMode = true;
@@ -123,20 +151,7 @@ public class CreateEventFragment extends Fragment {
         }
     }
 
-    private void showCategoryPicker() {
-        String[] categories = new String[]{
-                "Technology",
-                "Sports",
-                "Entertainment",
-                "Health"
-        };
-
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Select category")
-                .setItems(categories, (dialog, which) -> etCategory.setText(categories[which]))
-                .show();
-    }
-
+    // ----------------------- Load existing event -----------------------
     private void loadEventDetails() {
         firestore.collection("events")
                 .document(eventId)
@@ -144,64 +159,120 @@ public class CreateEventFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (!doc.exists()) return;
 
-                    ((EditText) getView().findViewById(R.id.etEventTitle))
-                            .setText(doc.getString("title"));
-                    ((EditText) getView().findViewById(R.id.etEventDescription))
-                            .setText(doc.getString("description"));
-                    ((EditText) getView().findViewById(R.id.etEventLocation))
-                            .setText(doc.getString("location"));
-
+                    etTitle.setText(doc.getString("title"));
+                    etDescription.setText(doc.getString("description"));
                     etDate.setText(doc.getString("date"));
                     etTime.setText(doc.getString("time"));
+                    etLocation.setText(doc.getString("location"));
                     etCategory.setText(doc.getString("category"));
 
-                    Long capacity = doc.getLong("capacity");
-                    if (capacity != null) {
-                        etMaxAttendees.setText(String.valueOf(capacity));
-                    }
+                    Double price = doc.getDouble("price");
+                    if (price != null) etPrice.setText(String.valueOf(price));
 
-                    String imageUrl = doc.getString("imageUrl");
-                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Long cap = doc.getLong("capacity");
+                    if (cap != null) etCapacity.setText(String.valueOf(cap));
+
+                    Boolean requireGeo = doc.getBoolean("requireGeolocation");
+                    switchRequireGeo.setChecked(requireGeo != null && requireGeo);
+
+                    existingImageUrl = doc.getString("imageUrl");
+                    if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
                         placeholderLayout.setVisibility(View.GONE);
                         ivEventImage.setVisibility(View.VISIBLE);
-                        Glide.with(requireContext()).load(imageUrl).into(ivEventImage);
+                        Glide.with(requireContext()).load(existingImageUrl).into(ivEventImage);
                     }
                 });
     }
 
-    /* --------------------- VASU’S UPDATE EVENT FEATURE --------------------- */
+    // ----------------------- Publish NEW event -----------------------
+    private void publishNewEvent(View view) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
 
+        String title       = etTitle.getText().toString().trim();
+        String desc        = etDescription.getText().toString().trim();
+        String date        = etDate.getText().toString().trim();
+        String time        = etTime.getText().toString().trim();
+        String location    = etLocation.getText().toString().trim();
+        String category    = etCategory.getText().toString().trim();
+        String priceStr    = etPrice.getText().toString().trim();
+        String capacityStr = etCapacity.getText().toString().trim();
+
+        if (title.isEmpty() || date.isEmpty() || time.isEmpty() || location.isEmpty()) {
+            Toast.makeText(getContext(), "Please fill all required fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        geocodeAddress(location, latLng -> {
+            if (latLng == null) {
+                Toast.makeText(getContext(), "Invalid location.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            Map<String, Object> event = new HashMap<>();
+            event.put("title", title);
+            event.put("description", desc);
+            event.put("date", date);
+            event.put("time", time);
+            event.put("location", location);
+            event.put("category", category);
+
+            event.put("price", priceStr.isEmpty() ? 0.0 : Double.parseDouble(priceStr));
+
+            if (!capacityStr.isEmpty()) {
+                event.put("capacity", Integer.parseInt(capacityStr));
+            }
+
+            event.put("requireGeolocation", switchRequireGeo.isChecked());
+            event.put("lat", latLng.latitude);
+            event.put("lng", latLng.longitude);
+
+            event.put("organizerId", user.getUid());
+            event.put("organizerEmail", user.getEmail());
+            event.put("createdAt", Timestamp.now());
+
+            firestore.collection("events")
+                    .add(event)
+                    .addOnSuccessListener(docRef -> {
+                        Toast.makeText(getContext(), "Event published!", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(view).popBackStack();
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        });
+    }
+
+    // ----------------------- Update event -----------------------
     private void updateEvent(View view) {
         if (eventId == null) return;
 
-        if (selectedImageUri != null) {
-            StorageReference imageRef = storage.getReference()
-                    .child("event_covers/" + eventId + ".jpg");
+        String location = etLocation.getText().toString().trim();
 
-            imageRef.putFile(selectedImageUri)
-                    .continueWithTask(task -> {
-                        if (!task.isSuccessful()) throw task.getException();
-                        return imageRef.getDownloadUrl();
-                    })
-                    .addOnSuccessListener(downloadUrl -> {
-                        Map<String, Object> updates = getUpdatedFields();
-                        updates.put("imageUrl", downloadUrl.toString());
+        geocodeAddress(location, latLng -> {
+            if (latLng == null) {
+                Toast.makeText(getContext(), "Invalid location.", Toast.LENGTH_LONG).show();
+                return;
+            }
 
-                        firestore.collection("events")
-                                .document(eventId)
-                                .update(updates)
-                                .addOnSuccessListener(unused -> {
-                                    Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
-                                    Navigation.findNavController(view).popBackStack();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("title", etTitle.getText().toString().trim());
+            updates.put("description", etDescription.getText().toString().trim());
+            updates.put("date", etDate.getText().toString().trim());
+            updates.put("time", etTime.getText().toString().trim());
+            updates.put("location", location);
+            updates.put("category", etCategory.getText().toString().trim());
 
-        } else {
-            Map<String, Object> updates = getUpdatedFields();
+            String priceStr = etPrice.getText().toString().trim();
+            updates.put("price", priceStr.isEmpty() ? 0.0 : Double.parseDouble(priceStr));
+
+            String capStr = etCapacity.getText().toString().trim();
+            if (!capStr.isEmpty()) {
+                updates.put("capacity", Integer.parseInt(capStr));
+            }
+
+            updates.put("requireGeolocation", switchRequireGeo.isChecked());
+            updates.put("lat", latLng.latitude);
+            updates.put("lng", latLng.longitude);
 
             firestore.collection("events")
                     .document(eventId)
@@ -212,115 +283,69 @@ public class CreateEventFragment extends Fragment {
                     })
                     .addOnFailureListener(e ->
                             Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        }
+        });
     }
 
-    private Map<String, Object> getUpdatedFields() {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("title", ((EditText) getView().findViewById(R.id.etEventTitle)).getText().toString().trim());
-        updates.put("description", ((EditText) getView().findViewById(R.id.etEventDescription)).getText().toString().trim());
-        updates.put("date", etDate.getText().toString().trim());
-        updates.put("time", etTime.getText().toString().trim());
-        updates.put("location", ((EditText) getView().findViewById(R.id.etEventLocation)).getText().toString().trim());
-        updates.put("category", ((EditText) getView().findViewById(R.id.etEventCategory)).getText().toString().trim());
-        return updates;
-    }
+    // ----------------------- Category picker -----------------------
+    private void showCategoryPicker() {
+        String[] categories = {"Technology", "Sports", "Entertainment", "Health", "Others"};
 
-    /* ---------------------------------------------------------------------- */
-
-    private void publishEvent(View view) {
-        if (getView() == null) return;
-
-        String title = ((EditText) getView().findViewById(R.id.etEventTitle))
-                .getText().toString().trim();
-        String desc = ((EditText) getView().findViewById(R.id.etEventDescription))
-                .getText().toString().trim();
-        String date = etDate.getText().toString().trim();
-        String time = etTime.getText().toString().trim();
-        String location = ((EditText) getView().findViewById(R.id.etEventLocation))
-                .getText().toString().trim();
-        String category = etCategory.getText().toString().trim();
-        String maxStr = etMaxAttendees.getText().toString().trim();
-
-        if (title.isEmpty() || date.isEmpty() || time.isEmpty()) {
-            Toast.makeText(getContext(), "Please fill all required fields.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (category.isEmpty()) {
-            Toast.makeText(getContext(), "Please choose a category.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (maxStr.isEmpty()) {
-            Toast.makeText(getContext(), "Enter maximum attendees.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int maxAttendees = Integer.parseInt(maxStr);
-
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
-            doPublishEvent(view, title, desc, date, time, location,
-                    category, user.getUid(), user.getEmail(), maxAttendees);
-        }
-    }
-
-    private void doPublishEvent(View view,
-                                String title,
-                                String desc,
-                                String date,
-                                String time,
-                                String location,
-                                String category,
-                                String organizerId,
-                                String organizerEmail,
-                                int maxAttendees) {
-
-        Map<String, Object> event = new HashMap<>();
-        event.put("title", title);
-        event.put("description", desc);
-        event.put("date", date);
-        event.put("time", time);
-        event.put("location", location);
-        event.put("category", category);
-        event.put("createdAt", Timestamp.now());
-        event.put("organizerId", organizerId);
-        event.put("organizerEmail", organizerEmail);
-        event.put("capacity", maxAttendees);
-
-        firestore.collection("events")
-                .add(event)
-                .addOnSuccessListener(doc -> {
-                    Toast.makeText(getContext(), "Event Published!", Toast.LENGTH_SHORT).show();
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString("qrData", doc.getId());
-                    Navigation.findNavController(view).navigate(R.id.qrCodeFragment, bundle);
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Select Category")
+                .setSingleChoiceItems(categories, -1, (dialog, which) -> {
+                    etCategory.setText(categories[which]);
+                    dialog.dismiss();
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .show();
     }
 
-    private void showDatePicker() {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(requireContext(),
-                (view, year, month, day) ->
-                        etDate.setText(day + "/" + (month + 1) + "/" + year),
-                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
-    }
-
-    private void showTimePicker() {
-        Calendar c = Calendar.getInstance();
-        new TimePickerDialog(requireContext(),
-                (view, hour, min) ->
-                        etTime.setText(String.format("%02d:%02d", hour, min)),
-                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
-    }
-
+    // ----------------------- Image Picker -----------------------
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         imagePickerLauncher.launch(intent);
     }
+
+    // ----------------------- Date Picker -----------------------
+    private void showDatePicker() {
+        Calendar c = Calendar.getInstance();
+        new DatePickerDialog(
+                requireContext(),
+                (view, year, month, day) ->
+                        etDate.setText(day + "/" + (month + 1) + "/" + year),
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
+        ).show();
+    }
+
+    // ----------------------- Time Picker -----------------------
+    private void showTimePicker() {
+        Calendar c = Calendar.getInstance();
+        new TimePickerDialog(
+                requireContext(),
+                (view, hour, min) ->
+                        etTime.setText(String.format("%02d:%02d", hour, min)),
+                c.get(Calendar.HOUR_OF_DAY),
+                c.get(Calendar.MINUTE),
+                true
+        ).show();
+    }
+
+    // ----------------------- Geocoding helper -----------------------
+    private void geocodeAddress(String address, OnSuccessListener<LatLng> callback) {
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            List<Address> results = geocoder.getFromLocationName(address, 1);
+            if (results != null && !results.isEmpty()) {
+                Address loc = results.get(0);
+                callback.onSuccess(new LatLng(loc.getLatitude(), loc.getLongitude()));
+            } else {
+                callback.onSuccess(null);
+            }
+        } catch (Exception e) {
+            callback.onSuccess(null);
+        }
+    }
 }
+

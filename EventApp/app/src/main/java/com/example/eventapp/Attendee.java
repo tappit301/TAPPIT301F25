@@ -10,15 +10,15 @@ public class Attendee {
     // Required empty constructor for Firestore
     public Attendee() {}
 
-    // Constructor used by ManageEventsFragment (UID, email, status)
+    // Main constructor used throughout the project
     public Attendee(String userId, String email, String status) {
         this.userId = userId;
         this.email = email;
         this.status = status;
-        this.name = ""; // optional, can be empty
+        this.name = "";
     }
 
-    // Full constructor (if needed later)
+    // Full constructor (optional extended)
     public Attendee(String userId, String name, String email, String status) {
         this.userId = userId;
         this.email = email;
@@ -26,8 +26,18 @@ public class Attendee {
         this.name = name;
     }
 
+    // Wrapper constructor (for compatibility with Yashit's code)
+    // If Yashit created an Attendee using (name, email, status),
+    // we assign userId = "", and fill in the fields.
+    public Attendee(String name, String email, String status, boolean fromYashit) {
+        this.name = name;
+        this.email = email;
+        this.status = status;
+        this.userId = "";
+    }
+
     public String getUserId() {
-        return userId;
+        return userId != null ? userId : "";
     }
 
     public String getEmail() {

@@ -18,11 +18,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * The first screen of the app that lets users choose between
- * signing in, creating an account, or viewing events as a guest.
+ * Home screen where user chooses:
+ * - Login
+ * - Create Account
+ * - View Events as Guest
  *
- * If a user is already signed in, they are automatically redirected
- * to the landing page without seeing this screen.
+ * If already logged in → directly open LandingHostActivity.
  */
 public class HomeActivity extends AppCompatActivity {
 
@@ -35,21 +36,21 @@ public class HomeActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        boolean fromExplore = getIntent().getBooleanExtra("fromExplore", false);
 
-        // If a user is already signed in → skip home screen
-        if (currentUser != null) {
-            Log.d("AuthCheck", "Signed in. Going to LandingHostActivity...");
-            goToLandingAsUser();
-            return;
+        // AUTO LOGIN unless coming back manually
+        if (!fromExplore) {
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            if (currentUser != null) {
+                goToLandingAsUser();
+                return;
+            }
         }
 
         setupHomeUI();
     }
 
-    /**
-     * Sets up toolbar and main buttons.
-     */
+    /** Sets up toolbar + buttons */
     private void setupHomeUI() {
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
@@ -59,24 +60,21 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         Button btnGettingStarted = findViewById(R.id.btnGettingStarted);
-        btnGettingStarted.setOnClickListener(v ->
-                startActivity(new Intent(HomeActivity.this, LoginActivity.class))
+        btnGettingStarted.setOnClickListener(
+                v -> startActivity(new Intent(HomeActivity.this, LoginActivity.class))
         );
 
         Button btnCreateAccount = findViewById(R.id.btnCreateAccount);
-        btnCreateAccount.setOnClickListener(v ->
-                startActivity(new Intent(HomeActivity.this, SignUpActivity.class))
+        btnCreateAccount.setOnClickListener(
+                v -> startActivity(new Intent(HomeActivity.this, SignUpActivity.class))
         );
 
-        // ⭐ GUEST MODE BUTTON ⭐
+        // Guest Mode
         Button btnViewEvents = findViewById(R.id.button_view_events);
         btnViewEvents.setOnClickListener(v -> continueAsGuest());
     }
 
-    /**
-     * Guest mode: no login required.
-     * Simply store a preference flag & open LandingHostActivity.
-     */
+    /** Guest mode logic */
     private void continueAsGuest() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", true).apply();
@@ -84,11 +82,12 @@ public class HomeActivity extends AppCompatActivity {
         Toast.makeText(this, "Continuing as guest...", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
+        intent.putExtra("openExplore", true);
         startActivity(intent);
         finish();
     }
 
-    /** Normal logged-in navigation */
+    /** Logged-in navigation */
     private void goToLandingAsUser() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", false).apply();
@@ -98,31 +97,23 @@ public class HomeActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Inflate toolbar menu (Profile / Sign In).
-     */
+    // Toolbar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        new MenuInflater(this).inflate(R.menu.main_menu, menu);
         return true;
     }
 
-    /**
-     * Handles top-right toolbar actions.
-     */
+    // Toolbar item click handling
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_profile) {
+        if (item.getItemId() == R.id.action_profile) {
             Toast.makeText(this, "Sign in to view profile", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (id == R.id.action_sign_in) {
+        } else if (item.getItemId() == R.id.action_sign_in) {
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

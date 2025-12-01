@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,8 +25,6 @@ import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -52,7 +49,6 @@ public class OrganizerLandingFragment extends Fragment {
 
     private final List<Event> allEvents = new ArrayList<>();
     private final Set<String> eventIdSet = new HashSet<>();
-
     private final List<Event> upcomingEvents = new ArrayList<>();
     private final List<Event> pastEvents = new ArrayList<>();
 
@@ -81,7 +77,9 @@ public class OrganizerLandingFragment extends Fragment {
 
         NavController navController = Navigation.findNavController(view);
 
-        // ---------------- EXPLORE BUTTON ----------------
+        // ------------------------------------------------------------
+        // EXPLORE BUTTON
+        // ------------------------------------------------------------
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
         if (btnExplore != null) {
             btnExplore.setOnClickListener(v ->
@@ -89,94 +87,87 @@ public class OrganizerLandingFragment extends Fragment {
             );
         }
 
-        // ---------------- CREATE EVENT BUTTONS ----------------
-        View.OnClickListener createClick = v ->
+        // ------------------------------------------------------------
+        // CREATE EVENT BUTTONS
+        // ------------------------------------------------------------
+        View.OnClickListener createEventClick = v ->
                 navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
         MaterialButton btnAddEventEmpty = view.findViewById(R.id.btnAddEventEmpty);
         FloatingActionButton btnAddEvent = view.findViewById(R.id.btnAddEvent);
         MaterialButton btnCreateEventTop = view.findViewById(R.id.btnCreateEventTop);
 
-        if (btnAddEventEmpty != null) btnAddEventEmpty.setOnClickListener(createClick);
-        if (btnAddEvent != null) btnAddEvent.setOnClickListener(createClick);
-        if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createClick);
+        if (btnAddEventEmpty != null) btnAddEventEmpty.setOnClickListener(createEventClick);
+        if (btnAddEvent != null) btnAddEvent.setOnClickListener(createEventClick);
+        if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createEventClick);
 
-        // ---------------- PROFILE ICON (if present) ----------------
+        // ------------------------------------------------------------
+        // PROFILE BUTTON & LOAD AVATAR
+        // ------------------------------------------------------------
         ImageView btnProfile = view.findViewById(R.id.btnProfile);
         if (btnProfile != null) {
             btnProfile.setOnClickListener(v ->
                     navController.navigate(R.id.action_organizerLandingFragment_to_profileFragment)
             );
-            // If you had a method to load avatar into toolbar:
-            // loadProfileAvatarIntoToolbar(btnProfile);
+            loadProfileAvatar(btnProfile);
         }
 
-        // ---------------- NOTIFICATIONS BUTTON (IN-APP DROPDOWN) ----------------
+        // ------------------------------------------------------------
+        // NOTIFICATION BUTTON (TOP RIGHT)
+        // ------------------------------------------------------------
         View btnNotifications = view.findViewById(R.id.btnNotifications);
         if (btnNotifications != null) {
             btnNotifications.setOnClickListener(v -> showNotificationsDialog());
         }
 
-        // ---------------- RV + FILTERS (your existing logic) ----------------
+        // ------------------------------------------------------------
+        // RECYCLER + TABS
+        // ------------------------------------------------------------
+        rvEvents = view.findViewById(R.id.rvEvents);
+        emptyState = view.findViewById(R.id.emptyStateLayout);
+        rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
+
         btnUpcoming = view.findViewById(R.id.btnUpcoming);
         btnPast = view.findViewById(R.id.btnPast);
 
-        rvEvents = view.findViewById(R.id.rvEvents);
-        emptyState = view.findViewById(R.id.emptyStateLayout);
+        setupFilterButtons();
 
-        rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // Default adapter = upcoming events
-        adapter = new EventAdapter(
-                upcomingEvents,
-                R.id.action_organizerLandingFragment_to_eventDetailsFragment
-        );
+        adapter = new EventAdapter(upcomingEvents,
+                R.id.action_organizerLandingFragment_to_eventDetailsFragment);
         rvEvents.setAdapter(adapter);
 
-        setupFilters();
         loadAllEventsForUser();
     }
 
-    // Load user's profile picture URL and show it in toolbar icon
-    private void loadProfileAvatarIntoToolbar(ImageView imageView) {
+    // ------------------------------------------------------------
+    // LOAD PROFILE IMAGE INTO TOOLBAR ICON
+    // ------------------------------------------------------------
+    private void loadProfileAvatar(ImageView imageView) {
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            return;
-        }
-
-        String uid = user.getUid();
+        if (user == null) return;
 
         firestore.collection("users")
-                .document(uid)
+                .document(user.getUid())
                 .get()
                 .addOnSuccessListener(doc -> {
-                    if (doc != null && doc.exists()) {
-                        String url = doc.getString("profileImageUrl");
-                        if (url != null && !url.isEmpty()) {
-                            Glide.with(this)
-                                    .load(url)
-                                    .circleCrop()   // small circular icon
-                                    .into(imageView);
-                        }
+                    String url = doc.getString("profileImageUrl");
+                    if (url != null && !url.isEmpty()) {
+                        Glide.with(this).load(url).circleCrop().into(imageView);
                     }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Failed to load profile avatar", e));
+                });
     }
 
-    // ----------------------
-    // FILTER BUTTONS
-    // ----------------------
-    private void setupFilters() {
+    // ------------------------------------------------------------
+    // FILTER BUTTON LOGIC
+    // ------------------------------------------------------------
+    private void setupFilterButtons() {
 
         btnUpcoming.setOnClickListener(v -> {
             btnUpcoming.setChecked(true);
             btnPast.setChecked(false);
 
-            adapter = new EventAdapter(
-                    upcomingEvents,
-                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
-            );
+            adapter = new EventAdapter(upcomingEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment);
             rvEvents.setAdapter(adapter);
         });
 
@@ -184,28 +175,27 @@ public class OrganizerLandingFragment extends Fragment {
             btnPast.setChecked(true);
             btnUpcoming.setChecked(false);
 
-            adapter = new EventAdapter(
-                    pastEvents,
-                    R.id.action_organizerLandingFragment_to_eventDetailsFragment
-            );
+            adapter = new EventAdapter(pastEvents,
+                    R.id.action_organizerLandingFragment_to_eventDetailsFragment);
             rvEvents.setAdapter(adapter);
         });
 
         btnUpcoming.setChecked(true);
     }
 
-    // ----------------------
-    // LOAD CREATED + JOINED
-    // ----------------------
+    // ------------------------------------------------------------
+    // LOAD ORGANIZED + JOINED EVENTS
+    // ------------------------------------------------------------
     private void loadAllEventsForUser() {
-        String userId = null;
-        FirebaseUser user = auth.getCurrentUser();
 
-        if (user != null) {
-            userId = user.getUid();
+        String userId;
+
+        FirebaseUser fb = auth.getCurrentUser();
+        if (fb != null) {
+            userId = fb.getUid();
         } else {
-            SharedPreferences prefs = requireContext()
-                    .getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
+            SharedPreferences prefs =
+                    requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
             userId = prefs.getString("GUEST_USER_ID", null);
         }
 
@@ -214,48 +204,38 @@ public class OrganizerLandingFragment extends Fragment {
             return;
         }
 
-        final String effectiveUserId = userId;
-
         allEvents.clear();
         eventIdSet.clear();
         upcomingEvents.clear();
         pastEvents.clear();
 
-        // 1 — Load ORGANIZED events
+        // LOAD EVENTS CREATED BY USER
         firestore.collection("events")
                 .whereEqualTo("organizerId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
-                .addOnSuccessListener(snapshots -> {
-                    if (snapshots != null) {
-                        for (QueryDocumentSnapshot doc : snapshots) {
-                            Event event = doc.toObject(Event.class);
-                            if (event != null) {
-                                event.setId(doc.getId());
-                                if (eventIdSet.add(event.getId())) {
-                                    allEvents.add(event);
-                                }
-                            }
+                .addOnSuccessListener(snap -> {
+                    if (snap != null) {
+                        for (QueryDocumentSnapshot doc : snap) {
+                            Event e = doc.toObject(Event.class);
+                            e.setId(doc.getId());
+                            if (eventIdSet.add(e.getId()))
+                                allEvents.add(e);
                         }
                     }
-
-                    loadJoinedEvents(effectiveUserId);
+                    loadJoinedEvents(userId);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to load organized", e);
-                    loadJoinedEvents(effectiveUserId);
-                });
+                .addOnFailureListener(e -> loadJoinedEvents(userId));
     }
 
     private void loadJoinedEvents(String userId) {
-
         firestore.collectionGroup("attendees")
                 .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener(attendeeSnap -> {
 
                     if (attendeeSnap == null || attendeeSnap.isEmpty()) {
-                        refreshListsAndAdapter();
+                        refreshLists();
                         return;
                     }
 
@@ -274,28 +254,23 @@ public class OrganizerLandingFragment extends Fragment {
                                 .addOnSuccessListener(eventDoc -> {
                                     if (eventDoc.exists()) {
                                         Event e = eventDoc.toObject(Event.class);
-                                        if (e != null) {
-                                            e.setId(eventDoc.getId());
-                                            if (eventIdSet.add(e.getId()))
-                                                allEvents.add(e);
-                                        }
+                                        e.setId(eventDoc.getId());
+                                        if (eventIdSet.add(e.getId()))
+                                            allEvents.add(e);
                                     }
-                                    refreshListsAndAdapter();
+                                    refreshLists();
                                 });
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to load joined", e);
-                    refreshListsAndAdapter();
-                });
+                .addOnFailureListener(e -> refreshLists());
     }
 
-    // ----------------------
-    // SPLIT + ADAPTER REFRESH
-    // ----------------------
-    private void refreshListsAndAdapter() {
+    // ------------------------------------------------------------
+    // REFRESH LISTS + UPDATE ADAPTER
+    // ------------------------------------------------------------
+    private void refreshLists() {
 
-        splitEventsByTime();
+        splitEvents();
 
         boolean empty = allEvents.isEmpty();
         emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
@@ -303,14 +278,15 @@ public class OrganizerLandingFragment extends Fragment {
 
         List<Event> source = btnUpcoming.isChecked() ? upcomingEvents : pastEvents;
 
-        adapter = new EventAdapter(
-                source,
-                R.id.action_organizerLandingFragment_to_eventDetailsFragment
-        );
+        adapter = new EventAdapter(source,
+                R.id.action_organizerLandingFragment_to_eventDetailsFragment);
         rvEvents.setAdapter(adapter);
     }
 
-    private void splitEventsByTime() {
+    // ------------------------------------------------------------
+    // SPLIT UPCOMING VS PAST
+    // ------------------------------------------------------------
+    private void splitEvents() {
         upcomingEvents.clear();
         pastEvents.clear();
 
@@ -320,55 +296,45 @@ public class OrganizerLandingFragment extends Fragment {
         for (Event e : allEvents) {
             try {
                 Date d = sdf.parse(e.getDate() + " " + e.getTime());
-                if (d != null && !d.before(now))
+                if (d != null && !d.before(now)) {
                     upcomingEvents.add(e);
-                else
+                } else {
                     pastEvents.add(e);
-
+                }
             } catch (Exception ex) {
-                Log.e(TAG, "Parse failed for " + e.getId());
                 pastEvents.add(e);
             }
         }
     }
 
-    // ----------------------------------------------------------
-// NOTIFICATIONS: FETCH ALL FOR CURRENT USER & SHOW DIALOG
-// ----------------------------------------------------------
-    /**
-     * Fetch all notifications for this user from Firestore and show them in a dialog.
-     * No filtering, just a simple list. If none, show “No notifications yet”.
-     */
+    // ------------------------------------------------------------
+    // NOTIFICATION DIALOG
+    // ------------------------------------------------------------
     private void showNotificationsDialog() {
-        // 1) Determine which userId to use: Firebase user or guest
-        String userId = null;
 
-        FirebaseUser firebaseUser = auth != null ? auth.getCurrentUser()
-                : FirebaseAuth.getInstance().getCurrentUser();
+        String userId;
+        FirebaseUser fb = auth.getCurrentUser();
 
-        if (firebaseUser != null) {
-            userId = firebaseUser.getUid();
+        if (fb != null) {
+            userId = fb.getUid();
         } else {
-            // Fallback to guest ID (same prefs you used in EventDetailsFragment)
             SharedPreferences prefs =
                     requireContext().getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
             userId = prefs.getString("GUEST_USER_ID", null);
         }
 
         if (userId == null) {
-            Toast.makeText(getContext(),
-                    "No user found. Please sign in or join an event first.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please sign in to view notifications.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 2) Query Firestore for this user's notifications
         firestore.collection("notifications")
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(30)  // just to keep it small
+                .limit(30)
                 .get()
                 .addOnSuccessListener(snapshot -> {
+
                     if (snapshot == null || snapshot.isEmpty()) {
                         new MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("Notifications")
@@ -380,29 +346,15 @@ public class OrganizerLandingFragment extends Fragment {
 
                     List<String> messages = new ArrayList<>();
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                        String msg = doc.getString("message");
-                        if (msg == null || msg.trim().isEmpty()) {
-                            msg = "(no message)";
-                        }
-                        messages.add(msg);
+                        messages.add(doc.getString("message"));
                     }
-
-                    CharSequence[] items = messages.toArray(new CharSequence[0]);
 
                     new MaterialAlertDialogBuilder(requireContext())
                             .setTitle("Notifications")
-                            .setItems(items, null)    // just display, no click actions
+                            .setItems(messages.toArray(new String[0]), null)
                             .setPositiveButton("Close", null)
                             .show();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to load notifications", e);
-                    Toast.makeText(getContext(),
-                            "Failed to load notifications: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
                 });
     }
-
-
-
 }
+

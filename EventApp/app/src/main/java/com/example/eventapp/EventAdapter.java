@@ -86,4 +86,5 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             tvDate = itemView.findViewById(R.id.tvEventDate);
         }
     }
+
 }
