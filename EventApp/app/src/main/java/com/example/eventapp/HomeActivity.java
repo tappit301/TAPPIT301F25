@@ -34,20 +34,16 @@ public class HomeActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        Log.d("AuthCheck", currentUser != null
-                ? "Signed in as: " + currentUser.getEmail()
-                : "No user signed in");
+        boolean fromExplore = getIntent().getBooleanExtra("fromExplore", false);
 
-        // Redirect if already logged in
-        if (currentUser != null) {
-            Log.d("AuthCheck", "User already signed in, redirecting to LandingHostActivity...");
-            Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
-            startActivity(intent);
-            finish();
-            return;
+        if (!fromExplore) {
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            if (currentUser != null) {
+                startActivity(new Intent(HomeActivity.this, LandingHostActivity.class));
+                finish();
+                return;
+            }
         }
-
         setupHomeUI();
     }
 
@@ -75,13 +71,17 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         Button btnViewEvents = findViewById(R.id.button_view_events);
-        btnViewEvents.setOnClickListener(v ->
-                Toast.makeText(this, "Guest view coming soon!", Toast.LENGTH_SHORT).show());
-    }
+        btnViewEvents.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
+            intent.putExtra("openExplore", true);
+            startActivity(intent);
+        });
 
-    /**
-     * Inflates the top-right menu (profile, sign-in, etc.)
-     */
+
+    }
+        /**
+         * Inflates the top-right menu (profile, sign-in, etc.)
+         */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();

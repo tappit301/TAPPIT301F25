@@ -12,8 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -29,6 +27,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
  * Author: tappit
  */
 public class QrCodeFragment extends Fragment {
+
 
     /**
      * Inflates the layout that contains the QR code image and description text.
@@ -63,24 +62,9 @@ public class QrCodeFragment extends Fragment {
         ImageButton btnBack = view.findViewById(R.id.btnBack);
 
 
-        btnBack.setOnClickListener(v -> {
-            boolean cameFromDetails = false;
-
-            if (getArguments() != null) {
-                cameFromDetails = getArguments().getBoolean("cameFromDetails", false);
-            }
-
-            if (cameFromDetails) {
-                // Only go back to EventDetailsFragment
-                NavHostFragment.findNavController(QrCodeFragment.this).navigateUp();
-            } else {
-                // Go back to OrganizerLanding
-                NavHostFragment.findNavController(QrCodeFragment.this)
-                        .navigate(R.id.action_qrCodeFragment_to_organizerLandingFragment);
-            }
-        });
-
-
+        btnBack.setOnClickListener(v ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed()
+        );
 
         String qrData = "";
         if (getArguments() != null) {

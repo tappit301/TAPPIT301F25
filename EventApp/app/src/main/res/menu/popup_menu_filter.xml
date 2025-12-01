@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/filter_all"
+        android:title="All" />
+
+    <item
+        android:id="@+id/filter_entertainment"
+        android:title="Entertainment" />
+
+    <item
+        android:id="@+id/filter_sports"
+        android:title="Sports" />
+
+    <item
+        android:id="@+id/filter_tech"
+        android:title="Technology" />
+
+    <item
+        android:id="@+id/filter_health"
+        android:title="Health" />
+
+</menu>
