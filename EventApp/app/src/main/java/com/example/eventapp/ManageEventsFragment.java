@@ -1,7 +1,6 @@
 package com.example.eventapp;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,6 +66,7 @@ public class ManageEventsFragment extends Fragment {
         adapter = new AttendeeAdapter(attendees);
         recyclerView.setAdapter(adapter);
 
+        // buttons
         btnEditEvent = view.findViewById(R.id.btnEditEvent);
         btnRunLottery = view.findViewById(R.id.btnRunLottery);
 
@@ -80,15 +80,16 @@ public class ManageEventsFragment extends Fragment {
         btnNotifyCancelled = view.findViewById(R.id.btnNotifyCancelled);
         btnExportCsv = view.findViewById(R.id.btnExportCsv);
 
+        // Get event ID
         Bundle args = getArguments();
-        if (args != null) {
-            eventId = args.getString("eventId", "");
-        }
+        if (args != null) eventId = args.getString("eventId", "");
 
         if (eventId == null || eventId.isEmpty()) {
             Log.e(TAG, "No eventId received");
             return;
         }
+
+        // ------------------ BUTTON LISTENERS ------------------
 
         btnEditEvent.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
@@ -205,14 +206,35 @@ public class ManageEventsFragment extends Fragment {
                         return;
                     }
 
+                    // Corrected messages
+                    String message;
+                    switch (status) {
+                        case "waiting":
+                            message = "You are still on the waiting list for this event.";
+                            break;
+                        case "selected":
+                            message = "You have been selected! Please accept or decline your spot.";
+                            break;
+                        case "cancelled":
+                            message = "Your spot has been cancelled. Contact the organizer for help.";
+                            break;
+                        default:
+                            message = "You have an update regarding the event.";
+                            break;
+                    }
+
+                    String title = "Event Update";
+
+                    // Send notification to each user
                     snapshot.getDocuments().forEach(doc -> {
                         String uid = doc.getString("userId");
+
                         NotificationHelper.notifyUser(
                                 getContext(),
                                 uid,
                                 "group_notify",
-                                "Event Update",
-                                "Organizer sent you an update."
+                                title,
+                                message
                         );
                     });
 
@@ -263,3 +285,4 @@ public class ManageEventsFragment extends Fragment {
                 });
     }
 }
+
