@@ -61,6 +61,7 @@
                 android:orientation="vertical"
                 android:background="@android:color/white">
 
+                <!-- Title -->
                 <TextView
                     android:id="@+id/tvEventTitle"
                     android:layout_width="match_parent"
@@ -70,7 +71,7 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- DATE + TIME -->
+                <!-- Date + Time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -100,7 +101,7 @@
                         android:textColor="@android:color/darker_gray"/>
                 </LinearLayout>
 
-                <!-- LOCATION -->
+                <!-- Location -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -122,7 +123,7 @@
                         android:textColor="@android:color/black"/>
                 </LinearLayout>
 
-                <!-- ORGANIZER -->
+                <!-- Organizer -->
                 <TextView
                     android:id="@+id/tvOrganizerName"
                     android:layout_width="wrap_content"
@@ -138,7 +139,7 @@
                     android:background="#E0E0E0"
                     android:layout_marginBottom="16dp"/>
 
-                <!-- DESCRIPTION -->
+                <!-- Description -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -166,6 +167,7 @@
                     android:textStyle="bold"
                     android:layout_marginTop="8dp"/>
 
+                <!-- QR Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnViewQr"
                     android:layout_width="match_parent"
@@ -191,6 +193,7 @@
         android:background="@android:color/white"
         android:elevation="8dp">
 
+        <!-- Join button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnJoinWaitingList"
             android:layout_width="match_parent"
@@ -200,29 +203,31 @@
             android:textSize="16sp"
             app:cornerRadius="8dp"/>
 
+        <!-- Manage Event (Organizer only) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageEvent"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Manage Event"
             android:textAllCaps="false"
-            android:visibility="gone"
             android:textColor="@android:color/white"
             android:backgroundTint="@color/purple_500"
+            android:layout_marginTop="8dp"
             app:cornerRadius="8dp"
-            android:layout_marginTop="8dp"/>
+            android:visibility="gone"/>
 
+        <!-- Delete Event -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDeleteEvent"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Delete Event"
             android:textAllCaps="false"
-            android:visibility="gone"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginTop="8dp"
             app:cornerRadius="8dp"
-            android:layout_marginTop="8dp"/>
+            android:visibility="gone"/>
 
         <!-- ACCEPT + DECLINE -->
         <LinearLayout
@@ -259,3 +264,4 @@
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="3667c207-41bc-4fe4-9630-bed137dd4751" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
     </list>
+=======
+    <list default="true" id="3667c207-41bc-4fe4-9630-bed137dd4751" name="Changes" comment="" />
+>>>>>>> origin/Pavan
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,6 +22,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
+<<<<<<< HEAD
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
     &quot;state&quot;: &quot;OPEN&quot;,
@@ -33,6 +38,23 @@
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
+=======
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "KrishikaKhosla"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/tappit301/TAPPIT301F25.git",
+    "accountId": "1fe1bfa4-ba12-4f83-a2aa-57f861cec896"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 2
+}]]></component>
+>>>>>>> origin/Pavan
   <component name="ProjectId" id="35nxBE4ae91Tzh8ptiTHxQWMCaX" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -49,7 +71,11 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "krishika",
+<<<<<<< HEAD
     "last_opened_file_path": "/Users/krishikakhosla/Desktop/CMPUT 301/part4final/TAPPIT301F25/EventApp/app"
+=======
+    "last_opened_file_path": "/Users/krishikakhosla/Desktop/CMPUT 301/project4/TAPPIT301F25/EventApp/app"
+>>>>>>> origin/Pavan
   }
 }]]></component>
   <component name="TaskManager">

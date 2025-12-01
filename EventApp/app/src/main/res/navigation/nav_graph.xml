@@ -29,6 +29,7 @@
             app:destination="@id/profileFragment" />
     </fragment>
 
+
     <!-- EXPLORE EVENTS -->
     <fragment
         android:id="@+id/exploreEventsFragment"
@@ -45,6 +46,7 @@
             app:destination="@id/categoryEventsFragment" />
     </fragment>
 
+
     <!-- CATEGORY EVENTS -->
     <fragment
         android:id="@+id/categoryEventsFragment"
@@ -60,6 +62,7 @@
             app:destination="@id/eventDetailsFragment" />
     </fragment>
 
+
     <!-- CREATE EVENT -->
     <fragment
         android:id="@+id/createEventFragment"
@@ -71,6 +74,7 @@
             android:id="@+id/action_createEventFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
     </fragment>
+
 
     <!-- EVENT DETAILS -->
     <fragment
@@ -84,12 +88,12 @@
             app:destination="@id/qrCodeFragment" />
 
         <action
-            android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
-            app:destination="@id/createEventFragment" />
-
-        <action
             android:id="@+id/action_eventDetailsFragment_to_manageEventsFragment"
             app:destination="@id/manageEventsFragment" />
+
+        <action
+            android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
 
         <!-- arguments -->
         <argument android:name="eventId" app:argType="string" android:defaultValue="" />
@@ -101,6 +105,7 @@
         <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
         <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
     </fragment>
+
 
     <!-- QR CODE -->
     <fragment
@@ -126,6 +131,7 @@
             android:defaultValue="" />
     </fragment>
 
+
     <!-- MANAGE EVENTS -->
     <fragment
         android:id="@+id/manageEventsFragment"
@@ -142,6 +148,7 @@
             app:destination="@id/eventMapFragment" />
     </fragment>
 
+
     <!-- EVENT MAP -->
     <fragment
         android:id="@+id/eventMapFragment"
@@ -154,6 +161,7 @@
             app:argType="string"
             android:defaultValue="" />
     </fragment>
+
 
     <!-- PROFILE -->
     <fragment
@@ -171,12 +179,14 @@
             app:destination="@id/scanQrFragment" />
     </fragment>
 
+
     <!-- EDIT PROFILE -->
     <fragment
         android:id="@+id/editProfileFragment"
         android:name="com.example.eventapp.EditProfileFragment"
         android:label="Edit Profile"
         tools:layout="@layout/fragment_edit_profile" />
+
 
     <!-- SCAN QR -->
     <fragment

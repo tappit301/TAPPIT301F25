@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <!-- Selected cover image -->
                 <ImageView
                     android:id="@+id/ivEventImage"
                     android:layout_width="match_parent"
@@ -34,6 +35,7 @@
                     android:scaleType="centerCrop"
                     android:visibility="gone" />
 
+                <!-- Placeholder -->
                 <LinearLayout
                     android:id="@+id/layoutAddCoverPlaceholder"
                     android:layout_width="wrap_content"
@@ -59,15 +61,13 @@
 
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
-        <!-- END CARDVIEW ✔✔✔ -->
-
 
         <!-- TITLE -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Event Title"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -81,8 +81,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Description"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -94,7 +94,6 @@
                 android:gravity="top" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <!-- DATE + TIME -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -104,8 +103,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:hint="Date"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
@@ -119,8 +118,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:hint="Time"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
@@ -131,16 +130,14 @@
                     android:layout_height="wrap_content"
                     android:focusable="false" />
             </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
-
 
         <!-- LOCATION -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Location"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -149,13 +146,12 @@
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <!-- PRICE -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Price ($)"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -165,13 +161,12 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <!-- CAPACITY -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Max Attendees"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -181,22 +176,22 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <!-- CATEGORY -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Select Category"
+            android:layout_marginBottom="10dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
             <AutoCompleteTextView
                 android:id="@+id/etEventCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:focusable="false"
+                android:clickable="true" />
 
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- REQUIRE GEO -->
         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -205,7 +200,6 @@
             android:layout_height="wrap_content"
             android:text="Require geolocation"
             android:layout_marginBottom="20dp" />
-
 
         <!-- BUTTONS -->
         <LinearLayout
@@ -228,6 +222,7 @@
                 android:text="Publish"
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/purple_500" />
+
         </LinearLayout>
 
     </LinearLayout>

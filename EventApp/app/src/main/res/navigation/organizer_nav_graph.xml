@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/organizer_nav_graph"
+    app:startDestination="@id/organizerLandingFragment">
+
+    <fragment
+        android:id="@+id/organizerLandingFragment"
+        android:name="com.example.eventapp.OrganizerLandingFragment"
+        android:label="Organizer Landing">
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_exploreEventsFragment"
+            app:destination="@id/exploreEventsFragment" />
+
+        <action
+            android:id="@+id/action_organizerLandingFragment_to_createEventFragment"
+            app:destination="@id/createEventFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/exploreEventsFragment"
+        android:name="com.example.eventapp.ExploreEventsFragment"
+        android:label="Explore Events" />
+
+    <fragment
+        android:id="@+id/createEventFragment"
+        android:name="com.example.eventapp.CreateEventFragment"
+        android:label="Create Event" />
+
+</navigation>

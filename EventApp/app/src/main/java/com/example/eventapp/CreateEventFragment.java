@@ -348,4 +348,3 @@ public class CreateEventFragment extends Fragment {
         }
     }
 }
-

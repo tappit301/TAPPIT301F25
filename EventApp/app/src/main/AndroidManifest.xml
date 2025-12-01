@@ -2,12 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Notifications -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 🌐 INTERNET & NETWORK -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- Location Permissions -->
+    <!-- 📍 LOCATION PERMISSIONS (needed for geolocation join) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- 🔔 NOTIFICATIONS -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".App"
@@ -26,22 +30,35 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_api_key" />
 
-        <!-- Launcher Activity -->
+        <!-- 🚀 Launcher Activity -->
         <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <!-- Login / Signup -->
+        <!-- 🔐 Auth Screens -->
         <activity android:name=".LoginActivity" />
         <activity android:name=".SignUpActivity" />
 
-        <!-- Logged-in Navigation Host -->
+        <!-- 🌐 User Navigation Host -->
         <activity android:name=".LandingHostActivity" />
 
+        <!-- ⭐ ADMIN HOST -->
+        <activity
+            android:name=".admin.AdminHostActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
+        <!-- 🧪 Robolectric Test Activity -->
+        <activity
+            android:name=".NavHostTestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.EventApp" />
+
     </application>
+
 </manifest>

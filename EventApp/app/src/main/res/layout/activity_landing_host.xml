@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".LandingHostActivity">
 
-
+    <!-- TOP APP BAR -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
         app:layout_collapseMode="pin"
         app:layout_collapseParallaxMultiplier="0.7" />
 
-
+    <!-- NAVIGATION HOST -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -34,5 +34,4 @@
         app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 

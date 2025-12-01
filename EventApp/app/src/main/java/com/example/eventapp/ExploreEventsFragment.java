@@ -27,6 +27,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Final merged ExploreEventsFragment.
+ * Includes filtering, back button, category popup, and Firestore loading.
+ */
 public class ExploreEventsFragment extends Fragment {
 
     private RecyclerView rvExploreEvents;
@@ -36,7 +40,9 @@ public class ExploreEventsFragment extends Fragment {
 
     private FirebaseFirestore firestore;
 
+    // Full list from Firestore
     private final List<Event> fullList = new ArrayList<>();
+    // List shown after filtering
     private final List<Event> filteredList = new ArrayList<>();
 
     public ExploreEventsFragment() {}
@@ -71,7 +77,7 @@ public class ExploreEventsFragment extends Fragment {
         setupFilterMenu();
         loadEventsFromFirestore();
 
-        // back button
+        // Back button
         ImageButton btnBack = view.findViewById(R.id.btnBackExplore);
         btnBack.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).popBackStack()
@@ -92,6 +98,7 @@ public class ExploreEventsFragment extends Fragment {
                             if (ev != null) {
                                 ev.setId(doc.getId());
 
+                                // Only load today and future events
                                 if (isTodayOrFuture(ev)) {
                                     fullList.add(ev);
                                 }
@@ -139,31 +146,29 @@ public class ExploreEventsFragment extends Fragment {
             inflater.inflate(R.menu.popup_menu_filter, popup.getMenu());
 
             popup.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-
-                if (id == R.id.filter_all) {
-                    filterEvents("ALL");
+                switch (item.getItemId()) {
+                    case R.id.filter_all:
+                        filterEvents("ALL");
+                        break;
+                    case R.id.filter_entertainment:
+                        filterEvents("Entertainment");
+                        break;
+                    case R.id.filter_sports:
+                        filterEvents("Sports");
+                        break;
+                    case R.id.filter_tech:
+                        filterEvents("Technology");
+                        break;
+                    case R.id.filter_health:
+                        filterEvents("Health");
+                        break;
                 }
-                else if (id == R.id.filter_entertainment) {
-                    filterEvents("Entertainment");
-                }
-                else if (id == R.id.filter_sports) {
-                    filterEvents("Sports");
-                }
-                else if (id == R.id.filter_tech) {
-                    filterEvents("Technology");
-                }
-                else if (id == R.id.filter_health) {
-                    filterEvents("Health");
-                }
-
                 return true;
             });
 
             popup.show();
         });
     }
-
 
     private void filterEvents(String category) {
         filteredList.clear();
@@ -189,4 +194,3 @@ public class ExploreEventsFragment extends Fragment {
         rvExploreEvents.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 }
-

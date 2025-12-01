@@ -11,7 +11,7 @@ public class FirebaseHelper {
     private static FirebaseFirestore firestore;
     private static FirebaseStorage storage;
 
-    // Get shared FirebaseAuth instance
+    // --------- AUTH ----------
     public static FirebaseAuth getAuth() {
         if (auth == null) {
             auth = FirebaseAuth.getInstance();
@@ -19,10 +19,12 @@ public class FirebaseHelper {
         return auth;
     }
 
-    // Get shared Firestore instance with persistence enabled
+    // --------- FIRESTORE (merged version) ----------
     public static FirebaseFirestore getFirestore() {
         if (firestore == null) {
             firestore = FirebaseFirestore.getInstance();
+
+            // Enable offline persistence once
             FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                     .setPersistenceEnabled(true)
                     .build();
@@ -31,7 +33,7 @@ public class FirebaseHelper {
         return firestore;
     }
 
-    // Get shared FirebaseStorage instance
+    // --------- STORAGE ----------
     public static FirebaseStorage getStorage() {
         if (storage == null) {
             storage = FirebaseStorage.getInstance();
@@ -39,3 +41,4 @@ public class FirebaseHelper {
         return storage;
     }
 }
+

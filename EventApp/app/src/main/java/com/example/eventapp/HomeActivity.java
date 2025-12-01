@@ -3,7 +3,6 @@ package com.example.eventapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.eventapp.admin.AdminHostActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -36,9 +36,10 @@ public class HomeActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Determine if user explicitly returned from Explore
         boolean fromExplore = getIntent().getBooleanExtra("fromExplore", false);
 
-        // AUTO LOGIN unless coming back manually
+        // === AUTO LOGIN HANDLING ===
         if (!fromExplore) {
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser != null) {
@@ -59,19 +60,28 @@ public class HomeActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Tappit");
         }
 
+        // === USER LOGIN ===
         Button btnGettingStarted = findViewById(R.id.btnGettingStarted);
         btnGettingStarted.setOnClickListener(
                 v -> startActivity(new Intent(HomeActivity.this, LoginActivity.class))
         );
 
+        // === CREATE ACCOUNT ===
         Button btnCreateAccount = findViewById(R.id.btnCreateAccount);
         btnCreateAccount.setOnClickListener(
                 v -> startActivity(new Intent(HomeActivity.this, SignUpActivity.class))
         );
 
-        // Guest Mode
+        // === GUEST MODE ===
         Button btnViewEvents = findViewById(R.id.button_view_events);
         btnViewEvents.setOnClickListener(v -> continueAsGuest());
+
+        // === ADMIN LOGIN ===
+        Button btnAdmin = findViewById(R.id.btnAdminLogin);
+        btnAdmin.setOnClickListener(v -> {
+            Intent adminIntent = new Intent(HomeActivity.this, AdminHostActivity.class);
+            startActivity(adminIntent);
+        });
     }
 
     /** Guest mode logic */
@@ -82,7 +92,7 @@ public class HomeActivity extends AppCompatActivity {
         Toast.makeText(this, "Continuing as guest...", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
-        intent.putExtra("openExplore", true);
+        intent.putExtra("openExplore", true);  // opens Explore tab automatically
         startActivity(intent);
         finish();
     }
@@ -110,6 +120,7 @@ public class HomeActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_profile) {
             Toast.makeText(this, "Sign in to view profile", Toast.LENGTH_SHORT).show();
             return true;
+
         } else if (item.getItemId() == R.id.action_sign_in) {
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             return true;
@@ -117,3 +128,4 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+

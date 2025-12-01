@@ -1,7 +1,7 @@
 package com.example.eventapp;
 
-import android.os.Bundle;
 import android.text.InputType;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,12 +34,12 @@ public class ManageEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AttendeeAdapter adapter;
-    private List<Attendee> attendees = new ArrayList<>();
+    private final List<Attendee> attendees = new ArrayList<>();
 
     private FirebaseFirestore firestore;
     private String eventId;
 
-    // UI Buttons
+    // UI elements
     private View btnWaiting, btnSelected, btnEnrolled, btnCancelled;
     private View btnEditEvent, btnRunLottery;
     private View btnNotifyWaiting, btnNotifySelected, btnNotifyCancelled, btnExportCsv;
@@ -67,7 +67,7 @@ public class ManageEventsFragment extends Fragment {
         adapter = new AttendeeAdapter(attendees);
         recyclerView.setAdapter(adapter);
 
-        // Buttons
+        // UI BUTTONS
         btnEditEvent = view.findViewById(R.id.btnEditEvent);
         btnRunLottery = view.findViewById(R.id.btnRunLottery);
 
@@ -83,54 +83,58 @@ public class ManageEventsFragment extends Fragment {
 
         btnViewMap = view.findViewById(R.id.btnViewMap);
 
-        // Get event ID
+        // Read eventId
         Bundle args = getArguments();
         if (args != null)
             eventId = args.getString("eventId", "");
 
         if (eventId == null || eventId.isEmpty()) {
-            Log.e(TAG, "No eventId received");
+            Log.e(TAG, "⚠ No eventId received!");
             return;
         }
 
-        // OPEN EDIT EVENT
+        // ----------- EDIT EVENT -----------
         btnEditEvent.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("eventId", eventId);
+            Bundle b = new Bundle();
+            b.putString("eventId", eventId);
+
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_manageEventsFragment_to_createEventFragment, bundle);
+                    .navigate(R.id.action_manageEventsFragment_to_createEventFragment, b);
         });
 
-        // VIEW MAP
+        // ----------- VIEW MAP -----------
         btnViewMap.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("eventId", eventId);
+            Bundle b = new Bundle();
+            b.putString("eventId", eventId);
+
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_manageEventsFragment_to_eventMapFragment, bundle);
+                    .navigate(R.id.action_manageEventsFragment_to_eventMapFragment, b);
         });
 
-        // FILTER BUTTONS
+        // ----------- FILTER BUTTONS -----------
         btnWaiting.setOnClickListener(v -> loadList("waiting"));
         btnSelected.setOnClickListener(v -> loadList("selected"));
         btnEnrolled.setOnClickListener(v -> loadList("enrolled"));
         btnCancelled.setOnClickListener(v -> loadList("cancelled"));
 
-        // RUN LOTTERY
+        // ----------- LOTTERY -----------
         btnRunLottery.setOnClickListener(v -> showSampleSizeDialog());
 
-        // NOTIFICATIONS
+        // ----------- NOTIFICATIONS -----------
         btnNotifyWaiting.setOnClickListener(v -> notifyGroup("waiting"));
         btnNotifySelected.setOnClickListener(v -> notifyGroup("selected"));
         btnNotifyCancelled.setOnClickListener(v -> notifyGroup("cancelled"));
 
-        // CSV EXPORT
+        // ----------- CSV EXPORT -----------
         btnExportCsv.setOnClickListener(v -> exportCsv());
 
-        // default list
+        // DEFAULT = waiting list
         loadList("waiting");
     }
 
-    // ---------------- LOAD LIST ----------------
+    // =====================================================================
+    // LOAD LIST BASED ON STATUS
+    // =====================================================================
     private void loadList(String status) {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -139,18 +143,20 @@ public class ManageEventsFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(snapshot -> {
                     attendees.clear();
-                    snapshot.getDocuments().forEach(doc -> {
-                        attendees.add(new Attendee(
-                                doc.getString("userId"),
-                                doc.getString("email"),
-                                status
-                        ));
-                    });
+                    snapshot.forEach(doc -> attendees.add(
+                            new Attendee(
+                                    doc.getString("userId"),
+                                    doc.getString("email"),
+                                    status
+                            )
+                    ));
                     adapter.notifyDataSetChanged();
                 });
     }
 
-    // ---------------- LOTTERY ----------------
+    // =====================================================================
+    // LOTTERY
+    // =====================================================================
     private void showSampleSizeDialog() {
         final EditText input = new EditText(requireContext());
         input.setHint("How many people?");
@@ -185,19 +191,26 @@ public class ManageEventsFragment extends Fragment {
                     Collections.shuffle(list, new Random());
                     List<String> selected = list.subList(0, Math.min(sampleSize, list.size()));
 
-                    selected.forEach(uid -> firestore.collection("eventAttendees")
-                            .document(eventId)
-                            .collection("attendees")
-                            .document(uid)
-                            .update("status", "selected"));
+                    selected.forEach(uid ->
+                            firestore.collection("eventAttendees")
+                                    .document(eventId)
+                                    .collection("attendees")
+                                    .document(uid)
+                                    .update("status", "selected")
+                    );
 
-                    Snackbar.make(requireView(), "Selected " + selected.size() + " users", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(requireView(),
+                            "Selected " + selected.size() + " users", Snackbar.LENGTH_LONG).show();
+
                     loadList("selected");
                 });
     }
 
-    // ---------------- NOTIFICATIONS ----------------
+    // =====================================================================
+    // NOTIFICATIONS
+    // =====================================================================
     private void notifyGroup(String status) {
+
         firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
@@ -226,11 +239,14 @@ public class ManageEventsFragment extends Fragment {
                                     message
                             ));
 
-                    Snackbar.make(requireView(), "Notifications sent.", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(requireView(),
+                            "Notifications sent.", Snackbar.LENGTH_LONG).show();
                 });
     }
 
-    // ---------------- CSV EXPORT ----------------
+    // =====================================================================
+    // CSV EXPORT
+    // =====================================================================
     private void exportCsv() {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -238,12 +254,14 @@ public class ManageEventsFragment extends Fragment {
                 .whereEqualTo("status", "enrolled")
                 .get()
                 .addOnSuccessListener(snapshot -> {
+
                     if (snapshot.isEmpty()) {
                         Snackbar.make(requireView(), "No enrolled users.", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
 
                     StringBuilder csv = new StringBuilder("UserId,Email,Status\n");
+
                     snapshot.forEach(doc -> {
                         csv.append(doc.getString("userId")).append(",");
                         csv.append(doc.getString("email")).append(",");
@@ -267,5 +285,5 @@ public class ManageEventsFragment extends Fragment {
                     }
                 });
     }
-}
 
+}

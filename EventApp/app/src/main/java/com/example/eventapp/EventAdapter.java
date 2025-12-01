@@ -18,10 +18,10 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private final List<Event> eventList;
-    /** Navigation action to use when a card is clicked */
+    /** Navigation action used when a card is clicked */
     private final int navActionId;
 
-    //New constructor: list + action ID
+    // Constructor
     public EventAdapter(List<Event> eventList, int navActionId) {
         this.eventList = eventList;
         this.navActionId = navActionId;
@@ -42,7 +42,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.tvTitle.setText(event.getTitle());
         holder.tvDate.setText(event.getDate() + " • " + event.getTime());
 
-        // Load event image if exists
+        // Load event image
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(event.getImageUrl())
@@ -52,7 +52,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             holder.ivPoster.setImageResource(R.drawable.placeholder_img);
         }
 
-        // Navigate to details (uses the action ID passed to the adapter)
+        // Navigate with bundle
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", event.getId());
@@ -63,7 +63,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             bundle.putString("location", event.getLocation());
             bundle.putString("organizerId", event.getOrganizerId());
             bundle.putString("organizerEmail", event.getOrganizerEmail());
-            bundle.putString("imageUrl", event.getImageUrl()); // poster url
+            bundle.putString("imageUrl", event.getImageUrl());
 
             Navigation.findNavController(v).navigate(navActionId, bundle);
         });
@@ -86,5 +86,4 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             tvDate = itemView.findViewById(R.id.tvEventDate);
         }
     }
-
 }

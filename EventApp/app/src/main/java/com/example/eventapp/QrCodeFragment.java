@@ -20,24 +20,13 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 /**
- *This is thee Fragment that generates and displays a QR code based on event data.
- * The QR code is created from text passd through a bundle argument,
- * usually containing event details. If no data is provided,
- * an error message is displayed instead.
+ * Fragment that generates and displays a QR code based on event data.
+ * The QR code is created from text passed in the bundle, usually containing event details.
  *
  * Author: tappit
  */
 public class QrCodeFragment extends Fragment {
 
-
-    /**
-     * Inflates the layout that contains the QR code image and description text.
-     *
-     * @param inflater LayoutInflater used to inflate the layout
-     * @param container The parent container for this fragment
-     * @param savedInstanceState Saved state, if any
-     * @return The inflated layout view
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,14 +35,6 @@ public class QrCodeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_qr_code, container, false);
     }
 
-
-    /**
-     * Helps in Retrieving the event data from the bundle and generates
-     * a QR code to display on the screen.
-     *
-     * @param view The root view of this fragment
-     * @param savedInstanceState Previously saved state, if any
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -62,18 +43,22 @@ public class QrCodeFragment extends Fragment {
         TextView qrText = view.findViewById(R.id.qrText);
         ImageButton btnBack = view.findViewById(R.id.btnBack);
 
-
+        // Determine where QR was opened from
         boolean cameFromDetails =
                 getArguments() != null && getArguments().getBoolean("cameFromDetails", false);
 
         btnBack.setOnClickListener(v -> {
             if (cameFromDetails) {
+                // Simply go back to EventDetailsFragment
                 requireActivity().getOnBackPressedDispatcher().onBackPressed();
             } else {
+                // Go back to OrganizerLandingFragment
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_qrCodeFragment_to_organizerLandingFragment);
             }
         });
+
+        // Load QR data from bundle
         String qrData = "";
         if (getArguments() != null) {
             qrData = getArguments().getString("qrData", "");
@@ -88,16 +73,13 @@ public class QrCodeFragment extends Fragment {
     }
 
     /**
-     * This Creates a QR code from the given data and sets it
-     * as a bitmap in the provided ImageView.
-     *
-     * @param data The text data to encode into the QR code
-     * @param qrImage The ImageView to display the generated QR code
+     * Generates a QR code bitmap and displays it.
      */
     private void generateQRCode(String data, ImageView qrImage) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
             int size = 600;
+
             BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size);
 
             Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565);
@@ -106,7 +88,9 @@ public class QrCodeFragment extends Fragment {
                     bmp.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
                 }
             }
+
             qrImage.setImageBitmap(bmp);
+
         } catch (WriterException e) {
             e.printStackTrace();
         }

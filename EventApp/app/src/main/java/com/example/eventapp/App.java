@@ -1,7 +1,5 @@
 package com.example.eventapp;
 
-
-
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,12 +24,6 @@ public class App extends Application {
     // Channel ID used by NotificationHelper
     public static final String CHANNEL_ID = "eventapp_main_notifications";
 
-    /**
-     * Called when the application is first created.
-     * Initializes Firebase, enables Firestore offline persistence,
-     * and checks if the app was launched after a full termination.
-     * If it is a cold start, the FirebaseAuth session is cleared.
-     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,8 +38,9 @@ public class App extends Application {
                         .build()
         );
 
-
+        // Create notifications channel (Siya's addition)
         createNotificationChannel();
+
         SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
         boolean wasRunning = prefs.getBoolean("was_running", false);
 
@@ -63,11 +56,6 @@ public class App extends Application {
         prefs.edit().putBoolean("was_running", true).apply();
     }
 
-    /**
-     * Called when the app process is terminated (mainly on emulators or debug mode).
-     * Marks the app as not running so that a new Firebase session is required
-     * on the next launch.
-     */
     @Override
     public void onTerminate() {
         super.onTerminate();

@@ -12,8 +12,12 @@ import java.util.List;
 
 public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.AttendeeViewHolder> {
 
+<<<<<<< HEAD
     // Keep YOUR version — final + safe
     private final List<Attendee> attendeeList;
+=======
+    private List<Attendee> attendeeList;
+>>>>>>> origin/Pavan
 
     public AttendeeAdapter(List<Attendee> attendeeList) {
         this.attendeeList = attendeeList;
@@ -38,11 +42,18 @@ public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.Attend
 
     @Override
     public int getItemCount() {
+<<<<<<< HEAD
         return attendeeList != null ? attendeeList.size() : 0;
     }
 
     public static class AttendeeViewHolder extends RecyclerView.ViewHolder {
 
+=======
+        return attendeeList.size();
+    }
+
+    public static class AttendeeViewHolder extends RecyclerView.ViewHolder {
+>>>>>>> origin/Pavan
         TextView tvName, tvEmail, tvStatus;
 
         public AttendeeViewHolder(@NonNull View itemView) {
@@ -52,4 +63,8 @@ public class AttendeeAdapter extends RecyclerView.Adapter<AttendeeAdapter.Attend
             tvStatus = itemView.findViewById(R.id.tvStatus);
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/Pavan

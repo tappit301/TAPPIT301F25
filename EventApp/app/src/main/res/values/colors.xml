@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Existing Colors -->
+    <!-- Base Colors -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="outline">#DDDDDD</color>
@@ -14,12 +14,13 @@
     <color name="purple_dark">#4A148C</color>
     <color name="purple_outline">#7B1FA2</color>
 
-    <!-- New Button Colors -->
-    <color name="light_purple">#E6D6FF</color>     <!-- For Accept / Decline -->
-    <color name="purple_button">#7C4DFF</color>    <!-- Main Purple Button -->
+    <!-- Buttons -->
+    <color name="light_purple">#E6D6FF</color>
+    <color name="purple_button">#7C4DFF</color>
     <color name="purple_button_dark">#5E35B1</color>
 
     <!-- Launcher Icon Background -->
     <color name="ic_launcher_background">#FFFFFF</color>
 
 </resources>
+

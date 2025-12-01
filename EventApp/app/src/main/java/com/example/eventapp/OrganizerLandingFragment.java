@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,9 +78,7 @@ public class OrganizerLandingFragment extends Fragment {
 
         NavController navController = Navigation.findNavController(view);
 
-        // ------------------------------------------------------------
-        // EXPLORE BUTTON
-        // ------------------------------------------------------------
+        // ----------------- EXPLORE BUTTON -------------------
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
         if (btnExplore != null) {
             btnExplore.setOnClickListener(v ->
@@ -87,9 +86,7 @@ public class OrganizerLandingFragment extends Fragment {
             );
         }
 
-        // ------------------------------------------------------------
-        // CREATE EVENT BUTTONS
-        // ------------------------------------------------------------
+        // ----------------- CREATE EVENT BUTTONS -------------------
         View.OnClickListener createEventClick = v ->
                 navController.navigate(R.id.action_organizerLandingFragment_to_createEventFragment);
 
@@ -101,9 +98,7 @@ public class OrganizerLandingFragment extends Fragment {
         if (btnAddEvent != null) btnAddEvent.setOnClickListener(createEventClick);
         if (btnCreateEventTop != null) btnCreateEventTop.setOnClickListener(createEventClick);
 
-        // ------------------------------------------------------------
-        // PROFILE BUTTON & LOAD AVATAR
-        // ------------------------------------------------------------
+        // ----------------- PROFILE IMAGE -------------------
         ImageView btnProfile = view.findViewById(R.id.btnProfile);
         if (btnProfile != null) {
             btnProfile.setOnClickListener(v ->
@@ -112,17 +107,13 @@ public class OrganizerLandingFragment extends Fragment {
             loadProfileAvatar(btnProfile);
         }
 
-        // ------------------------------------------------------------
-        // NOTIFICATION BUTTON (TOP RIGHT)
-        // ------------------------------------------------------------
+        // ----------------- NOTIFICATIONS -------------------
         View btnNotifications = view.findViewById(R.id.btnNotifications);
         if (btnNotifications != null) {
             btnNotifications.setOnClickListener(v -> showNotificationsDialog());
         }
 
-        // ------------------------------------------------------------
-        // RECYCLER + TABS
-        // ------------------------------------------------------------
+        // ----------------- RECYCLER & FILTER -------------------
         rvEvents = view.findViewById(R.id.rvEvents);
         emptyState = view.findViewById(R.id.emptyStateLayout);
         rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -139,9 +130,7 @@ public class OrganizerLandingFragment extends Fragment {
         loadAllEventsForUser();
     }
 
-    // ------------------------------------------------------------
-    // LOAD PROFILE IMAGE INTO TOOLBAR ICON
-    // ------------------------------------------------------------
+    // ----------------- LOAD PROFILE IMAGE -------------------
     private void loadProfileAvatar(ImageView imageView) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) return;
@@ -157,11 +146,8 @@ public class OrganizerLandingFragment extends Fragment {
                 });
     }
 
-    // ------------------------------------------------------------
-    // FILTER BUTTON LOGIC
-    // ------------------------------------------------------------
+    // ----------------- FILTER TOGGLE -------------------
     private void setupFilterButtons() {
-
         btnUpcoming.setOnClickListener(v -> {
             btnUpcoming.setChecked(true);
             btnPast.setChecked(false);
@@ -180,14 +166,12 @@ public class OrganizerLandingFragment extends Fragment {
             rvEvents.setAdapter(adapter);
         });
 
+        // default: upcoming
         btnUpcoming.setChecked(true);
     }
 
-    // ------------------------------------------------------------
-    // LOAD ORGANIZED + JOINED EVENTS
-    // ------------------------------------------------------------
+    // ----------------- LOAD ALL EVENTS -------------------
     private void loadAllEventsForUser() {
-
         String userId;
 
         FirebaseUser fb = auth.getCurrentUser();
@@ -209,7 +193,7 @@ public class OrganizerLandingFragment extends Fragment {
         upcomingEvents.clear();
         pastEvents.clear();
 
-        // LOAD EVENTS CREATED BY USER
+        // 1️⃣ Events created by user
         firestore.collection("events")
                 .whereEqualTo("organizerId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
@@ -228,6 +212,7 @@ public class OrganizerLandingFragment extends Fragment {
                 .addOnFailureListener(e -> loadJoinedEvents(userId));
     }
 
+    // 2️⃣ Load events user joined
     private void loadJoinedEvents(String userId) {
         firestore.collectionGroup("attendees")
                 .whereEqualTo("userId", userId)
@@ -265,11 +250,8 @@ public class OrganizerLandingFragment extends Fragment {
                 .addOnFailureListener(e -> refreshLists());
     }
 
-    // ------------------------------------------------------------
-    // REFRESH LISTS + UPDATE ADAPTER
-    // ------------------------------------------------------------
+    // ----------------- REFRESH + FILTER -------------------
     private void refreshLists() {
-
         splitEvents();
 
         boolean empty = allEvents.isEmpty();
@@ -283,9 +265,7 @@ public class OrganizerLandingFragment extends Fragment {
         rvEvents.setAdapter(adapter);
     }
 
-    // ------------------------------------------------------------
-    // SPLIT UPCOMING VS PAST
-    // ------------------------------------------------------------
+    // ----------------- DIVIDE INTO UPCOMING / PAST -------------------
     private void splitEvents() {
         upcomingEvents.clear();
         pastEvents.clear();
@@ -307,9 +287,7 @@ public class OrganizerLandingFragment extends Fragment {
         }
     }
 
-    // ------------------------------------------------------------
-    // NOTIFICATION DIALOG
-    // ------------------------------------------------------------
+    // ----------------- NOTIFICATIONS POPUP -------------------
     private void showNotificationsDialog() {
 
         String userId;

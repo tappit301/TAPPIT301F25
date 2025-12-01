@@ -1,6 +1,7 @@
 package com.example.eventapp;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -17,85 +18,84 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class LandingHostActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_landing_host);
 
-        // Ask for notification permission on Android 13+
-        requestNotificationPermissionIfNeeded();
+        // ============ AUTH CHECK (safely handles guest mode) ============
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        boolean guestMode = prefs.getBoolean("GUEST_MODE", false);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Toolbar setup
-        Toolbar toolbar = findViewById(R.id.topAppBar);
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
+        if (!guestMode && user == null) {
+            // No user logged in → redirect to Login
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
         }
 
-        // Navigation setup
+        setContentView(R.layout.activity_landing_host);
+
+        // ============ Notification permission (Android 13+) ============
+        requestNotificationPermissionIfNeeded();
+
+        // ============ Toolbar ============
+        Toolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+
+        // ============ Navigation Setup ============
         NavHostFragment navHostFragment =
-                (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
 
-            // If redirected to explore
-            if (getIntent().getBooleanExtra("openExplore", false)) {
+            // Auto-open Explore if coming as Guest
+            if (getIntent().getBooleanExtra("openExplore", false) || guestMode) {
                 navController.navigate(R.id.exploreEventsFragment);
             }
 
-            // Configure ActionBar for navigation
-            if (getSupportActionBar() != null) {
-                NavigationUI.setupActionBarWithNavController(this, navController);
-            }
-
-            // Guest mode handling
-            SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
-            boolean guestMode = prefs.getBoolean("GUEST_MODE", false);
-            boolean fromGuest = getIntent().getBooleanExtra("FROM_GUEST", false);
-
-            if (guestMode || fromGuest) {
-                navController.navigate(R.id.exploreEventsFragment);
-            }
+            // Set up toolbar with navigation
+            NavigationUI.setupActionBarWithNavController(this, navController);
         }
     }
 
-    /** Inflate toolbar menu */
+    // Inflate toolbar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.landing_menu, menu);
         return true;
     }
 
-    /** Handle toolbar menu icons */
+    // Toolbar icon handling
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_profile) {
-            // TODO: Navigate to profile fragment
-            // NavHostFragment.findNavController(...)
+        if (item.getItemId() == R.id.action_profile) {
+            // TODO: Navigate to profile
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    /** Handle navigation up */
+    // Navigation up (back button in toolbar)
     @Override
     public boolean onSupportNavigateUp() {
         NavHostFragment navHostFragment =
-                (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host_fragment);
 
-        if (navHostFragment != null) {
-            return navHostFragment.getNavController().navigateUp()
-                    || super.onSupportNavigateUp();
-        }
-        return super.onSupportNavigateUp();
+        return (navHostFragment != null &&
+                navHostFragment.getNavController().navigateUp())
+                || super.onSupportNavigateUp();
     }
 
-    /** Request notification permission if needed (Android 13+) */
+    // Request notification permission (Android 13+)
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -112,3 +112,4 @@ public class LandingHostActivity extends AppCompatActivity {
         }
     }
 }
+

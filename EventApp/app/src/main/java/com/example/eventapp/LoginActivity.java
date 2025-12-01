@@ -1,6 +1,7 @@
 package com.example.eventapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,38 +16,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * This is the Activity that lets users log in with their email and password.
- * Verifies credential using Firebase Authentication and redirects
- * to the landing screen if login is successful.
- *
- * Author: tappit
+ * Handles user login using Firebase Authentication.
+ * Supports: Email login + Guest Mode redirection.
  */
 public class LoginActivity extends AppCompatActivity {
 
-    /** Tag used for logging. */
     private static final String TAG = "LoginActivity";
 
-    /** Email input field. */
     private EditText emailInput;
-
-    /** Password input field. */
     private EditText passwordInput;
-
-    /** Button to trigger the login process. */
     private Button loginButton;
-
-    /** Button to switch to the sign-up screen. */
     private Button signUpToggleButton;
+    private Button btnContinueAsGuest;
 
-    /** Firebase authentication instance. */
     private FirebaseAuth auth;
 
-    /**
-     * Called when the activity is created.
-     * Sets up the login form and button listeners.
-     *
-     * @param savedInstanceState saved state of the activity, if any
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +42,9 @@ public class LoginActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.editTextPassword);
         loginButton = findViewById(R.id.btnSignIn);
         signUpToggleButton = findViewById(R.id.btnSignUpToggle);
+        btnContinueAsGuest = findViewById(R.id.btnContinueAsGuest);
 
+        // --- SIGN IN BUTTON ---
         loginButton.setOnClickListener(v -> {
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
@@ -71,27 +57,30 @@ public class LoginActivity extends AppCompatActivity {
             signInUser(email, password);
         });
 
+        // --- GO TO SIGNUP ---
         signUpToggleButton.setOnClickListener(v -> {
             startActivity(new Intent(this, SignUpActivity.class));
             finish();
         });
 
-        Button btnContinueAsGuest = findViewById(R.id.btnContinueAsGuest);
+        // --- GUEST MODE ---
+        btnContinueAsGuest.setOnClickListener(v -> continueAsGuest());
+    }
 
-        btnContinueAsGuest.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, LandingHostActivity.class);
-            intent.putExtra("isGuest", true);
-            startActivity(intent);
-            finish();
-        });
+    private void continueAsGuest() {
+        // Persist guest mode
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        prefs.edit().putBoolean("GUEST_MODE", true).apply();
+
+        Intent intent = new Intent(LoginActivity.this, LandingHostActivity.class);
+        intent.putExtra("openExplore", true);
+        startActivity(intent);
+
+        finish();
     }
 
     /**
-     * Signs in a user with the provided email and password.
-     * If successful, redirects to {@link LandingHostActivity}.
-     *
-     * @param email the user's email address
-     * @param password the user's password
+     * Signs in the user with Firebase Authentication.
      */
     private void signInUser(String email, String password) {
         Log.d(TAG, "Attempting login for " + email);
@@ -102,6 +91,10 @@ public class LoginActivity extends AppCompatActivity {
                     if (user != null) {
                         Log.d(TAG, "Login successful: " + user.getUid());
                         Toast.makeText(this, "Welcome back, " + user.getEmail(), Toast.LENGTH_SHORT).show();
+
+                        // Disable guest mode
+                        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+                        prefs.edit().putBoolean("GUEST_MODE", false).apply();
 
                         Intent intent = new Intent(LoginActivity.this, LandingHostActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -115,3 +108,4 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 }
+
