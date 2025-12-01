@@ -5,21 +5,21 @@ import android.content.SharedPreferences;
 
 public class AdminSession {
 
-    private static final String PREF_NAME = "admin_session";
-    private static final String KEY_LOGGED_IN = "logged_in";
+    private static final String PREF = "ADMIN_PREFS";
+    private static final String KEY = "IS_ADMIN";
 
     public static void login(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_LOGGED_IN, true).apply();
-    }
-
-    public static void logout(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_LOGGED_IN, false).apply();
+        SharedPreferences prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY, true).apply();
     }
 
     public static boolean isLoggedIn(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getBoolean(KEY_LOGGED_IN, false);
+        return context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+                .getBoolean(KEY, false);
+    }
+
+    public static void logout(Context context) {
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY, false).apply();
     }
 }

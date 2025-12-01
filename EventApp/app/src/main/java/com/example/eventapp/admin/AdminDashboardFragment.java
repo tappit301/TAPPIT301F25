@@ -19,61 +19,49 @@ public class AdminDashboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        // Ensure Admin is logged in
+        // 1) Check admin login
         if (!AdminSession.isLoggedIn(requireContext())) {
             NavHostFragment.findNavController(this)
                     .navigate(R.id.adminLoginFragment);
             return;
         }
 
-        // ----------------------------------------------------------
-        // BUTTON: Manage Events (Browse Events)
-        // ----------------------------------------------------------
+        // 2) Manage Events
         view.findViewById(R.id.btnAdminManageEvents).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_dashboard_to_browseEvents)
+                        .navigate(R.id.action_adminDashboardFragment_to_adminBrowseEventsFragment)
         );
 
-        // ----------------------------------------------------------
-        // BUTTON: Manage Users (Browse Profiles)
-        // ----------------------------------------------------------
+        // 3) Manage Users
         view.findViewById(R.id.btnAdminManageUsers).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_dashboard_to_browseUsers)
+                        .navigate(R.id.action_adminDashboardFragment_to_adminBrowseUsersFragment)
         );
 
-        // ----------------------------------------------------------
-        // BUTTON: Manage Images
-        // ----------------------------------------------------------
+        // 4) Manage Images
         view.findViewById(R.id.btnAdminManageImages).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_dashboard_to_browseImages)
+                        .navigate(R.id.action_adminDashboardFragment_to_adminBrowseImagesFragment)
         );
 
-        // ----------------------------------------------------------
-        // BUTTON: Remove Organizers
-        // ----------------------------------------------------------
+        // 5) Remove Organizers
         view.findViewById(R.id.btnAdminRemoveOrganizers).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_dashboard_to_removeOrganizers)
+                        .navigate(R.id.action_adminDashboardFragment_to_adminRemoveOrganizersFragment)
         );
 
-        // ----------------------------------------------------------
-        // BUTTON: Notification Logs
-        // ----------------------------------------------------------
+        // 6) Notification Logs
         view.findViewById(R.id.btnAdminNotificationLogs).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_dashboard_to_notificationLogs)
+                        .navigate(R.id.action_adminDashboardFragment_to_adminNotificationLogsFragment)
         );
 
-        // ----------------------------------------------------------
-        // BUTTON: System Config (Optional)
-        // ----------------------------------------------------------
+        // 7) System Config
         View systemConfigButton = view.findViewById(R.id.btnAdminSystemConfig);
         if (systemConfigButton != null) {
             systemConfigButton.setOnClickListener(v ->
                     NavHostFragment.findNavController(this)
-                            .navigate(R.id.action_dashboard_to_systemConfig)
+                            .navigate(R.id.action_adminDashboardFragment_to_adminSystemConfigFragment)
             );
         }
     }

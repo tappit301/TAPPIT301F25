@@ -18,7 +18,7 @@ public class AdminLoginFragment extends Fragment {
     private static final String ADMIN_PASSWORD = "admin123";
 
     public AdminLoginFragment() {
-        super(R.layout.admin_login);
+        super(R.layout.fragment_admin_login);
     }
 
     @Override
@@ -37,17 +37,18 @@ public class AdminLoginFragment extends Fragment {
                 return;
             }
 
+            // 🔥 LOCAL-ONLY ADMIN LOGIN
             if (!e.equals(ADMIN_EMAIL) || !p.equals(ADMIN_PASSWORD)) {
                 Toast.makeText(getContext(), "Invalid admin credentials", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // ⭐ FIX: Save admin login session
+            // Save admin session
             AdminSession.login(requireContext());
 
-            // ⭐ Navigate to Dashboard
+            // Navigate to dashboard
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_adminLogin_to_adminDashboard);
+                    .navigate(R.id.action_adminLoginFragment_to_adminDashboardFragment);
         });
     }
 }

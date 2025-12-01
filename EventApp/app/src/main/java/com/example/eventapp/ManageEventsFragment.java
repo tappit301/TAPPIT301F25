@@ -13,8 +13,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.eventapp.Attendee;
-import com.example.eventapp.AttendeeAdapter;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -24,11 +22,13 @@ import java.util.List;
 public class ManageEventsFragment extends Fragment {
 
     private static final String TAG = "ManageEventsFragment";
+
     private RecyclerView recyclerView;
     private AttendeeAdapter adapter;
-    private List<Attendee> attendees = new ArrayList<>();
 
+    private final List<Attendee> attendees = new ArrayList<>();
     private FirebaseFirestore firestore;
+
     private String eventId;
 
     public ManageEventsFragment() {}
@@ -38,12 +38,13 @@ public class ManageEventsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         return inflater.inflate(R.layout.fragment_manage_events, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
 
         firestore = FirebaseHelper.getFirestore();
 
@@ -54,36 +55,25 @@ public class ManageEventsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         Bundle args = getArguments();
-        if (args != null) {
-            eventId = args.getString("eventId", "");
-        }
+        if (args != null) eventId = args.getString("eventId");
 
-        if (eventId == null || eventId.isEmpty()) {
-            Log.e(TAG, "No eventId received");
+        if (eventId == null) {
+            Log.e(TAG, "Missing eventId");
             return;
         }
 
-        //EDIT EVENT BUTTON CLICK
-        View btnEditEvent = view.findViewById(R.id.btnEditEvent);
+        view.findViewById(R.id.btnEditEvent).setOnClickListener(v -> {
+            Bundle b = new Bundle();
+            b.putString("eventId", eventId);
 
-        btnEditEvent.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("eventId", eventId);
-            bundle.putString("title", args.getString("title", ""));
-            bundle.putString("desc", args.getString("desc", ""));
-            bundle.putString("date", args.getString("date", ""));
-            bundle.putString("time", args.getString("time", ""));
-            bundle.putString("location", args.getString("location", ""));
-            bundle.putString("imageUrl", args.getString("imageUrl", ""));
-
-            NavHostFragment.findNavController(ManageEventsFragment.this)
-                    .navigate(R.id.action_manageEventsFragment_to_createEventFragment, bundle);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_manageEventsFragment_to_createEventFragment, b);
         });
 
-        loadWaitingList();
+        loadAttendees();
     }
 
-    private void loadWaitingList() {
+    private void loadAttendees() {
         firestore.collection("eventAttendees")
                 .document(eventId)
                 .collection("attendees")
@@ -99,6 +89,6 @@ public class ManageEventsFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e ->
-                        Log.e(TAG, "Error loading attendees", e));
+                        Log.e(TAG, "Failed loading attendees", e));
     }
 }

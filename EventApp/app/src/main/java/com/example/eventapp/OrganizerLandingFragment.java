@@ -28,144 +28,97 @@ import java.util.List;
 public class OrganizerLandingFragment extends Fragment {
 
     private FirebaseFirestore firestore;
-
-    // UI
     private RecyclerView rvEvents;
     private LinearLayout emptyStateLayout;
-    private MaterialButton btnUpcoming;
-    private MaterialButton btnPast;
-    private MaterialButtonToggleGroup toggleGroup;
 
-    // Data
     private final List<Event> fullList = new ArrayList<>();
     private final List<Event> filteredList = new ArrayList<>();
     private EventAdapter adapter;
 
     @Nullable
     @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState
-    ) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.landing_page, container, false);
     }
 
     @Override
-    public void onViewCreated(
-            @NonNull View view,
-            @Nullable Bundle savedInstanceState
-    ) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle sis) {
+        firestore = FirebaseHelper.getFirestore();
 
-        firestore = FirebaseHelper.getFirestore(); // null in tests
-
-        // Top Toolbar Buttons
-        ImageButton btnExplore = view.findViewById(R.id.btnExplore);
-        MaterialButton btnCreateTop = view.findViewById(R.id.btnCreateEventTop);
-        ImageView btnProfile = view.findViewById(R.id.btnProfile);
-        ImageButton btnNotifications = view.findViewById(R.id.btnNotifications);
-
-        // Recycler + Empty Layout
         rvEvents = view.findViewById(R.id.rvEvents);
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
-        MaterialButton btnAddEventEmpty = view.findViewById(R.id.btnAddEventEmpty);
 
-        // FAB
-        View fabAddEvent = view.findViewById(R.id.btnAddEvent);
-
-        // Toggle Group
-        toggleGroup = view.findViewById(R.id.toggleEventType);
-        btnUpcoming = view.findViewById(R.id.btnUpcoming);
-        btnPast = view.findViewById(R.id.btnPast);
+        MaterialButtonToggleGroup toggle = view.findViewById(R.id.toggleEventType);
 
         rvEvents.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new EventAdapter(filteredList,
                 R.id.action_organizerLandingFragment_to_eventDetailsFragment);
         rvEvents.setAdapter(adapter);
 
-        // --- Navigation buttons ---
-        btnExplore.setOnClickListener(v ->
-                safeNavigate(view, R.id.action_organizerLandingFragment_to_exploreEventsFragment));
+        view.findViewById(R.id.btnCreateEventTop)
+                .setOnClickListener(v -> safeNav(view,
+                        R.id.action_organizerLandingFragment_to_createEventFragment));
 
-        btnCreateTop.setOnClickListener(v ->
-                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
+        view.findViewById(R.id.btnAddEvent)
+                .setOnClickListener(v -> safeNav(view,
+                        R.id.action_organizerLandingFragment_to_createEventFragment));
 
-        fabAddEvent.setOnClickListener(v ->
-                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
+        view.findViewById(R.id.btnAddEventEmpty)
+                .setOnClickListener(v -> safeNav(view,
+                        R.id.action_organizerLandingFragment_to_createEventFragment));
 
-        btnAddEventEmpty.setOnClickListener(v ->
-                safeNavigate(view, R.id.action_organizerLandingFragment_to_createEventFragment));
+        view.findViewById(R.id.btnExplore)
+                .setOnClickListener(v -> safeNav(view,
+                        R.id.action_organizerLandingFragment_to_exploreEventsFragment));
 
-        // Toggle: Upcoming / Past
-        toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (isChecked) {
-                applyFilter(checkedId == R.id.btnUpcoming);
-            }
+        toggle.addOnButtonCheckedListener((g, id, checked) -> {
+            if (checked) applyFilter(id == R.id.btnUpcoming);
         });
 
-        loadEventsFromFirestore();
+        loadEvents();
     }
 
-    private void loadEventsFromFirestore() {
-
+    private void loadEvents() {
         if (firestore == null) {
-            // Robolectric test mode
             updateEmptyState();
             return;
         }
 
         firestore.collection("events")
                 .get()
-                .addOnSuccessListener(query -> {
+                .addOnSuccessListener(snap -> {
                     fullList.clear();
-
-                    for (QueryDocumentSnapshot doc : query) {
+                    for (QueryDocumentSnapshot doc : snap) {
                         Event e = doc.toObject(Event.class);
+                        e.setId(doc.getId());
                         fullList.add(e);
                     }
-
-                    // Default view is "Upcoming"
                     applyFilter(true);
                 })
                 .addOnFailureListener(e -> updateEmptyState());
     }
 
-    /** Filter list by upcoming/past */
     private void applyFilter(boolean showUpcoming) {
         filteredList.clear();
-
         for (Event e : fullList) {
-            if (showUpcoming && !e.isPastEvent()) {
-                filteredList.add(e);
-            } else if (!showUpcoming && e.isPastEvent()) {
-                filteredList.add(e);
-            }
+            if (showUpcoming && !e.isPastEvent()) filteredList.add(e);
+            else if (!showUpcoming && e.isPastEvent()) filteredList.add(e);
         }
-
         adapter.notifyDataSetChanged();
         updateEmptyState();
     }
 
     private void updateEmptyState() {
-        if (filteredList.isEmpty()) {
-            emptyStateLayout.setVisibility(View.VISIBLE);
-            rvEvents.setVisibility(View.GONE);
-        } else {
-            emptyStateLayout.setVisibility(View.GONE);
-            rvEvents.setVisibility(View.VISIBLE);
-        }
+        boolean empty = filteredList.isEmpty();
+        emptyStateLayout.setVisibility(empty ? View.VISIBLE : View.GONE);
+        rvEvents.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
-    /** Safe nav controller for tests */
-    private void safeNavigate(View root, int actionId) {
-        NavController nav = null;
+    private void safeNav(View root, int actionId) {
         try {
-            nav = Navigation.findNavController(root);
-        } catch (Exception ignored) { }
-
-        if (nav != null) {
+            NavController nav = Navigation.findNavController(root);
             nav.navigate(actionId);
-        }
+        } catch (Exception ignored) {}
     }
 }

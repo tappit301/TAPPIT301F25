@@ -1,101 +1,87 @@
 package com.example.eventapp;
 
-/**
- * Event model mapped from Firestore.
- * Includes title, description, date, time, location, organizer info,
- * capacity, imageUrl for event poster, timestamps, and other metadata.
- */
+import com.google.firebase.Timestamp;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class Event {
 
     private String id;
     private String title;
     private String description;
-    private String date;          // YYYY-MM-DD or user format
-    private String time;          // HH:mm
     private String location;
     private String category;
+
+    private String date;     // "30/11/2025"
+    private String time;     // "06:30"
 
     private String organizerId;
     private String organizerEmail;
 
-    /** Poster image URL (Firebase Storage) */
     private String imageUrl;
 
-    /** For upcoming / past filtering */
-    private long timestamp;
-
-    /** Optional: capacity if you use lotteries */
     private int capacity;
-
-    /** Optional: attendees count (for waitlist UI) */
     private int attendeeCount;
 
-    // REQUIRED empty constructor for Firestore
-    public Event() {}
+    // Used by admin screens
+    private Timestamp dateTime;
 
-    public Event(String title, String description, String date,
-                 String time, String location, String category) {
-        this.title = title;
-        this.description = description;
-        this.date = date;
-        this.time = time;
-        this.location = location;
-        this.category = category;
-    }
+    public Event() {} // Required for Firestore
 
-    // --------------------
-    // GETTERS
-    // --------------------
-
+    // ----------------- GETTERS -----------------
     public String getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
+    public String getLocation() { return location; }
+    public String getCategory() { return category; }
     public String getDate() { return date; }
     public String getTime() { return time; }
-    public String getLocation() { return location; }
-
     public String getOrganizerId() { return organizerId; }
     public String getOrganizerEmail() { return organizerEmail; }
-
-    public String getCategory() { return category; }
     public String getImageUrl() { return imageUrl; }
-    public long getTimestamp() { return timestamp; }
-
     public int getCapacity() { return capacity; }
     public int getAttendeeCount() { return attendeeCount; }
+    public Timestamp getDateTime() { return dateTime; }
 
-    // --------------------
-    // SETTERS
-    // --------------------
-
+    // ----------------- SETTERS -----------------
     public void setId(String id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
-    public void setCategory(String category) { this.category = category; }
     public void setDescription(String description) { this.description = description; }
+    public void setLocation(String location) { this.location = location; }
+    public void setCategory(String category) { this.category = category; }
     public void setDate(String date) { this.date = date; }
     public void setTime(String time) { this.time = time; }
-    public void setLocation(String location) { this.location = location; }
-
     public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
     public void setOrganizerEmail(String organizerEmail) { this.organizerEmail = organizerEmail; }
-
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public void setAttendeeCount(int attendeeCount) { this.attendeeCount = attendeeCount; }
+    public void setDateTime(Timestamp dateTime) { this.dateTime = dateTime; }
 
-    // --------------------
-    // Derived helper methods
-    // --------------------
+    // ----------------- HELPERS -----------------
 
-    /**
-     * Returns true if this event's timestamp is in the past.
-     * If timestamp = 0 (not set), treat event as upcoming.
-     */
+    /** Used by organizer/explorer filtering */
     public boolean isPastEvent() {
-        if (timestamp == 0) return false;
-        long now = System.currentTimeMillis();
-        return timestamp < now;
+
+        // Case 1: Admin uses Timestamp dateTime
+        if (dateTime != null) {
+            return dateTime.toDate().before(new Date());
+        }
+
+        // Case 2: Organizer UI has date + time strings
+        if (date != null && time != null) {
+            try {
+                String raw = date + " " + time;
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US);
+                Date eventDate = sdf.parse(raw);
+
+                return eventDate != null && eventDate.before(new Date());
+            } catch (ParseException ignored) {}
+        }
+
+        return false; // No valid date → treat as upcoming
     }
 }

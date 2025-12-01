@@ -1,7 +1,8 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build.gradle.kts
+
 plugins {
     alias(libs.plugins.android.application) apply false
 
-    //Add the Google services Gradle plugin
+    // Google Services plugin declared here but NOT applied
     id("com.google.gms.google-services") version "4.4.4" apply false
 }

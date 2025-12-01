@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services")   // ✅ Apply here ONLY
 }
 
 android {
@@ -32,7 +32,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // REQUIRED for Robolectric + FragmentScenario
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
@@ -51,7 +50,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
 
-    // Firebase
+    // Firebase (BOM ensures version alignment)
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -66,30 +65,20 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    // --- TESTING ---
-
-    // JUnit
+    // Unit tests
     testImplementation("junit:junit:4.13.2")
-
-    // Robolectric
     testImplementation("org.robolectric:robolectric:4.12.1")
-
-    // AndroidX Test Core
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.2.0")
-
-    // Mockito
     testImplementation("org.mockito:mockito-core:5.11.0")
 
-    // FragmentScenario → MUST be debugImplementation (NOT testImplementation)
+    // FragmentScenario MUST be debugImplementation
     debugImplementation("androidx.fragment:fragment-testing:1.6.2")
 
-    // Navigation testing (required for TestNavHostController)
+    // Navigation testing
     testImplementation("androidx.navigation:navigation-testing:2.7.5")
-    testImplementation("androidx.navigation:navigation-fragment:2.7.5")
-    testImplementation("androidx.navigation:navigation-runtime:2.7.5")
 
-    // Instrumented tests (Espresso)
+    // Instrumented tests
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
