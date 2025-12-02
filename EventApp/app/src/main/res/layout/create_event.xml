@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/snowWhite">
+    android:background="@color/snowWhite"
+    tools:context=".CreateEventFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -70,30 +71,45 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Event Title -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Event Title"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Description -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Description"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventDescription"
@@ -101,16 +117,19 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine|textCapSentences"
                 android:minLines="4"
-                android:gravity="top|start" />
+                android:gravity="top|start"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Date & Time row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
+            <!-- Date -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEventDate"
                 android:layout_width="0dp"
@@ -118,7 +137,13 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:hint="Date"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/hollyRed"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                app:boxBackgroundColor="@android:color/transparent"
+                app:hintTextColor="@color/hollyRed">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEventDate"
@@ -126,10 +151,12 @@
                     android:layout_height="wrap_content"
                     android:focusable="false"
                     android:clickable="true"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:textColor="@android:color/black" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Time -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilEventTime"
                 android:layout_width="0dp"
@@ -137,7 +164,13 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:hint="Time"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/hollyRed"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                app:boxBackgroundColor="@android:color/transparent"
+                app:hintTextColor="@color/hollyRed">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEventTime"
@@ -145,26 +178,35 @@
                     android:layout_height="wrap_content"
                     android:focusable="false"
                     android:clickable="true"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:textColor="@android:color/black" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
+        <!-- Location -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Location"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLines="2" />
+                android:maxLines="2"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -175,31 +217,46 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Price ($)"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Capacity -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Max Attendees (Optional)"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEventCapacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -209,7 +266,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/hollyRed"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:hintTextColor="@color/hollyRed">
 
             <AutoCompleteTextView
                 android:id="@+id/etEventCategory"
@@ -218,7 +281,8 @@
                 android:inputType="none"
                 android:focusable="false"
                 android:clickable="true"
-                android:hint="Select category" />
+                android:hint="Select category"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -262,3 +326,4 @@
 
     </LinearLayout>
 </ScrollView>
+
