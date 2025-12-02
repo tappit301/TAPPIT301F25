@@ -73,6 +73,6 @@ This section summarizes the required deliverables for **Project Part 4** and our
 - [UI Mockups](https://github.com/tappit301/TAPPIT301F25/wiki/UI-Mockups:-Part-4)
 - [Storyboards](https://github.com/tappit301/TAPPIT301F25/wiki/Storyboard:-Part-4)
 - [UML Diagrams](https://github.com/tappit301/TAPPIT301F25/wiki/UML-Diagrams:-part-4)
-- [CRC Cards](https://github.com/tappit301/TAPPIT301F25/wiki/CRC-CARDS:-Project-3)
+- [CRC Cards](https://github.com/tappit301/TAPPIT301F25/wiki/CRC_cards4)
 
 ---
