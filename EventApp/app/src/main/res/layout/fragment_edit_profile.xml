@@ -5,9 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_blue"
+    android:background="#FFF8F8"
     tools:context=".EditProfileFragment">
-
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -17,9 +16,9 @@
             android:id="@+id/topAppBarEditProfile"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="#B71C1C"
             app:title="Edit Profile"
-            app:titleTextColor="@color/black"
+            app:titleTextColor="@android:color/white"
             app:navigationIcon="@drawable/ic_back" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -36,7 +35,6 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-
             <ImageView
                 android:id="@+id/imgEditProfileAvatar"
                 android:layout_width="120dp"
@@ -45,26 +43,24 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/profile_icon"
                 android:scaleType="centerCrop"
-                android:padding="0dp"
                 android:clickable="true"
                 android:focusable="true" />
-
-
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangeProfilePicture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Change profile picture"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:strokeColor="#B71C1C"
+                android:textColor="#B71C1C" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:background="@drawable/white_box"
                 android:orientation="vertical"
+                android:background="@drawable/white_box"
                 android:padding="16dp">
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -111,8 +107,9 @@
                     android:layout_marginTop="24dp"
                     android:text="Save changes"
                     android:textAllCaps="false"
-                    app:backgroundTint="@color/light_blue"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="#B71C1C"
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
         </LinearLayout>

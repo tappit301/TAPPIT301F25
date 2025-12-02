@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F5F5">
+    android:background="@color/snowWhite">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,14 +13,16 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Festive cover card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardEventImage"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="16dp"
             app:strokeWidth="2dp"
-            app:strokeColor="#DDDDDD"
+            app:strokeColor="@color/hollyRed"
+            app:cardBackgroundColor="#FFF8E1"
             android:clickable="true"
             android:focusable="true">
 
@@ -34,7 +36,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:background="#F0F0F0"
+                    android:background="#FFE0B2"
                     android:contentDescription="Event cover image"
                     android:visibility="gone" />
 
@@ -51,7 +53,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/add_photo"
-                        android:alpha="0.5"
+                        android:alpha="0.6"
                         android:contentDescription="Add photo" />
 
                     <TextView
@@ -166,7 +168,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- PRICE FIELD (REQUIRED) -->
+        <!-- PRICE FIELD -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventPrice"
             android:layout_width="match_parent"
@@ -183,7 +185,6 @@
                 android:maxLines="1" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
@@ -202,7 +203,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- CATEGORY DROPDOWN (keeps id etEventCategory) -->
+        <!-- CATEGORY DROPDOWN -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCategory"
             android:layout_width="match_parent"
@@ -221,6 +222,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Buttons + switch (kept same structure) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -244,16 +246,19 @@
                 android:textSize="16sp"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                app:cornerRadius="8dp" />
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switchRequireGeo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Require geolocation to join waiting list"
-                android:textSize="14sp"
-                android:layout_marginTop="16dp" />
+                app:cornerRadius="8dp"
+                android:backgroundTint="@color/hollyRed"
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchRequireGeo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Require geolocation to join waiting list"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp" />
+
     </LinearLayout>
 </ScrollView>

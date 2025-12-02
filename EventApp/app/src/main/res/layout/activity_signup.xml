@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0E0E0">
+    android:background="#FFF8E1">
 
     <ScrollView
         android:layout_width="0dp"
@@ -23,7 +23,7 @@
             android:background="@drawable/login_card_bg"
             android:layout_margin="16dp">
 
-
+            <!-- Toggle bar -->
             <LinearLayout
                 android:id="@+id/toggleBar"
                 android:layout_width="match_parent"
@@ -37,9 +37,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="#E0E0E0"
+                    android:backgroundTint="#FBE9E7"
                     android:text="Sign In"
-                    android:textColor="#333333" />
+                    android:textColor="#C62828" />
 
                 <Button
                     android:id="@+id/btnSignUpToggle"
@@ -47,12 +47,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:backgroundTint="#708090"
+                    android:backgroundTint="#C62828"
                     android:text="Sign Up"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
 
-
+            <!-- Heading -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,53 +60,57 @@
                 android:textAlignment="center"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="#333333"
+                android:textColor="#3E2723"
                 android:layout_marginBottom="16dp" />
 
+            <!-- Full Name -->
             <EditText
                 android:id="@+id/editTextFullName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Full Name"
-                android:backgroundTint="#BDBDBD"
+                android:backgroundTint="#D7CCC8"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Email -->
             <EditText
                 android:id="@+id/editTextSignUpEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="E-mail"
                 android:inputType="textEmailAddress"
-                android:backgroundTint="#BDBDBD"
+                android:backgroundTint="#D7CCC8"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Password -->
             <EditText
                 android:id="@+id/editTextSignUpPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:backgroundTint="#BDBDBD"
+                android:backgroundTint="#D7CCC8"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Confirm Password -->
             <EditText
                 android:id="@+id/editTextConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Confirm Password"
                 android:inputType="textPassword"
-                android:backgroundTint="#BDBDBD"
+                android:backgroundTint="#D7CCC8"
                 android:layout_marginBottom="16dp" />
 
+            <!-- Sign Up Button -->
             <Button
                 android:id="@+id/btnSignUp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Sign Up"
-                android:backgroundTint="#708090"
-                android:textColor="#FFFFFF"/>
+                android:backgroundTint="#C62828"
+                android:textColor="#FFFFFF" />
         </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

@@ -5,10 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- CHRISTMAS RED HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#7C6AC7"
+        android:background="#B71C1C"
         android:gravity="center_vertical"
         android:paddingStart="16dp">
 
@@ -34,4 +35,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
 </LinearLayout>
+

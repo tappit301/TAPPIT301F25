@@ -5,9 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_blue"
+    android:background="#FFF8E1"
     tools:context=".HomeActivity">
-
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -19,15 +18,14 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="#C62828"
             app:logo="@drawable/ic_tappit_logo"
             app:title="Tappit"
-            app:titleTextColor="@color/black"
+            app:titleTextColor="@android:color/white"
             app:titleCentered="false"
             app:menu="@menu/main_menu"
             android:elevation="4dp" />
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <ScrollView
         android:layout_width="match_parent"
@@ -42,14 +40,14 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-
+            <!-- Hero heading -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Fair Chance for Everyone"
                 android:textStyle="bold"
                 android:textSize="24sp"
-                android:textColor="@color/black"
+                android:textColor="#3E2723"
                 android:textAlignment="center"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp" />
@@ -59,11 +57,11 @@
                 android:layout_height="wrap_content"
                 android:text="Register for community events through a fair lottery system — giving everyone an equal chance to participate without rushing."
                 android:textAlignment="center"
-                android:textColor="@color/black"
+                android:textColor="#4E342E"
                 android:layout_marginBottom="20dp"
                 android:layout_marginHorizontal="24dp" />
 
-
+            <!-- Primary CTA buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -78,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:backgroundTint="#708090"
+                    android:backgroundTint="#C62828"
                     android:text="Getting Started"
                     android:textColor="@android:color/white" />
 
@@ -88,19 +86,19 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:backgroundTint="@color/white"
+                    android:backgroundTint="#FFFFFF"
                     android:text="View Events"
-                    android:textColor="@color/black" />
+                    android:textColor="#2E7D32" />
             </LinearLayout>
 
-
+            <!-- Section: Why choose Tappit -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Why Choose Tappit?"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="@color/black"
+                android:textColor="#3E2723"
                 android:layout_marginBottom="4dp" />
 
             <TextView
@@ -108,11 +106,11 @@
                 android:layout_height="wrap_content"
                 android:text="A modern approach to event registration that prioritizes fairness and accessibility."
                 android:textAlignment="center"
-                android:textColor="@color/black"
+                android:textColor="#4E342E"
                 android:textSize="14sp"
                 android:layout_marginBottom="20dp" />
 
-
+            <!-- First feature row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -120,7 +118,6 @@
                 android:weightSum="2"
                 android:gravity="center"
                 android:layout_marginBottom="32dp">
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -143,7 +140,7 @@
                         android:text="Fair Lottery Process"
                         android:textStyle="bold"
                         android:textSize="16sp"
-                        android:textColor="@color/black"
+                        android:textColor="#3E2723"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="4dp" />
@@ -153,10 +150,9 @@
                         android:layout_height="wrap_content"
                         android:text="Everyone gets an equal chance — no need to refresh pages or race against time."
                         android:textAlignment="center"
-                        android:textColor="@color/black"
+                        android:textColor="#4E342E"
                         android:textSize="13sp" />
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -179,7 +175,7 @@
                         android:text="Waiting List Management"
                         android:textStyle="bold"
                         android:textSize="16sp"
-                        android:textColor="@color/black"
+                        android:textColor="#3E2723"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="4dp" />
@@ -189,13 +185,12 @@
                         android:layout_height="wrap_content"
                         android:text="Join waiting lists &amp; get automatically selected when spots become available."
                         android:textAlignment="center"
-                        android:textColor="@color/black"
+                        android:textColor="#4E342E"
                         android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
 
-
-
+            <!-- Second features block -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,14 +198,12 @@
                 android:gravity="center"
                 android:layout_marginBottom="40dp">
 
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:weightSum="2"
                     android:layout_marginBottom="16dp">
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -233,7 +226,7 @@
                             android:text="QR Code Access"
                             android:textStyle="bold"
                             android:textSize="16sp"
-                            android:textColor="@color/black"
+                            android:textColor="#3E2723"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="8dp" />
 
@@ -242,10 +235,9 @@
                             android:layout_height="wrap_content"
                             android:text="Scan QR codes to join event lists easily."
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#4E342E"
                             android:textSize="13sp" />
                     </LinearLayout>
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -268,7 +260,7 @@
                             android:text="Smart Notifications"
                             android:textStyle="bold"
                             android:textSize="16sp"
-                            android:textColor="@color/black"
+                            android:textColor="#3E2723"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="8dp" />
 
@@ -277,18 +269,16 @@
                             android:layout_height="wrap_content"
                             android:text="Get alerts when you're selected and manage preferences."
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#4E342E"
                             android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:weightSum="2">
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -311,7 +301,7 @@
                             android:text="Accessible &amp; Inclusive"
                             android:textStyle="bold"
                             android:textSize="16sp"
-                            android:textColor="@color/black"
+                            android:textColor="#3E2723"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="8dp" />
 
@@ -320,10 +310,9 @@
                             android:layout_height="wrap_content"
                             android:text="Designed for all — inclusive for everyone."
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#4E342E"
                             android:textSize="13sp" />
                     </LinearLayout>
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -346,7 +335,7 @@
                             android:text="Location Tracking"
                             android:textStyle="bold"
                             android:textSize="16sp"
-                            android:textColor="@color/black"
+                            android:textColor="#3E2723"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="8dp" />
 
@@ -355,30 +344,29 @@
                             android:layout_height="wrap_content"
                             android:text="Optional geolocation to ensure fairness."
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#4E342E"
                             android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
-
+            <!-- How it works section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="How it works ?"
                 android:textStyle="bold"
                 android:textSize="22sp"
-                android:textColor="@color/black"
+                android:textColor="#3E2723"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Simple, fair &amp; accessible for everyone"
-                android:textColor="@color/black"
+                android:textColor="#4E342E"
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -387,7 +375,6 @@
                 android:weightSum="3"
                 android:gravity="center"
                 android:layout_marginBottom="40dp">
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -410,7 +397,7 @@
                         android:layout_height="wrap_content"
                         android:text="Join Waiting List"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="#3E2723"
                         android:layout_marginTop="8dp" />
 
                     <TextView
@@ -418,10 +405,9 @@
                         android:layout_height="wrap_content"
                         android:text="Browse events and join during registration."
                         android:textAlignment="center"
-                        android:textColor="@color/black"
+                        android:textColor="#4E342E"
                         android:textSize="13sp" />
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -444,7 +430,7 @@
                         android:layout_height="wrap_content"
                         android:text="Lottery Selection"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="#3E2723"
                         android:layout_marginTop="8dp" />
 
                     <TextView
@@ -452,10 +438,9 @@
                         android:layout_height="wrap_content"
                         android:text="Participants are randomly selected."
                         android:textAlignment="center"
-                        android:textColor="@color/black"
+                        android:textColor="#4E342E"
                         android:textSize="13sp" />
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -478,7 +463,7 @@
                         android:layout_height="wrap_content"
                         android:text="Accept &amp; Attend"
                         android:textStyle="bold"
-                        android:textColor="@color/black"
+                        android:textColor="#3E2723"
                         android:layout_marginTop="8dp" />
 
                     <TextView
@@ -486,26 +471,26 @@
                         android:layout_height="wrap_content"
                         android:text="Get notified if selected, accept your spot, and attend!"
                         android:textAlignment="center"
-                        android:textColor="@color/black"
+                        android:textColor="#4E342E"
                         android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
 
-
+            <!-- Final CTA -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ready to get started!"
                 android:textStyle="bold"
                 android:textSize="22sp"
-                android:textColor="@color/black"
+                android:textColor="#3E2723"
                 android:layout_marginBottom="8dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Create your account and join the fair event registration revolution"
-                android:textColor="@color/black"
+                android:textColor="#4E342E"
                 android:textAlignment="center"
                 android:layout_marginBottom="16dp" />
 
@@ -513,7 +498,7 @@
                 android:id="@+id/btnCreateAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#708090"
+                android:backgroundTint="#2E7D32"
                 android:text="Create Account"
                 android:textColor="@android:color/white"
                 android:layout_marginBottom="24dp" />

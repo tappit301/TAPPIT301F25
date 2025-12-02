@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F6FF"
+    android:background="#FFF4EE"
     android:padding="20dp">
 
     <LinearLayout
@@ -16,7 +16,7 @@
             android:text="Report Summary"
             android:textStyle="bold"
             android:textSize="24sp"
-            android:textColor="#000" />
+            android:textColor="#B00020" />
 
         <Button
             android:id="@+id/btnViewReports"
@@ -25,14 +25,14 @@
             android:layout_marginTop="16dp"
             android:text="Load Reports"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#6A0DAD"/>
+            android:backgroundTint="#C62828"/>
 
         <TextView
             android:id="@+id/tvReportOutput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="(report will appear here)"
-            android:textColor="#444"
+            android:textColor="#444444"
             android:padding="16dp"
             android:layout_marginTop="16dp"
             android:background="#FFFFFF" />

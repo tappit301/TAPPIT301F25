@@ -3,12 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F8F6FF">
+    android:background="#FFF7F5">  <!-- soft snow-white with warm tint -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCategoryEvents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:background="#FFFAF8" /> <!-- subtle lighter inner area -->
 
 </LinearLayout>

@@ -1,25 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
+    <!-- Base neutrals -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="outline">#DDDDDD</color>
     <color name="light_blue">#CFE3F1</color>
     <color name="gray">#666666</color>
 
-
+    <!-- Original purple brand colors -->
     <color name="purple_200">#BB86FC</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_dark">#4A148C</color>
     <color name="purple_outline">#7B1FA2</color>
 
-
     <color name="light_purple">#E6D6FF</color>
     <color name="purple_button">#7C4DFF</color>
     <color name="purple_button_dark">#5E35B1</color>
 
-
     <color name="ic_launcher_background">#FFFFFF</color>
+
+    <!-- Material 3 theme tokens (used by Theme.EventApp) -->
+    <!-- You can tweak these later, but these values will stop the resource-link errors
+         and give a subtle warm / slightly festive palette. -->
+    <color name="md_theme_primary">#C62828</color>        <!-- deep red -->
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+
+    <color name="md_theme_secondary">#1B5E20</color>      <!-- dark green -->
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+
+    <color name="md_theme_surface">#FFFBFE</color>        <!-- light surface -->
+    <color name="md_theme_onSurface">#1C1B1F</color>
+
+    <color name="md_theme_background">#FFF9F0</color>     <!-- warm background -->
+
+    <color name="md_theme_tertiary">#FFC107</color>       <!-- gold accent -->
+    <color name="md_theme_onTertiary">#3E2723</color>
+
+    <!-- FESTIVE / CHRISTMAS EXTRAS (for layouts like landing_page.xml) -->
+    <color name="snowWhite">#FFFDF7</color>
+    <color name="chipBackground">#26FFFFFF</color>  <!-- white with alpha -->
+    <color name="chipStroke">#40FFFFFF</color>
+
+    <color name="hollyRed">#C62828</color>
+    <color name="accentGold">#FFC107</color>
+    <color name="christmasGreen">#1B5E20</color>
+
+    <color name="fabRed">#D32F2F</color>
 
 </resources>

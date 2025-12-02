@@ -2,5 +2,25 @@
 
     <style name="Base.Theme.EventApp" parent="Theme.Material3.DayNight.NoActionBar">
 
+        <!-- Night Christmas Colors -->
+        <item name="colorPrimary">#8B1A1A</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="colorSecondary">#1B5E20</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <item name="colorSurface">#121212</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <item name="android:colorBackground">#121212</item>
+
+        <item name="colorTertiary">@color/md_theme_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_onTertiary</item>
+
+        <item name="android:statusBarColor">#8B1A1A</item>
+        <item name="android:navigationBarColor">#8B1A1A</item>
+
     </style>
+
 </resources>
+

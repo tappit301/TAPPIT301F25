@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:background="#FFF8E1"
     tools:context=".OrganizerLandingFragment">
 
-
+    <!-- Top Christmas AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F5F5F5"
+        android:background="#C62828"
         app:elevation="4dp">
 
         <androidx.appcompat.widget.Toolbar
@@ -22,6 +22,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
+            <!-- App name (kept same text) -->
             <TextView
                 android:id="@+id/AppName"
                 android:layout_width="wrap_content"
@@ -29,18 +30,20 @@
                 android:text="tappit"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
+                android:textColor="@android:color/white"
                 android:clickable="true"
                 android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"/>
+                android:foreground="?attr/selectableItemBackground" />
 
-            <!-- Explore -->
+            <!-- Explore (little green accent) -->
             <ImageButton
                 android:id="@+id/btnExplore"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginStart="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Explore"
+                app:tint="#FFEE58"
                 android:src="@drawable/explore_events" />
 
             <LinearLayout
@@ -50,36 +53,45 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
+                <!-- Create Event (festive green button) -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCreateEventTop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Create Event"
                     android:textSize="13sp"
-                    style="@style/Widget.Material3.Button.TonalButton" />
+                    android:textColor="@android:color/white"
+                    style="@style/Widget.Material3.Button"
+                    app:backgroundTint="#2E7D32"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#FFEB3B" />
 
+                <!-- Notifications bell with gold tint -->
                 <ImageButton
                     android:id="@+id/btnNotifications"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Notifications"
                     android:src="@drawable/notification_icon"
-                    android:contentDescription="Notifications" />
+                    app:tint="#FFEB3B" />
 
+                <!-- Profile avatar with little wreath circle bg -->
                 <ImageView
                     android:id="@+id/btnProfile"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_marginStart="8dp"
+                    android:padding="4dp"
                     android:src="@drawable/profile_icon"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/profile_avatar_circle"
                     android:contentDescription="Profile" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
-
+    <!-- Scroll content under app bar -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -91,7 +103,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-
+            <!-- Header row: "Events" + Upcoming/Past toggle -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Events"
-                    android:textColor="@android:color/black"
+                    android:textColor="#C62828"
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
@@ -122,7 +134,11 @@
                         android:layout_height="wrap_content"
                         android:text="Upcoming"
                         android:textSize="12sp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="#C62828"
+                        app:strokeWidth="1dp"
+                        app:backgroundTint="#FFFFFFFF"
+                        android:textColor="#C62828" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPast"
@@ -130,17 +146,21 @@
                         android:layout_height="wrap_content"
                         android:text="Past"
                         android:textSize="12sp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="#2E7D32"
+                        app:strokeWidth="1dp"
+                        app:backgroundTint="#FFFFFFFF"
+                        android:textColor="#2E7D32" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
             </LinearLayout>
 
-
+            <!-- Events content / empty state -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="35dp">
 
-
+                <!-- Empty state (snowy card vibe, same text) -->
                 <LinearLayout
                     android:id="@+id/emptyStateLayout"
                     android:layout_width="match_parent"
@@ -148,13 +168,15 @@
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="48dp"
+                    android:background="#80FFFFFF"
                     android:visibility="gone">
 
                     <ImageView
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:src="@drawable/empty_calender"
-                        android:alpha="0.3"
+                        app:tint="#C62828"
+                        android:alpha="0.85"
                         android:contentDescription="No events" />
 
                     <TextView
@@ -181,10 +203,14 @@
                         android:layout_marginTop="24dp"
                         android:text="+ Add Event"
                         android:textAllCaps="false"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="#C62828"
+                        app:strokeWidth="1dp"
+                        app:backgroundTint="#FFFFFFFF"
+                        android:textColor="#C62828" />
                 </LinearLayout>
 
-
+                <!-- Events list -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvEvents"
                     android:layout_width="match_parent"
@@ -194,7 +220,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-
+    <!-- Floating add button - red with white plus -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddEvent"
         android:layout_width="wrap_content"
@@ -202,9 +228,9 @@
         android:layout_margin="24dp"
         android:contentDescription="Add Event"
         app:layout_anchorGravity="bottom|end"
+        app:layout_anchor="@id/appBarLayout"
         app:srcCompat="@drawable/ic_add"
-        app:backgroundTint="@color/purple_500"
         app:tint="@android:color/white"
-        app:layout_anchor="@id/appBarLayout" />
+        app:backgroundTint="#C62828" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

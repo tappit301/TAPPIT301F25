@@ -5,13 +5,13 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="32dp"
-    android:background="#F8F6FF">
+    android:background="#FFF7F5">
 
     <TextView
         android:text="Admin Login"
         android:textStyle="bold"
         android:textSize="26sp"
-        android:textColor="#000"
+        android:textColor="#B22222"
         android:layout_marginBottom="24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:text="Login"
         android:layout_marginTop="20dp"
-        android:backgroundTint="#6A0DAD"
+        android:backgroundTint="#B22222"
         android:textColor="@android:color/white" />
 
 </LinearLayout>

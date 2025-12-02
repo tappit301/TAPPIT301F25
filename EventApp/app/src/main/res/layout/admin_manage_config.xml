@@ -2,10 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="#F8F6FF"
+    android:background="#FFF5E9"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
 
     <TextView
         android:layout_width="wrap_content"
@@ -13,23 +12,25 @@
         android:text="Edit System Configuration"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#000"/>
-
+        android:textColor="#8B0000" />
 
     <EditText
         android:id="@+id/etConfigKey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Config Key"
-        android:layout_marginTop="20dp"/>
-
+        android:layout_marginTop="20dp"
+        android:textColorHint="#8B0000"
+        android:background="@drawable/rounded_input" />
 
     <EditText
         android:id="@+id/etConfigValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Config Value"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="12dp"
+        android:textColorHint="#8B0000"
+        android:background="@drawable/rounded_input" />
 
     <Button
         android:id="@+id/btnSaveConfig"
@@ -37,6 +38,7 @@
         android:layout_height="wrap_content"
         android:text="Update"
         android:layout_marginTop="20dp"
-        android:backgroundTint="#7C6AC7"
-        android:textColor="#FFF"/>
+        android:backgroundTint="#B22222"
+        android:textColor="@android:color/white" />
+
 </LinearLayout>
