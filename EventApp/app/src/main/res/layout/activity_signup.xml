@@ -23,7 +23,7 @@
             android:background="@drawable/login_card_bg"
             android:layout_margin="16dp">
 
-            <!-- Toggle bar -->
+
             <LinearLayout
                 android:id="@+id/toggleBar"
                 android:layout_width="match_parent"
@@ -52,7 +52,7 @@
                     android:textColor="#FFFFFF" />
             </LinearLayout>
 
-            <!-- Form -->
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

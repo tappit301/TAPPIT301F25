@@ -21,6 +21,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Displays an event map with:
+ * - A marker for the event location
+ * - Markers for attendees who shared their location
+ */
 public class EventMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "EventMapFragment";
@@ -42,6 +47,9 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
         return inflater.inflate(R.layout.fragment_event_map, container, false);
     }
 
+    /**
+     * Sets up the map, reads eventId, and begins loading map data.
+     */
     @Override
     public void onViewCreated(
             @NonNull View view,
@@ -61,15 +69,17 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
 
         mapView = view.findViewById(R.id.eventMapView);
 
-        Bundle mapBundle = null;
-        if (savedInstanceState != null) {
-            mapBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
-        }
+        Bundle mapBundle = savedInstanceState != null
+                ? savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
+                : null;
 
         mapView.onCreate(mapBundle);
         mapView.getMapAsync(this);
     }
 
+    /**
+     * Called when the Google Map is ready to be interacted with.
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap gMap) {
         googleMap = gMap;
@@ -80,22 +90,19 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
 
-        // First show the event location
         loadEventLocation();
-
-        // Then add markers for attendees who have location data
         loadAttendeeLocations();
     }
 
+    /**
+     * Loads and displays the event's main location marker.
+     */
     private void loadEventLocation() {
         firestore.collection("events")
                 .document(eventId)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) {
-                        Log.e(TAG, "Event doc does NOT exist. Probably deleted.");
-                        return;
-                    }
+                    if (!doc.exists()) return;
 
                     Double lat = doc.getDouble("lat");
                     Double lng = doc.getDouble("lng");
@@ -112,7 +119,6 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
                             .title(doc.getString("title"))
                     );
 
-                    // Center camera on event
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14f));
                 })
                 .addOnFailureListener(e ->
@@ -121,7 +127,7 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     /**
-     * Add markers for waiting list users that have lat/lng stored in eventAttendees/{eventId}/attendees.
+     * Loads attendee markers if they have shared coordinates.
      */
     private void loadAttendeeLocations() {
         firestore.collection("eventAttendees")
@@ -129,33 +135,25 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
                 .collection("attendees")
                 .get()
                 .addOnSuccessListener(snapshot -> {
-                    if (snapshot.isEmpty()) {
-                        Log.d(TAG, "No attendees with location yet.");
-                        return;
-                    }
+                    if (snapshot.isEmpty()) return;
 
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         Double lat = doc.getDouble("lat");
                         Double lng = doc.getDouble("lng");
 
-                        if (lat == null || lng == null) {
-                            continue;
-                        }
+                        if (lat == null || lng == null) continue;
 
                         String email = doc.getString("email");
                         String status = doc.getString("status");
 
                         LatLng pos = new LatLng(lat, lng);
 
-                        String title = email != null ? email : "Attendee";
-                        String snippet = status != null ? ("Status: " + status) : null;
-
                         MarkerOptions markerOptions = new MarkerOptions()
                                 .position(pos)
-                                .title(title);
+                                .title(email != null ? email : "Attendee");
 
-                        if (snippet != null) {
-                            markerOptions.snippet(snippet);
+                        if (status != null) {
+                            markerOptions.snippet("Status: " + status);
                         }
 
                         googleMap.addMarker(markerOptions);
@@ -166,7 +164,6 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
                 );
     }
 
-    // --- Map lifecycle ---
     @Override
     public void onResume() {
         super.onResume();
@@ -203,6 +200,9 @@ public class EventMapFragment extends Fragment implements OnMapReadyCallback {
         if (mapView != null) mapView.onLowMemory();
     }
 
+    /**
+     * Saves the map state on rotation or backgrounding.
+     */
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);

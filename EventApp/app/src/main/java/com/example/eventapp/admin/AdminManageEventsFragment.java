@@ -17,15 +17,29 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that allows the admin to view and manage all events in the system.
+ * Loads events from Firestore and displays them in a list.
+ */
 public class AdminManageEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private final List<Event> eventList = new ArrayList<>();
 
+    /**
+     * Creates the fragment and sets its layout resource.
+     */
     public AdminManageEventsFragment() {
         super(R.layout.admin_manage_events);
     }
 
+    /**
+     * Checks if the admin is logged in, sets up the event list,
+     * and loads all events from the database.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -41,6 +55,10 @@ public class AdminManageEventsFragment extends Fragment {
         loadEvents();
     }
 
+    /**
+     * Loads all events from Firestore, converts documents into event objects,
+     * and displays them using an adapter.
+     */
     private void loadEvents() {
         FirebaseFirestore.getInstance()
                 .collection("events")
@@ -54,8 +72,7 @@ public class AdminManageEventsFragment extends Fragment {
                     }
 
                     AdminEventAdapter adapter = new AdminEventAdapter(eventList, event -> {
-                        // When click event:
-                        // Navigate to event details or show delete dialog
+                        // Reserved for future navigation or delete actions
                     });
 
                     recyclerView.setAdapter(adapter);

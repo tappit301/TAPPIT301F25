@@ -15,20 +15,41 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter used by the admin to display a list of events.
+ * Each row shows event details and provides a delete action.
+ */
 public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.EventViewHolder> {
 
     private final List<Event> events;
     private final OnEventClickListener listener;
 
+    /**
+     * Listener interface for handling delete actions on an event.
+     */
     public interface OnEventClickListener {
+        /**
+         * Called when the admin chooses to delete an event.
+         *
+         * @param event the selected event
+         */
         void onDeleteClicked(Event event);
     }
 
+    /**
+     * Creates an adapter with a list of events and a click listener.
+     *
+     * @param events the list of events to display
+     * @param listener callback for delete actions
+     */
     public AdminEventAdapter(List<Event> events, OnEventClickListener listener) {
         this.events = events;
         this.listener = listener;
     }
 
+    /**
+     * Inflates the layout for a single event row.
+     */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,23 +58,35 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
         return new EventViewHolder(view);
     }
 
+    /**
+     * Binds event data to the row at the given position.
+     */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
         holder.bind(event, listener);
     }
 
+    /**
+     * Returns the total number of events being shown.
+     */
     @Override
     public int getItemCount() {
         return events.size();
     }
 
-    // --------------------------------------------------
-
+    /**
+     * ViewHolder that represents a single event row for the admin.
+     */
     static class EventViewHolder extends RecyclerView.ViewHolder {
 
         TextView title, organizer, date, deleteBtn;
 
+        /**
+         * Finds and stores references to the UI elements for a row.
+         *
+         * @param itemView the row view
+         */
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -63,24 +96,26 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
             deleteBtn = itemView.findViewById(R.id.tvDeleteEventAdmin);
         }
 
+        /**
+         * Binds the event information to the UI elements for this row.
+         * Formats the event date and sets up the delete button action.
+         *
+         * @param event the event being displayed
+         * @param listener listener for delete actions
+         */
         void bind(Event event, OnEventClickListener listener) {
 
             title.setText(event.getTitle());
             organizer.setText("By: " + event.getOrganizerEmail());
 
-            // ----------------------------
-            // FORMAT DATE + TIME PROPERLY
-            // ----------------------------
-            String d = event.getDate();   // example: "2025-01-10"
-            String t = event.getTime();   // example: "14:30"
+            String d = event.getDate();
+            String t = event.getTime();
 
             if (d != null && t != null && !d.isEmpty() && !t.isEmpty()) {
                 try {
-                    String input = d + " " + t; // "2025-01-10 14:30"
-
+                    String input = d + " " + t;
                     SimpleDateFormat inputFormat =
                             new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-
                     SimpleDateFormat outputFormat =
                             new SimpleDateFormat("MMM dd, yyyy  hh:mm a", Locale.US);
 
@@ -94,7 +129,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
                 date.setText("No date set");
             }
 
-            // DELETE BUTTON
             deleteBtn.setOnClickListener(v -> listener.onDeleteClicked(event));
         }
     }

@@ -8,7 +8,7 @@
     android:background="@color/light_blue"
     tools:context=".HomeActivity">
 
-    <!-- Top App Bar -->
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:elevation="4dp" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Scrollable main content -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,7 +42,7 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-            <!-- HERO SECTION -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
                 android:layout_marginBottom="20dp"
                 android:layout_marginHorizontal="24dp" />
 
-            <!-- Buttons -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
                     android:textColor="@color/black" />
             </LinearLayout>
 
-            <!-- WHY CHOOSE TAPPIT -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                 android:textSize="14sp"
                 android:layout_marginBottom="20dp" />
 
-            <!-- TWO MAIN BOXES WITH ICONS -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -121,7 +121,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="32dp">
 
-                <!-- Fair Lottery Process -->
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Waiting List Management -->
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -195,7 +195,7 @@
             </LinearLayout>
 
 
-            <!-- FOUR FEATURE BOXES -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,7 +203,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="40dp">
 
-                <!-- Row 1 -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -211,7 +211,7 @@
                     android:weightSum="2"
                     android:layout_marginBottom="16dp">
 
-                    <!-- QR Code -->
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -246,7 +246,7 @@
                             android:textSize="13sp" />
                     </LinearLayout>
 
-                    <!-- Notifications -->
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -282,14 +282,14 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Row 2 -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:weightSum="2">
 
-                    <!-- Accessibility -->
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -324,7 +324,7 @@
                             android:textSize="13sp" />
                     </LinearLayout>
 
-                    <!-- Location -->
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -361,7 +361,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- HOW IT WORKS -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -379,7 +379,7 @@
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp" />
 
-            <!-- CIRCLED STEPS -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -388,7 +388,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="40dp">
 
-                <!-- Step 1 -->
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -422,7 +422,7 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Step 2 -->
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -456,7 +456,7 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Step 3 -->
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -491,7 +491,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- READY TO GET STARTED -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

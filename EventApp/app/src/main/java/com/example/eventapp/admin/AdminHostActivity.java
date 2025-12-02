@@ -7,8 +7,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.eventapp.R;
 
+/**
+ * Activity that hosts all admin-related fragments.
+ * Serves as the main container for the admin dashboard and its navigation flow.
+ */
 public class AdminHostActivity extends AppCompatActivity {
 
+    /**
+     * Sets up the activity layout that will display admin fragments.
+     *
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

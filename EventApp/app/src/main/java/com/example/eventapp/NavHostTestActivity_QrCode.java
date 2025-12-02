@@ -6,7 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+/**
+ * Test activity that loads the QRCodeFragment directly.
+ * Used in UI tests to isolate and render the QR screen.
+ */
 public class NavHostTestActivity_QrCode extends AppCompatActivity {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,8 +29,6 @@ public class NavHostTestActivity_QrCode extends AppCompatActivity {
                 .commitNow();
 
         NavController nav = host.getNavController();
-
-        // Make QR the visible destination
         nav.navigate(R.id.qrCodeFragment, args);
     }
 }

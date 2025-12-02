@@ -18,15 +18,28 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that allows an admin to browse all uploaded event cover images.
+ * Displays image IDs in a list and lets the admin delete any image.
+ */
 public class AdminBrowseImagesFragment extends Fragment {
 
     private RecyclerView recycler;
     private final List<String> imageIds = new ArrayList<>();
 
+    /**
+     * Creates the fragment and sets its layout resource.
+     */
     public AdminBrowseImagesFragment() {
-        super(R.layout.admin_browse_images);  // you already created this layout
+        super(R.layout.admin_browse_images);
     }
 
+    /**
+     * Sets up the RecyclerView and loads the list of images when the view is ready.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -36,6 +49,10 @@ public class AdminBrowseImagesFragment extends Fragment {
         loadImageList();
     }
 
+    /**
+     * Loads all image IDs stored under the event cover directory in Firebase Storage.
+     * Updates the RecyclerView once the list is retrieved.
+     */
     private void loadImageList() {
         FirebaseStorage.getInstance()
                 .getReference("event_covers")
@@ -59,6 +76,11 @@ public class AdminBrowseImagesFragment extends Fragment {
                                 Toast.LENGTH_LONG).show());
     }
 
+    /**
+     * Deletes the selected image from Firebase Storage and refreshes the list after deletion.
+     *
+     * @param imageId the ID of the image to delete
+     */
     private void deleteImage(String imageId) {
 
         StorageReference ref = FirebaseStorage.getInstance()
@@ -70,7 +92,7 @@ public class AdminBrowseImagesFragment extends Fragment {
                             "Image deleted successfully",
                             Toast.LENGTH_SHORT).show();
 
-                    loadImageList(); // refresh UI
+                    loadImageList();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(requireContext(),

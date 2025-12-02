@@ -11,14 +11,27 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.R;
 
+/**
+ * Fragment that provides admin controls for managing user accounts.
+ * Demonstrates deleting a user through the AdminManager.
+ */
 public class AdminManageUsersFragment extends Fragment {
 
     private AdminManager adminManager;
 
+    /**
+     * Creates the fragment and assigns its layout resource.
+     */
     public AdminManageUsersFragment() {
         super(R.layout.admin_manage_users);
     }
 
+    /**
+     * Checks admin login, initializes the admin manager, and sets up user actions.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -33,6 +46,7 @@ public class AdminManageUsersFragment extends Fragment {
         view.findViewById(R.id.btnDeleteUser).setOnClickListener(v -> {
 
             String userId = "DEMO_USER_ID";
+
             adminManager.deleteUser(userId)
                     .addOnSuccessListener(unused ->
                             Log.d("ADMIN", "User deleted"))

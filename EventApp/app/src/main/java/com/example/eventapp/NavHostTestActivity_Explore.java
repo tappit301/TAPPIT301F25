@@ -6,7 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+/**
+ * Test activity that loads the organizer navigation graph
+ * and immediately navigates to the ExploreEventsFragment.
+ * Used for isolated UI testing without launching the full app.
+ */
 public class NavHostTestActivity_Explore extends AppCompatActivity {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,8 +26,6 @@ public class NavHostTestActivity_Explore extends AppCompatActivity {
                 .commitNow();
 
         NavController nav = host.getNavController();
-
-        // Force correct fragment to load
         nav.navigate(R.id.exploreEventsFragment);
     }
 }

@@ -33,6 +33,10 @@ import com.google.firebase.storage.StorageReference;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Fragment that allows users to edit their profile details such as name,
+ * phone number, email, and profile picture.
+ */
 public class EditProfileFragment extends Fragment {
 
     private ImageView imgEditProfileAvatar;
@@ -45,10 +49,16 @@ public class EditProfileFragment extends Fragment {
 
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
-    public EditProfileFragment() {
-        // Required empty public constructor
-    }
+    /**
+     * Default constructor required for fragment instantiation.
+     */
+    public EditProfileFragment() { }
 
+    /**
+     * Initializes the image picker launcher used for selecting a new profile picture.
+     *
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +76,9 @@ public class EditProfileFragment extends Fragment {
         );
     }
 
+    /**
+     * Inflates the profile editing screen.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -74,6 +87,13 @@ public class EditProfileFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_edit_profile, container, false);
     }
 
+    /**
+     * Sets up UI elements, loads existing profile data,
+     * and attaches button actions for saving and updating profile information.
+     *
+     * @param view root view of the fragment
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
@@ -93,42 +113,32 @@ public class EditProfileFragment extends Fragment {
         inputFullName = view.findViewById(R.id.inputFullName);
         inputPhoneNumber = view.findViewById(R.id.inputPhoneNumber);
         inputEmail = view.findViewById(R.id.inputEmail);
+
         MaterialButton btnChangeProfilePicture = view.findViewById(R.id.btnChangeProfilePicture);
         MaterialButton btnSaveChanges = view.findViewById(R.id.btnSaveChanges);
 
         loadExistingProfile();
 
         btnChangeProfilePicture.setOnClickListener(v -> openImagePicker());
-
         btnSaveChanges.setOnClickListener(v -> saveProfile(navController));
     }
 
     /**
-     * Loads existing profile data and image.
+     * Loads the user's current profile information from FirebaseAuth and Firestore.
      */
     private void loadExistingProfile() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            Toast.makeText(requireContext(),
-                    "Not signed in.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Not signed in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String uid = user.getUid();
 
-        // From FirebaseAuth
-        if (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
-            inputFullName.setText(user.getDisplayName());
-        }
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            inputEmail.setText(user.getEmail());
-        }
-        if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
-            inputPhoneNumber.setText(user.getPhoneNumber());
-        }
+        if (user.getDisplayName() != null) inputFullName.setText(user.getDisplayName());
+        if (user.getEmail() != null) inputEmail.setText(user.getEmail());
+        if (user.getPhoneNumber() != null) inputPhoneNumber.setText(user.getPhoneNumber());
 
-        // From Firestore
         firestore.collection("users")
                 .document(uid)
                 .get()
@@ -139,31 +149,21 @@ public class EditProfileFragment extends Fragment {
                         String phone = doc.getString("phone");
                         String profileImageUrl = doc.getString("profileImageUrl");
 
-                        if (name != null && !name.isEmpty()) {
-                            inputFullName.setText(name);
-                        }
-                        if (email != null && !email.isEmpty()) {
-                            inputEmail.setText(email);
-                        }
-                        if (phone != null && !phone.isEmpty()) {
-                            inputPhoneNumber.setText(phone);
-                        }
-                        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                            showProfileImage(profileImageUrl);
-                        }
+                        if (name != null) inputFullName.setText(name);
+                        if (email != null) inputEmail.setText(email);
+                        if (phone != null) inputPhoneNumber.setText(phone);
+                        if (profileImageUrl != null) showProfileImage(profileImageUrl);
                     }
                 });
     }
 
     /**
-     * Opens the gallery to pick an image.
+     * Opens the gallery for selecting a new profile image.
      */
     private void openImagePicker() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            Toast.makeText(requireContext(),
-                    "Please sign in to change your profile picture.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Please sign in to change your profile picture.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -173,14 +173,14 @@ public class EditProfileFragment extends Fragment {
     }
 
     /**
-     * Uploads selected image to Firebase Storage and stores URL in Firestore.
+     * Uploads a new profile image to Firebase Storage and saves its URL in Firestore.
+     *
+     * @param imageUri the URI of the selected image
      */
     private void uploadProfileImage(Uri imageUri) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            Toast.makeText(requireContext(),
-                    "Not signed in.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Not signed in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -204,46 +204,40 @@ public class EditProfileFragment extends Fragment {
                                             .document(uid)
                                             .set(data, SetOptions.merge())
                                             .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(requireContext(),
-                                                        "Profile picture updated.",
-                                                        Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(requireContext(), "Profile picture updated.", Toast.LENGTH_SHORT).show();
                                                 showProfileImage(url);
                                             })
                                             .addOnFailureListener(e ->
-                                                    Toast.makeText(requireContext(),
-                                                            "Failed to save picture: " + e.getMessage(),
-                                                            Toast.LENGTH_SHORT).show());
+                                                    Toast.makeText(requireContext(), "Failed to save picture: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                                 })
                 )
                 .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(),
-                                "Upload failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                        Toast.makeText(requireContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     /**
-     * Shows image in the avatar ImageView using Glide.
+     * Displays the given image URL inside the avatar view.
+     *
+     * @param url the profile image URL
      */
     private void showProfileImage(String url) {
-        if (imgEditProfileAvatar == null) {
-            return;
-        }
+        if (imgEditProfileAvatar == null) return;
 
         Glide.with(this)
                 .load(url)
-                .circleCrop()   // ⬅️ make it circular here too
+                .circleCrop()
                 .into(imgEditProfileAvatar);
     }
 
     /**
-     * Saves name/phone/email to Firestore (profile info only).
+     * Saves the updated profile data (name, email, phone) to Firestore.
+     *
+     * @param navController used to return to the previous screen on success
      */
     private void saveProfile(NavController navController) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            Toast.makeText(requireContext(),
-                    "Not signed in.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Not signed in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -254,9 +248,7 @@ public class EditProfileFragment extends Fragment {
         String email = textOrEmpty(inputEmail);
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email)) {
-            Toast.makeText(requireContext(),
-                    "Name and email are required.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Name and email are required.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -275,11 +267,15 @@ public class EditProfileFragment extends Fragment {
                     navController.navigateUp();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(),
-                                "Update failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                        Toast.makeText(requireContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Safely extracts trimmed text from a TextInputEditText, returning an empty string if null.
+     *
+     * @param editText the input field
+     * @return the trimmed text value or empty string
+     */
     private String textOrEmpty(TextInputEditText editText) {
         return editText.getText() != null
                 ? editText.getText().toString().trim()

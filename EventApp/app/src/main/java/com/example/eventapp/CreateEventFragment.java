@@ -50,32 +50,34 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Fragment used for creating and editing events.
+ * Supports fields for date, time, category, location, cover image, pricing,
+ * capacity, organizer details, and geolocation requirements.
+ */
 public class CreateEventFragment extends Fragment {
 
     private static final String TAG = "CreateEventFragment";
 
-    // Edit Mode Variables
     private String eventId = null;
     private boolean isEditMode = false;
 
-    // Views
-    private EditText etDate, etTime;
-    private EditText etTitle, etDescription, etLocation;
-    private EditText etCategory, etPrice, etCapacity;
+    private EditText etDate, etTime, etTitle, etDescription, etLocation, etCategory, etPrice, etCapacity;
     private ImageView ivEventImage;
     private LinearLayout placeholderLayout;
     private MaterialButton btnPublish;
     private SwitchMaterial switchRequireGeo;
 
-    // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
 
     private Uri selectedImageUri = null;
-
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
+    /**
+     * Inflates the layout containing event creation fields.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -84,6 +86,11 @@ public class CreateEventFragment extends Fragment {
         return inflater.inflate(R.layout.create_event, container, false);
     }
 
+    /**
+     * Initializes Firebase references and the image picker callback.
+     *
+     * @param savedInstanceState previous state, if any
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,24 +105,26 @@ public class CreateEventFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         selectedImageUri = result.getData().getData();
                         if (selectedImageUri != null) {
-                            if (placeholderLayout != null) {
-                                placeholderLayout.setVisibility(View.GONE);
-                            }
-                            if (ivEventImage != null) {
-                                ivEventImage.setVisibility(View.VISIBLE);
-                                ivEventImage.setImageURI(selectedImageUri);
-                            }
+                            placeholderLayout.setVisibility(View.GONE);
+                            ivEventImage.setVisibility(View.VISIBLE);
+                            ivEventImage.setImageURI(selectedImageUri);
                         }
                     }
                 }
         );
     }
 
+    /**
+     * Connects views, handles edit mode, sets listeners for date/time pickers,
+     * and initializes event create/update actions.
+     *
+     * @param view root layout
+     * @param savedInstanceState previously saved instance state
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Init Views
         etDate        = view.findViewById(R.id.etEventDate);
         etTime        = view.findViewById(R.id.etEventTime);
         etTitle       = view.findViewById(R.id.etEventTitle);
@@ -132,53 +141,42 @@ public class CreateEventFragment extends Fragment {
         placeholderLayout = view.findViewById(R.id.layoutAddCoverPlaceholder);
         switchRequireGeo  = view.findViewById(R.id.switchRequireGeo);
 
-        // Category dropdown behaviour
         etCategory.setFocusable(false);
-        etCategory.setClickable(true);
         etCategory.setOnClickListener(v -> showCategoryPicker());
 
-        // Read Arguments (edit mode)
         Bundle args = getArguments();
         if (args != null && args.containsKey("eventId")) {
             isEditMode = true;
             eventId = args.getString("eventId");
             btnPublish.setText("Save Changes");
-            loadEventDetails(); // Fetch from Firestore (includes price / capacity / requireGeo)
+            loadEventDetails();
         }
 
-        // Inputs
         etDate.setOnClickListener(v -> showDatePicker());
         etTime.setOnClickListener(v -> showTimePicker());
         cardEventImage.setOnClickListener(v -> openImagePicker());
 
-        // Buttons
         btnPublish.setOnClickListener(v -> {
-            if (isEditMode) {
-                updateEvent(view);
-            } else {
-                publishEvent(view);   // One method for normal + guest
-            }
+            if (isEditMode) updateEvent(view);
+            else publishEvent(view);
         });
 
         btnCancel.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
     }
 
-    /** Shows the category picker dialog */
+    /**
+     * Shows the category picker dialog with predefined choices.
+     */
     private void showCategoryPicker() {
         String[] categories = new String[] {
-                "Technology",
-                "Sports",
-                "Entertainment",
-                "Health"
+                "Technology", "Sports", "Entertainment", "Health"
         };
 
         int checkedItem = -1;
         String current = etCategory.getText().toString().trim();
+
         for (int i = 0; i < categories.length; i++) {
-            if (categories[i].equalsIgnoreCase(current)) {
-                checkedItem = i;
-                break;
-            }
+            if (categories[i].equalsIgnoreCase(current)) checkedItem = i;
         }
 
         new MaterialAlertDialogBuilder(requireContext())
@@ -191,7 +189,10 @@ public class CreateEventFragment extends Fragment {
                 .show();
     }
 
-    /** Fetch Event from Firestore (edit mode) */
+    /**
+     * Loads existing event details from Firestore when editing an event.
+     * Populates all fields including geolocation and cover image.
+     */
     private void loadEventDetails() {
         firestore.collection("events")
                 .document(eventId)
@@ -199,32 +200,22 @@ public class CreateEventFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (!doc.exists()) return;
 
-                    if (etTitle != null)       etTitle.setText(doc.getString("title"));
-                    if (etDescription != null) etDescription.setText(doc.getString("description"));
-                    if (etDate != null)        etDate.setText(doc.getString("date"));
-                    if (etTime != null)        etTime.setText(doc.getString("time"));
-                    if (etLocation != null)    etLocation.setText(doc.getString("location"));
-                    if (etCategory != null)    etCategory.setText(doc.getString("category"));
+                    etTitle.setText(doc.getString("title"));
+                    etDescription.setText(doc.getString("description"));
+                    etDate.setText(doc.getString("date"));
+                    etTime.setText(doc.getString("time"));
+                    etLocation.setText(doc.getString("location"));
+                    etCategory.setText(doc.getString("category"));
 
-                    // Price
                     Double price = doc.getDouble("price");
-                    if (price != null && etPrice != null) {
-                        etPrice.setText(String.valueOf(price));
-                    }
+                    if (price != null) etPrice.setText(String.valueOf(price));
 
-                    // Capacity
                     Long cap = doc.getLong("capacity");
-                    if (cap != null && etCapacity != null) {
-                        etCapacity.setText(String.valueOf(cap));
-                    }
+                    if (cap != null) etCapacity.setText(String.valueOf(cap));
 
-                    // Require geolocation
                     Boolean requireGeo = doc.getBoolean("requireGeolocation");
-                    if (switchRequireGeo != null) {
-                        switchRequireGeo.setChecked(requireGeo != null && requireGeo);
-                    }
+                    switchRequireGeo.setChecked(requireGeo != null && requireGeo);
 
-                    // Image
                     String imageUrl = doc.getString("imageUrl");
                     if (imageUrl != null && !imageUrl.isEmpty()) {
                         placeholderLayout.setVisibility(View.GONE);
@@ -235,10 +226,8 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
-     * Publish event:
-     * - If Firebase user with email → use that
-     * - Else → show popup asking for name + email, then publish as "guest organizer"
-     *   (still storing organizerId + organizerEmail, plus geo and price).
+     * Validates input fields and decides whether to publish as a signed-in user
+     * or prompt a guest organizer for details.
      */
     private void publishEvent(View view) {
         if (getView() == null) return;
@@ -262,23 +251,18 @@ public class CreateEventFragment extends Fragment {
 
         FirebaseUser user = auth.getCurrentUser();
 
-        // Signed-in user with email → publish directly
         if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
-            String organizerId = user.getUid();
-            String organizerEmail = user.getEmail();
-
             doPublishEvent(view, title, desc, date, time, location, category,
-                    organizerId, organizerEmail);
+                    user.getUid(), user.getEmail());
             return;
         }
 
-        // Guest / missing email → show dialog to collect name + email, then publish
         showGuestOrganizerDialog(view, title, desc, date, time, location, category);
     }
 
     /**
-     * Show popup asking guest for name + email, then publish with a stable guest ID
-     * remembered via SharedPreferences.
+     * Shows a dialog for guest organizers to enter name and email,
+     * and generates a stable guest organizer ID using device information.
      */
     private void showGuestOrganizerDialog(View anchorView,
                                           String title,
@@ -298,12 +282,8 @@ public class CreateEventFragment extends Fragment {
                 .setTitle("Enter your details")
                 .setView(dialogView)
                 .setPositiveButton("Continue", (dialog, which) -> {
-                    String guestName = etName.getText() != null
-                            ? etName.getText().toString().trim()
-                            : "";
                     String guestEmail = etEmail.getText() != null
-                            ? etEmail.getText().toString().trim()
-                            : "";
+                            ? etEmail.getText().toString().trim() : "";
 
                     if (guestEmail.isEmpty()) {
                         Toast.makeText(requireContext(),
@@ -312,22 +292,17 @@ public class CreateEventFragment extends Fragment {
                         return;
                     }
 
-                    // Build a stable guest organizer ID using device id
                     Context ctx = requireContext();
                     SharedPreferences prefs =
                             ctx.getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE);
-                    String guestId = prefs.getString("GUEST_ORGANIZER_ID", null);
 
+                    String guestId = prefs.getString("GUEST_ORGANIZER_ID", null);
                     if (guestId == null) {
                         String deviceId = Settings.Secure.getString(
-                                ctx.getContentResolver(),
-                                Settings.Secure.ANDROID_ID
-                        );
+                                ctx.getContentResolver(), Settings.Secure.ANDROID_ID);
                         guestId = "guest_" + deviceId;
                         prefs.edit().putString("GUEST_ORGANIZER_ID", guestId).apply();
                     }
-
-                    // Optionally use guestName if you want to store it somewhere
 
                     doPublishEvent(anchorView, title, desc, date, time, location, category,
                             guestId, guestEmail);
@@ -337,12 +312,9 @@ public class CreateEventFragment extends Fragment {
     }
 
     /**
-     * Actually writes the event document to Firestore using the given organizerId/email,
-     * including:
-     *  - price
-     *  - capacity
-     *  - requireGeolocation
-     *  - lat/lng (from geocoded address)
+     * Writes a new event document to Firestore.
+     * Includes metadata such as geolocation, price, capacity, organizer info,
+     * and automatically generates a QR payload.
      */
     private void doPublishEvent(View view,
                                 String title,
@@ -354,9 +326,8 @@ public class CreateEventFragment extends Fragment {
                                 String organizerId,
                                 String organizerEmail) {
 
-        // Read price / capacity from fields
-        String priceStr    = etPrice != null ? etPrice.getText().toString().trim() : "";
-        String capacityStr = etCapacity != null ? etCapacity.getText().toString().trim() : "";
+        String priceStr = etPrice.getText().toString().trim();
+        String capacityStr = etCapacity.getText().toString().trim();
 
         geocodeAddress(location, latLng -> {
             if (latLng == null) {
@@ -373,21 +344,17 @@ public class CreateEventFragment extends Fragment {
             event.put("category", category);
 
             double priceVal = 0.0;
-            if (!priceStr.isEmpty()) {
-                try {
-                    priceVal = Double.parseDouble(priceStr);
-                } catch (NumberFormatException ignored) {}
-            }
+            try { if (!priceStr.isEmpty()) priceVal = Double.parseDouble(priceStr); }
+            catch (Exception ignored) {}
             event.put("price", priceVal);
 
-            if (!capacityStr.isEmpty()) {
-                try {
-                    event.put("capacity", Integer.parseInt(capacityStr));
-                } catch (NumberFormatException ignored) {}
-            }
+            try { if (!capacityStr.isEmpty()) event.put("capacity",
+                    Integer.parseInt(capacityStr)); }
+            catch (Exception ignored) {}
 
-            boolean requireGeo = switchRequireGeo != null && switchRequireGeo.isChecked();
+            boolean requireGeo = switchRequireGeo.isChecked();
             event.put("requireGeolocation", requireGeo);
+
             event.put("lat", latLng.latitude);
             event.put("lng", latLng.longitude);
 
@@ -398,8 +365,8 @@ public class CreateEventFragment extends Fragment {
             firestore.collection("events")
                     .add(event)
                     .addOnSuccessListener(doc -> {
-                        Toast.makeText(getContext(), "Event published successfully!", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "Event saved by " + organizerEmail);
+                        Toast.makeText(getContext(), "Event published successfully!",
+                                Toast.LENGTH_SHORT).show();
 
                         String qrPayload = "Event: " + title +
                                 "\nDate: " + date +
@@ -409,16 +376,18 @@ public class CreateEventFragment extends Fragment {
 
                         Bundle bundle = new Bundle();
                         bundle.putString("qrData", qrPayload);
-                        Navigation.findNavController(view).navigate(R.id.qrCodeFragment, bundle);
+                        Navigation.findNavController(view)
+                                .navigate(R.id.qrCodeFragment, bundle);
                     })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error adding event", e);
-                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(), "Failed: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
         });
     }
 
-    /** Update Existing Event (with geo, price, capacity, requireGeolocation, and optional new image) */
+    /**
+     * Updates an existing event with edited fields, including optional image upload.
+     */
     private void updateEvent(View view) {
         if (eventId == null) return;
 
@@ -442,28 +411,19 @@ public class CreateEventFragment extends Fragment {
             updates.put("location",    location);
             updates.put("category",    etCategory.getText().toString().trim());
 
-            String priceStr = etPrice.getText().toString().trim();
             double priceVal = 0.0;
-            if (!priceStr.isEmpty()) {
-                try {
-                    priceVal = Double.parseDouble(priceStr);
-                } catch (NumberFormatException ignored) {}
-            }
+            try { priceVal = Double.parseDouble(etPrice.getText().toString().trim()); }
+            catch (Exception ignored) {}
             updates.put("price", priceVal);
 
-            String capStr = etCapacity.getText().toString().trim();
-            if (!capStr.isEmpty()) {
-                try {
-                    updates.put("capacity", Integer.parseInt(capStr));
-                } catch (NumberFormatException ignored) {}
-            }
+            try {
+                updates.put("capacity", Integer.parseInt(etCapacity.getText().toString().trim()));
+            } catch (Exception ignored) {}
 
-            boolean requireGeo = switchRequireGeo != null && switchRequireGeo.isChecked();
-            updates.put("requireGeolocation", requireGeo);
+            updates.put("requireGeolocation", switchRequireGeo.isChecked());
             updates.put("lat", latLng.latitude);
             updates.put("lng", latLng.longitude);
 
-            // If a new image was selected, upload and include imageUrl
             if (selectedImageUri != null) {
                 StorageReference imageRef = storage.getReference()
                         .child("event_covers/" + eventId + ".jpg");
@@ -475,36 +435,39 @@ public class CreateEventFragment extends Fragment {
                         })
                         .addOnSuccessListener(downloadUrl -> {
                             updates.put("imageUrl", downloadUrl.toString());
-
                             firestore.collection("events")
                                     .document(eventId)
                                     .update(updates)
                                     .addOnSuccessListener(unused -> {
-                                        Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), "Event updated!",
+                                                Toast.LENGTH_SHORT).show();
                                         Navigation.findNavController(view).popBackStack();
-                                    })
-                                    .addOnFailureListener(e ->
-                                            Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                    });
                         })
                         .addOnFailureListener(e ->
-                                Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
+                                Toast.makeText(getContext(),
+                                        "Image upload failed: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT).show());
             } else {
-                // No new image; just update fields
                 firestore.collection("events")
                         .document(eventId)
                         .update(updates)
                         .addOnSuccessListener(unused -> {
-                            Toast.makeText(getContext(), "Event updated!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Event updated!",
+                                    Toast.LENGTH_SHORT).show();
                             Navigation.findNavController(view).popBackStack();
                         })
                         .addOnFailureListener(e ->
-                                Toast.makeText(getContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                Toast.makeText(getContext(),
+                                        "Update failed: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT).show());
             }
         });
     }
 
-    /** Date picker */
+    /**
+     * Opens a date picker dialog for the event date field.
+     */
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(
@@ -517,7 +480,9 @@ public class CreateEventFragment extends Fragment {
         ).show();
     }
 
-    /** Time picker */
+    /**
+     * Opens a time picker dialog for the event time field.
+     */
     private void showTimePicker() {
         Calendar c = Calendar.getInstance();
         new TimePickerDialog(
@@ -530,14 +495,23 @@ public class CreateEventFragment extends Fragment {
         ).show();
     }
 
-    /** Image picker */
+    /**
+     * Opens the device gallery for selecting an event cover image.
+     */
     private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         imagePickerLauncher.launch(intent);
     }
 
-    /** Geocoding helper */
+    /**
+     * Converts a written address into a LatLng using the system geocoder.
+     * Returns null through the callback if geocoding fails.
+     *
+     * @param address the text address to convert
+     * @param callback callback receiving the resulting LatLng
+     */
     private void geocodeAddress(String address, OnSuccessListener<LatLng> callback) {
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
         try {

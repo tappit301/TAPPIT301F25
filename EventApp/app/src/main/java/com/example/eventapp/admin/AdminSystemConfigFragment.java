@@ -12,12 +12,25 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.R;
 
+/**
+ * Fragment that allows the admin to update system configuration values.
+ * Provides a simple key-value interface for storing settings in Firestore.
+ */
 public class AdminSystemConfigFragment extends Fragment {
 
+    /**
+     * Creates the fragment and assigns its layout resource.
+     */
     public AdminSystemConfigFragment() {
         super(R.layout.admin_system_config);
     }
 
+    /**
+     * Ensures the admin is logged in, then sets up the form for saving config values.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
