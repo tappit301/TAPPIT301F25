@@ -14,10 +14,10 @@ public class EventFirebase {
     private int attendeeCount;
     private Timestamp dateTime;
 
-    // Empty constructor required by Firestore
+
     public EventFirebase() {}
 
-    // Full constructor
+
     public EventFirebase(String title, String description, String location, String category,
                          String organizerId, String organizerName,
                          int capacity, int attendeeCount, Timestamp dateTime) {
@@ -32,7 +32,7 @@ public class EventFirebase {
         this.dateTime = dateTime;
     }
 
-    // --- Getters and Setters ---
+
     public String getTitle() {
         return title;
     }

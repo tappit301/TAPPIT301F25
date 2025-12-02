@@ -8,10 +8,10 @@ public class UserFirebase {
     private String name;
     private Timestamp createdAt;
 
-    // Required empty constructor for Firestore
+
     public UserFirebase() {}
 
-    // Optional full constructor for testing or direct creation
+
     public UserFirebase(String id, String email, String name, Timestamp createdAt) {
         this.id = id;
         this.email = email;

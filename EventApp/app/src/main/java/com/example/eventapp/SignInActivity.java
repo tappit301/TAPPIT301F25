@@ -61,7 +61,7 @@ public class SignInActivity extends AppCompatActivity {
                 return;
             }
 
-            // Temporary success message — replace with real Firebase login later
+
             Toast.makeText(this, "Signed in successfully!", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(SignInActivity.this, LandingHostActivity.class);

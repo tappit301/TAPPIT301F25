@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/admin_nav_graph"
+    app:startDestination="@id/adminLoginFragment">
+
+
+    <fragment
+        android:id="@+id/adminLoginFragment"
+        android:name="com.example.eventapp.admin.AdminLoginFragment"
+        android:label="Admin Login">
+
+        <action
+            android:id="@+id/action_adminLoginFragment_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.example.eventapp.admin.AdminDashboardFragment"
+        android:label="Admin Dashboard">
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminBrowseEventsFragment"
+            app:destination="@id/adminBrowseEventsFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminBrowseUsersFragment"
+            app:destination="@id/adminBrowseUsersFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminBrowseImagesFragment"
+            app:destination="@id/adminBrowseImagesFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminRemoveOrganizersFragment"
+            app:destination="@id/adminRemoveOrganizersFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminNotificationLogsFragment"
+            app:destination="@id/adminNotificationLogsFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminSystemConfigFragment"
+            app:destination="@id/adminSystemConfigFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/adminBrowseEventsFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseEventsFragment"
+        android:label="Browse Events" />
+
+
+    <fragment
+        android:id="@+id/adminBrowseUsersFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseUsersFragment"
+        android:label="Browse Users" />
+
+
+    <fragment
+        android:id="@+id/adminBrowseImagesFragment"
+        android:name="com.example.eventapp.admin.AdminBrowseImagesFragment"
+        android:label="Browse Images">
+
+        <action
+            android:id="@+id/action_adminBrowseImagesFragment_to_adminImagePreviewFragment"
+            app:destination="@id/adminImagePreviewFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/adminImagePreviewFragment"
+        android:name="com.example.eventapp.admin.AdminImagePreviewFragment"
+        android:label="Image Preview">
+
+        <argument
+            android:name="imageUrl"
+            app:argType="string" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/adminRemoveOrganizersFragment"
+        android:name="com.example.eventapp.admin.AdminRemoveOrganizersFragment"
+        android:label="Remove Organizers" />
+
+
+    <fragment
+        android:id="@+id/adminNotificationLogsFragment"
+        android:name="com.example.eventapp.admin.AdminNotificationLogsFragment"
+        android:label="Notification Logs" />
+
+
+    <fragment
+        android:id="@+id/adminSystemConfigFragment"
+        android:name="com.example.eventapp.admin.AdminSystemConfigFragment"
+        android:label="System Config" />
+
+</navigation>

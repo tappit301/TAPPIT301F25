@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b51174e-4b87-4930-97a4-b5fc282762ef" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/EventApp/app/src/main/java/com/example/eventapp/QrCodeFragment.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EventApp/app/src/main/res/layout/fragment_qr_code.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EventApp/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/EventApp/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EventApp/app/src/main/java/com/example/eventapp/EventDetailsFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/EventApp/app/src/main/java/com/example/eventapp/EventDetailsFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EventApp/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/EventApp/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EventApp/app/src/main/res/layout/event_details.xml" beforeDir="false" afterPath="$PROJECT_DIR$/EventApp/app/src/main/res/layout/event_details.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EventApp/app/src/main/res/navigation/nav_graph.xml" beforeDir="false" afterPath="$PROJECT_DIR$/EventApp/app/src/main/res/navigation/nav_graph.xml" afterDir="false" />
-    </list>
+    <list default="true" id="0b51174e-4b87-4930-97a4-b5fc282762ef" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,8 +46,8 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "Vasu",
-    "last_opened_file_path": "/Users/krishikakhosla/Desktop/CMPUT 301/projectpart3"
+    "git-widget-placeholder": "krishika",
+    "last_opened_file_path": "/Users/krishikakhosla/Desktop/CMPUT 301/project4/TAPPIT301F25"
   }
 }]]></component>
   <component name="TaskManager">

@@ -1,7 +1,12 @@
 package com.example.eventapp;
 
+
+
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
@@ -17,6 +22,9 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
  * Author: tappit
  */
 public class App extends Application {
+
+    // Channel ID used by NotificationHelper
+    public static final String CHANNEL_ID = "eventapp_main_notifications";
 
     /**
      * Called when the application is first created.
@@ -38,6 +46,8 @@ public class App extends Application {
                         .build()
         );
 
+
+        createNotificationChannel();
         SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
         boolean wasRunning = prefs.getBoolean("was_running", false);
 
@@ -65,5 +75,26 @@ public class App extends Application {
         SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
         prefs.edit().putBoolean("was_running", false).apply();
         Log.d("FirebaseInit", "App terminated — will require login next launch");
+    }
+
+    /**
+     * Registers the notification channel used for all app notifications.
+     * Required on Android O and above.
+     */
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Event notifications";
+            String description = "Notifications about waitlists, selections, and event updates";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel channel =
+                    new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
     }
 }
