@@ -95,6 +95,15 @@ public class ManageEventsFragment extends Fragment {
         // Run Lottery
         btnRunLottery.setOnClickListener(v -> showLotteryDialog());
 
+        // ⭐ NEW: VIEW MAP BUTTON
+        View btnViewMap = view.findViewById(R.id.btnViewMap);
+        btnViewMap.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", eventId);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_manageEventsFragment_to_eventMapFragment, bundle);
+        });
+
         // Default view: waiting list
         loadListByStatus("waiting");
     }

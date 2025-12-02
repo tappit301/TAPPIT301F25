@@ -43,6 +43,13 @@ public class Event {
         this.category = category;
     }
 
+    private boolean requireGeolocation;
+
+    public boolean isRequireGeolocation() { return requireGeolocation; }
+    public void setRequireGeolocation(boolean requireGeolocation) {
+        this.requireGeolocation = requireGeolocation;
+    }
+
     // --------------------
     // GETTERS
     // --------------------

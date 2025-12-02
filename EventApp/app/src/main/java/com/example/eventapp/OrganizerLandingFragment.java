@@ -1,6 +1,7 @@
 package com.example.eventapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -83,11 +85,9 @@ public class OrganizerLandingFragment extends Fragment {
 
         // ---------------- EXPLORE BUTTON ----------------
         ImageButton btnExplore = view.findViewById(R.id.btnExplore);
-        if (btnExplore != null) {
-            btnExplore.setOnClickListener(v ->
-                    navController.navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment)
-            );
-        }
+        btnExplore.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                .navigate(R.id.action_organizerLandingFragment_to_exploreEventsFragment);});
 
         // ---------------- CREATE EVENT BUTTONS ----------------
         View.OnClickListener createClick = v ->

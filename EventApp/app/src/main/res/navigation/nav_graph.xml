@@ -5,6 +5,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/organizerLandingFragment">
 
+    <!-- ORGANIZER LANDING -->
     <fragment
         android:id="@+id/organizerLandingFragment"
         android:name="com.example.eventapp.OrganizerLandingFragment"
@@ -26,20 +27,40 @@
         <action
             android:id="@+id/action_organizerLandingFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
-
     </fragment>
 
-    <!-- Explore All Events Page -->
+    <!-- EXPLORE EVENTS -->
     <fragment
         android:id="@+id/exploreEventsFragment"
         android:name="com.example.eventapp.ExploreEventsFragment"
-        android:label="Explore Events">
+        android:label="Explore Events"
+        tools:layout="@layout/fragment_explore_events">
 
         <action
             android:id="@+id/action_exploreEventsFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
+
+        <action
+            android:id="@+id/action_exploreEventsFragment_to_categoryEventsFragment"
+            app:destination="@id/categoryEventsFragment" />
     </fragment>
 
+    <!-- CATEGORY EVENTS -->
+    <fragment
+        android:id="@+id/categoryEventsFragment"
+        android:name="com.example.eventapp.CategoryEventsFragment"
+        android:label="Category Events">
+
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_categoryEventsFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+    </fragment>
+
+    <!-- CREATE EVENT -->
     <fragment
         android:id="@+id/createEventFragment"
         android:name="com.example.eventapp.CreateEventFragment"
@@ -51,6 +72,7 @@
             app:destination="@id/eventDetailsFragment" />
     </fragment>
 
+    <!-- EVENT DETAILS -->
     <fragment
         android:id="@+id/eventDetailsFragment"
         android:name="com.example.eventapp.EventDetailsFragment"
@@ -61,16 +83,15 @@
             android:id="@+id/action_eventDetailsFragment_to_qrCodeFragment"
             app:destination="@id/qrCodeFragment" />
 
-
         <action
             android:id="@+id/action_eventDetailsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
-        <!--Manage Events-->
         <action
             android:id="@+id/action_eventDetailsFragment_to_manageEventsFragment"
             app:destination="@id/manageEventsFragment" />
 
+        <!-- arguments -->
         <argument android:name="eventId" app:argType="string" android:defaultValue="" />
         <argument android:name="title" app:argType="string" android:defaultValue="" />
         <argument android:name="desc" app:argType="string" android:defaultValue="" />
@@ -79,9 +100,9 @@
         <argument android:name="location" app:argType="string" android:defaultValue="" />
         <argument android:name="organizerId" app:argType="string" android:defaultValue="" />
         <argument android:name="organizerEmail" app:argType="string" android:defaultValue="" />
-
     </fragment>
 
+    <!-- QR CODE -->
     <fragment
         android:id="@+id/qrCodeFragment"
         android:name="com.example.eventapp.QrCodeFragment"
@@ -105,7 +126,7 @@
             android:defaultValue="" />
     </fragment>
 
-    <!--Manage Event Destination-->
+    <!-- MANAGE EVENTS -->
     <fragment
         android:id="@+id/manageEventsFragment"
         android:name="com.example.eventapp.ManageEventsFragment"
@@ -116,6 +137,22 @@
             android:id="@+id/action_manageEventsFragment_to_createEventFragment"
             app:destination="@id/createEventFragment" />
 
+        <action
+            android:id="@+id/action_manageEventsFragment_to_eventMapFragment"
+            app:destination="@id/eventMapFragment" />
+    </fragment>
+
+    <!-- EVENT MAP -->
+    <fragment
+        android:id="@+id/eventMapFragment"
+        android:name="com.example.eventapp.EventMapFragment"
+        android:label="Event Map"
+        tools:layout="@layout/fragment_event_map">
+
+        <argument
+            android:name="eventId"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <!-- PROFILE -->
@@ -129,7 +166,6 @@
             android:id="@+id/action_profileFragment_to_editProfileFragment"
             app:destination="@id/editProfileFragment" />
 
-        <!-- NEW: scan QR -->
         <action
             android:id="@+id/action_profileFragment_to_scanQrFragment"
             app:destination="@id/scanQrFragment" />
@@ -142,7 +178,7 @@
         android:label="Edit Profile"
         tools:layout="@layout/fragment_edit_profile" />
 
-    <!-- NEW: SCAN QR FRAGMENT -->
+    <!-- SCAN QR -->
     <fragment
         android:id="@+id/scanQrFragment"
         android:name="com.example.eventapp.ScanQrFragment"
@@ -155,4 +191,3 @@
     </fragment>
 
 </navigation>
-

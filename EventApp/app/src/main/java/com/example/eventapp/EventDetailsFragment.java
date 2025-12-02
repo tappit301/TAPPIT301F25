@@ -1,7 +1,11 @@
 package com.example.eventapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -13,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -20,6 +25,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.example.eventapp.utils.NotificationHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -31,7 +38,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -40,20 +50,30 @@ import java.util.Map;
  * - Join waiting list (Firebase user or guest)
  * - QR view
  * - Organizer-only: Manage(Edit) + Delete
- * - NEW: Accept / Decline invitation if user is selected
+ * - Accept / Decline invitation if user is selected
+ * - NEW: Optional geolocation when joining waiting list
  */
 public class EventDetailsFragment extends Fragment {
 
     private static final String TAG = "EventDetailsFragment";
 
+    // ⭐ GEO LOCATION
+    private static final int LOCATION_PERMISSION_CODE = 101;
+    private boolean requireGeolocation = true;
+    private FusedLocationProviderClient fusedLocationClient;
+    private String pendingUserIdForJoin;
+    private String pendingEmailForJoin;
+
     private MaterialButton joinBtn, btnViewQr, btnManageEvent, btnDeleteEvent;
-    private MaterialButton btnAccept, btnDecline; // ✅ NEW
+    private MaterialButton btnAccept, btnDecline; // ✅ Accept / Decline
     private ImageView ivEventCover;
 
     private String eventId;
     private String organizerId;
     private String organizerEmail;
     private String eventTitle;
+
+    private TextView tvEventPrice;
 
     private FirebaseFirestore firestore;
     private FirebaseUser firebaseUser;
@@ -77,6 +97,8 @@ public class EventDetailsFragment extends Fragment {
 
         firestore = FirebaseHelper.getFirestore();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        // ⭐ init fusedLocationClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
         // Resolve identity (Firebase user or previously-saved guest)
         resolveLocalIdentity();
@@ -88,7 +110,7 @@ public class EventDetailsFragment extends Fragment {
         btnDeleteEvent = view.findViewById(R.id.btnDeleteEvent);
         ivEventCover = view.findViewById(R.id.ivEventCover);
 
-        // ✅ NEW: Accept / Decline buttons
+        // ✅ Accept / Decline buttons
         btnAccept = view.findViewById(R.id.btnAccept);
         btnDecline = view.findViewById(R.id.btnDecline);
 
@@ -114,6 +136,8 @@ public class EventDetailsFragment extends Fragment {
             ((TextView) view.findViewById(R.id.tvEventDescription))
                     .setText(args.getString("desc", ""));
 
+            tvEventPrice = view.findViewById(R.id.tvEventPrice);
+
             TextView tvOrg = view.findViewById(R.id.tvOrganizerName);
             tvOrg.setText(organizerEmail == null ? "" : organizerEmail);
 
@@ -130,6 +154,9 @@ public class EventDetailsFragment extends Fragment {
                 ivEventCover.setImageResource(R.drawable.placeholder_img);
             }
         }
+
+        // ⭐ Load requireGeolocation flag from Firestore
+        fetchGeolocationRequirement();
 
         // Back
         view.findViewById(R.id.btnBack).setOnClickListener(v ->
@@ -151,10 +178,10 @@ public class EventDetailsFragment extends Fragment {
         // Disable join if already joined (for Firebase user or guest)
         checkIfAlreadyJoined();
 
-        // Join click (handles Firebase user or guest)
+        // Join click (handles Firebase user or guest + GEO)
         joinBtn.setOnClickListener(this::handleJoinClick);
 
-        // ✅ NEW: Accept / Decline handlers
+        // Accept / Decline handlers
         if (btnAccept != null) {
             btnAccept.setOnClickListener(v -> handleAccept());
         }
@@ -162,9 +189,9 @@ public class EventDetailsFragment extends Fragment {
             btnDecline.setOnClickListener(v -> handleDecline());
         }
 
-        // ------------------------------------------------------------------
+        refreshEventPrice();
+
         // QR click: encodes ONLY eventId so ScanQrFragment can look it up
-        // ------------------------------------------------------------------
         btnViewQr.setOnClickListener(v -> {
             if (eventId == null || eventId.isEmpty()) {
                 Snackbar.make(v, "Error: Missing event ID for QR.", Snackbar.LENGTH_LONG).show();
@@ -175,6 +202,8 @@ public class EventDetailsFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("qrData", eventId);        // QR contains eventId
             bundle.putBoolean("cameFromDetails", true);
+            bundle.putString("price", args.getString("price", "0"));
+
 
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventDetailsFragment_to_qrCodeFragment, bundle);
@@ -192,7 +221,7 @@ public class EventDetailsFragment extends Fragment {
         // Delete click
         btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmation());
 
-        // ✅ NEW: check if user is selected and show Accept/Decline
+        // Check selection status and show Accept/Decline if selected
         checkSelectionStatus();
     }
 
@@ -215,7 +244,27 @@ public class EventDetailsFragment extends Fragment {
     }
 
     // -----------------------------------------------------------------------
-    // JOIN BUTTON CLICK
+    // ⭐ Fetch Event requireGeolocation
+    // -----------------------------------------------------------------------
+    private void fetchGeolocationRequirement() {
+        if (eventId == null || eventId.isEmpty()) return;
+
+        firestore.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        Boolean value = doc.getBoolean("requireGeolocation");
+                        requireGeolocation = value != null && value;
+                        Log.d(TAG, "Geolocation required for this event? " + requireGeolocation);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error loading geolocation requirement", e));
+    }
+
+    // -----------------------------------------------------------------------
+    // JOIN BUTTON CLICK (now geolocation-aware)
     // -----------------------------------------------------------------------
     private void handleJoinClick(View v) {
         if (eventId == null || eventId.isEmpty()) {
@@ -223,9 +272,14 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        // If we already have an identity (Firebase user or saved guest), just join
+        // If we already have an identity (Firebase user or saved guest)
         if (localUserId != null && localUserEmail != null) {
-            addUserToWaitingListWithIdentity(v, localUserId, localUserEmail);
+            if (requireGeolocation) {
+                // ⭐ require location before joining
+                requestUserLocationAndJoin(v, localUserId, localUserEmail);
+            } else {
+                addUserToWaitingListWithIdentity(v, localUserId, localUserEmail, null);
+            }
             return;
         }
 
@@ -295,16 +349,99 @@ public class EventDetailsFragment extends Fragment {
                                     Log.e(TAG, "Failed to save guest user document", e));
 
                     // Now actually join the waiting list using this guest identity
-                    addUserToWaitingListWithIdentity(anchorView, localUserId, localUserEmail);
+                    if (requireGeolocation) {
+                        requestUserLocationAndJoin(anchorView, localUserId, localUserEmail);
+                    } else {
+                        addUserToWaitingListWithIdentity(anchorView, localUserId, localUserEmail, null);
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     // -----------------------------------------------------------------------
-    // ACTUAL JOIN LOGIC (REUSED FOR FIREBASE USER OR GUEST USER)
+    // ⭐ Step 1: Request location, then join
     // -----------------------------------------------------------------------
-    private void addUserToWaitingListWithIdentity(View v, String userId, String email) {
+    private void requestUserLocationAndJoin(View v, String userId, String email) {
+        pendingUserIdForJoin = userId;
+        pendingEmailForJoin = email;
+
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    LOCATION_PERMISSION_CODE
+            );
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) {
+                Snackbar.make(v, "Unable to fetch location.", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+
+            Map<String, Object> geoData = new HashMap<>();
+            geoData.put("lat", location.getLatitude());
+            geoData.put("lng", location.getLongitude());
+
+            try {
+                Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        1
+                );
+                if (addresses != null && !addresses.isEmpty()) {
+                    geoData.put("city", addresses.get(0).getLocality());
+                    geoData.put("country", addresses.get(0).getCountryName());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Geocoder failed", e);
+            }
+
+            addUserToWaitingListWithIdentity(v, userId, email, geoData);
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                View root = getView();
+                if (root != null && pendingUserIdForJoin != null && pendingEmailForJoin != null) {
+                    // Retry join after permission granted
+                    requestUserLocationAndJoin(root, pendingUserIdForJoin, pendingEmailForJoin);
+                }
+
+            } else {
+                Snackbar.make(requireView(),
+                        "Location permission is required for this event.",
+                        Snackbar.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // ACTUAL JOIN LOGIC (REUSED FOR FIREBASE USER OR GUEST USER)
+    // Now accepts optional geoData
+    // -----------------------------------------------------------------------
+    private void addUserToWaitingListWithIdentity(View v,
+                                                  String userId,
+                                                  String email,
+                                                  @Nullable Map<String, Object> geoData) {
         if (eventId == null || eventId.isEmpty()) {
             Snackbar.make(v, "Error: Event not found.", Snackbar.LENGTH_LONG).show();
             return;
@@ -321,6 +458,10 @@ public class EventDetailsFragment extends Fragment {
         data.put("joinedAt", Timestamp.now());
         data.put("status", "waiting");
 
+        if (geoData != null) {
+            data.putAll(geoData); // ⭐ store geo info with attendee
+        }
+
         attendeeRef.set(data)
                 .addOnSuccessListener(aVoid -> {
                     joinBtn.setEnabled(false);
@@ -328,23 +469,23 @@ public class EventDetailsFragment extends Fragment {
                     joinBtn.setAlpha(0.6f);
                     Snackbar.make(v, "Joined waiting list.", Snackbar.LENGTH_SHORT).show();
 
-                    // ✅ Notification for the participant
+                    // Notification for the participant
                     NotificationHelper.notifyUser(
                             requireContext(),
                             userId,
                             "WAITLIST_ADDED",
                             "Waiting list joined",
-                            "You were added to the waiting list for "+eventTitle
+                            "You were added to the waiting list for " + eventTitle
                     );
 
-                    // ✅ Notification for the organizer (if we know them)
+                    // Notification for the organizer (if we know them)
                     if (organizerId != null && !organizerId.isEmpty()) {
                         NotificationHelper.notifyUser(
                                 requireContext(),
                                 organizerId,
                                 "ORGANIZER_NEW_WAITLIST",
                                 "New waiting list participant",
-                                email + " joined waiting list for "+eventTitle
+                                email + " joined waiting list for " + eventTitle
                         );
                     }
                 })
@@ -394,7 +535,7 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Error checking waiting list entry", e));
     }
 
-    // ✅ NEW — Check selection status after lottery and show Accept/Decline
+    // ✅ Check selection status after lottery and show Accept/Decline
     private void checkSelectionStatus() {
         if (eventId == null || eventId.isEmpty()) return;
         if (localUserId == null) return;
@@ -413,35 +554,30 @@ public class EventDetailsFragment extends Fragment {
                         if (btnDecline != null) btnDecline.setVisibility(View.VISIBLE);
                         if (joinBtn != null) joinBtn.setVisibility(View.GONE);
 
-                        // 🔔 Notify the user they are selected
+                        // Notify the user they are selected
                         NotificationHelper.notifyUser(
                                 requireContext(),
                                 localUserId,
                                 "USER_SELECTED",
                                 "You were selected!",
-                                "Congratulations — you have been selected for "+eventTitle
+                                "Congratulations — you have been selected for " + eventTitle
                         );
-                    }
-
-                    else if ("not_selected".equals(status)) {
-                        // 🔔 Notify the user they were NOT selected
+                    } else if ("not_selected".equals(status)) {
+                        // Notify the user they were NOT selected
                         NotificationHelper.notifyUser(
                                 requireContext(),
                                 localUserId,
                                 "USER_NOT_SELECTED",
                                 "Not selected this time",
-                                "Unfortunately, you were not selected for "+eventTitle
+                                "Unfortunately, you were not selected for " + eventTitle
                         );
                     }
-
-
-
                 })
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error checking selection status", e));
     }
 
-    // ✅ NEW — Accept Invitation
+    // ✅ Accept Invitation
     private void handleAccept() {
         if (eventId == null || eventId.isEmpty() || localUserId == null) return;
 
@@ -465,7 +601,7 @@ public class EventDetailsFragment extends Fragment {
                                 organizerId,
                                 "ORGANIZER_USER_ACCEPTED",
                                 "Invitation accepted",
-                                who + " accepted their spot for "+eventTitle
+                                who + " accepted their spot for " + eventTitle
                         );
                     }
                 })
@@ -473,7 +609,7 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Error accepting invitation", e));
     }
 
-    // ✅ NEW — Decline Invitation
+    // ✅ Decline Invitation
     private void handleDecline() {
         if (eventId == null || eventId.isEmpty() || localUserId == null) return;
 
@@ -497,7 +633,7 @@ public class EventDetailsFragment extends Fragment {
                                 organizerId,
                                 "ORGANIZER_USER_DECLINED",
                                 "Invitation declined",
-                                who + " declined their spot for "+eventTitle
+                                who + " declined their spot for " + eventTitle
                         );
                     }
                     triggerReplacementDraw();
@@ -506,7 +642,7 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Error declining invitation", e));
     }
 
-    // ✅ NEW — Automatically select next user after someone declines
+    // ✅ Automatically select next user after someone declines
     private void triggerReplacementDraw() {
         if (eventId == null || eventId.isEmpty()) return;
 
@@ -592,7 +728,6 @@ public class EventDetailsFragment extends Fragment {
                         Log.e(TAG, "Failed to load attendees before delete", e));
     }
 
-
     private void deleteAttendeesForEvent() {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -620,6 +755,7 @@ public class EventDetailsFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Log.e(TAG, "Error deleting attendees", e));
     }
+
     /** Firestore attendee model (you can still use this elsewhere if needed). */
     public static class AttendeeData {
         public String userId;
@@ -635,5 +771,27 @@ public class EventDetailsFragment extends Fragment {
             this.joinedAt = Timestamp.now();
             this.status = "waiting";
         }
+    }
+
+    private void refreshEventPrice() {
+        if (eventId == null || eventId.isEmpty()) return;
+
+        firestore.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        Log.e(TAG, "Event doc not found when trying to load price");
+                        return;
+                    }
+
+                    Double price = doc.getDouble("price");
+                    if (price != null && tvEventPrice != null) {
+                        tvEventPrice.setText("Price: $" + price);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "Error loading event price", e)
+                );
     }
 }

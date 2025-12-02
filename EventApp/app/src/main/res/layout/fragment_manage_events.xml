@@ -37,6 +37,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="View Map" />
+
         <!-- Waiting List (LIGHT PURPLE) -->
         <Button
             android:id="@+id/btnWaiting"
