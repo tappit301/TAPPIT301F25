@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions -->
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -19,12 +19,12 @@
         android:theme="@style/Theme.EventApp"
         tools:targetApi="31">
 
-        <!-- Google Maps API key -->
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_api_key" />
 
-        <!-- Launcher Activity (Home Screen) -->
+
         <activity
             android:name=".HomeActivity"
             android:exported="true">
@@ -34,14 +34,14 @@
             </intent-filter>
         </activity>
 
-        <!-- Login and Signup -->
+
         <activity android:name=".LoginActivity" />
         <activity android:name=".SignUpActivity" />
 
-        <!-- User Landing Host -->
+
         <activity android:name=".LandingHostActivity" />
 
-        <!-- ⭐ ADMIN NAV HOST ACTIVITY (Needed for AdminLoginFragment) ⭐ -->
+
         <activity
             android:name=".admin.AdminHostActivity"
             android:exported="false" />

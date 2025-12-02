@@ -18,6 +18,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that displays all events belonging to a selected category.
+ * Loads events from Firestore and updates the list in real time.
+ */
 public class CategoryEventsFragment extends Fragment {
 
     private RecyclerView rvCategoryEvents;
@@ -27,6 +31,9 @@ public class CategoryEventsFragment extends Fragment {
     private final List<Event> eventList = new ArrayList<>();
     private String categoryName;
 
+    /**
+     * Inflates the layout for this fragment.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -35,6 +42,13 @@ public class CategoryEventsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_category_events, container, false);
     }
 
+    /**
+     * Initializes the RecyclerView, retrieves the selected category name,
+     * sets up the adapter, and loads events from Firestore.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
@@ -45,7 +59,6 @@ public class CategoryEventsFragment extends Fragment {
 
         firestore = FirebaseHelper.getFirestore();
 
-        // Get category name
         if (getArguments() != null) {
             categoryName = getArguments().getString("categoryName");
         }
@@ -57,11 +70,16 @@ public class CategoryEventsFragment extends Fragment {
         loadCategoryEvents();
     }
 
+    /**
+     * Loads events that match the selected category from Firestore.
+     * Uses a snapshot listener so updates appear in real time.
+     */
     private void loadCategoryEvents() {
         firestore.collection("events")
                 .whereEqualTo("category", categoryName)
                 .addSnapshotListener((snapshot, e) -> {
                     eventList.clear();
+
                     if (snapshot != null) {
                         snapshot.forEach(doc -> {
                             Event ev = doc.toObject(Event.class);
@@ -69,6 +87,7 @@ public class CategoryEventsFragment extends Fragment {
                             eventList.add(ev);
                         });
                     }
+
                     adapter.notifyDataSetChanged();
                 });
     }

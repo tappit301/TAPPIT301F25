@@ -18,17 +18,23 @@ import com.example.eventapp.admin.AdminHostActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Home screen shown to users before signing in.
+ * Handles navigation to login, sign-up, guest mode, or admin login.
+ */
 public class HomeActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
+    /**
+     * Initializes the home screen and redirects signed-in users immediately.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
         mAuth = FirebaseAuth.getInstance();
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if (currentUser != null) {
@@ -40,6 +46,9 @@ public class HomeActivity extends AppCompatActivity {
         setupHomeUI();
     }
 
+    /**
+     * Sets up buttons, toolbar, and guest access for the home page.
+     */
     private void setupHomeUI() {
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
@@ -60,6 +69,9 @@ public class HomeActivity extends AppCompatActivity {
         btnViewEvents.setOnClickListener(v -> continueAsGuest());
     }
 
+    /**
+     * Enables guest mode and navigates to the main event screen.
+     */
     private void continueAsGuest() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", true).apply();
@@ -71,6 +83,9 @@ public class HomeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Navigates authenticated users to the landing screen.
+     */
     private void goToLandingAsUser() {
         SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
         prefs.edit().putBoolean("GUEST_MODE", false).apply();
@@ -80,6 +95,9 @@ public class HomeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Inflates the action bar menu.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -87,6 +105,9 @@ public class HomeActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Handles menu selections such as sign-in, profile, or admin login.
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
@@ -110,7 +131,9 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ⭐ ADDED FOR TESTS ⭐
+    /**
+     * Exposed for testing: returns the home toolbar.
+     */
     public Toolbar getToolbar() {
         return findViewById(R.id.topAppBar);
     }

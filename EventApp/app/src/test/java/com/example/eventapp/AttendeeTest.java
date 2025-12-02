@@ -30,7 +30,8 @@ public class AttendeeTest {
         assertEquals("anna@example.com", a.getEmail());
         assertEquals("selected", a.getStatus());
 
-
+        // This constructor does NOT set name → name stays null unless email fallback is added
+        // If you want name = email, add: this.name = email; in that constructor
         assertNull(a.getName());
     }
 

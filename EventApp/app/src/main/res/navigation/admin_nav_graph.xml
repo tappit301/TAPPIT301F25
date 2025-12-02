@@ -4,7 +4,7 @@
     android:id="@+id/admin_nav_graph"
     app:startDestination="@id/adminLoginFragment">
 
-    <!-- ADMIN LOGIN -->
+
     <fragment
         android:id="@+id/adminLoginFragment"
         android:name="com.example.eventapp.admin.AdminLoginFragment"
@@ -15,7 +15,7 @@
             app:destination="@id/adminDashboardFragment" />
     </fragment>
 
-    <!-- ADMIN DASHBOARD -->
+
     <fragment
         android:id="@+id/adminDashboardFragment"
         android:name="com.example.eventapp.admin.AdminDashboardFragment"
@@ -46,19 +46,19 @@
             app:destination="@id/adminSystemConfigFragment" />
     </fragment>
 
-    <!-- BROWSE EVENTS -->
+
     <fragment
         android:id="@+id/adminBrowseEventsFragment"
         android:name="com.example.eventapp.admin.AdminBrowseEventsFragment"
         android:label="Browse Events" />
 
-    <!-- BROWSE USERS -->
+
     <fragment
         android:id="@+id/adminBrowseUsersFragment"
         android:name="com.example.eventapp.admin.AdminBrowseUsersFragment"
         android:label="Browse Users" />
 
-    <!-- BROWSE IMAGES -->
+
     <fragment
         android:id="@+id/adminBrowseImagesFragment"
         android:name="com.example.eventapp.admin.AdminBrowseImagesFragment"
@@ -69,7 +69,7 @@
             app:destination="@id/adminImagePreviewFragment" />
     </fragment>
 
-    <!-- IMAGE PREVIEW -->
+
     <fragment
         android:id="@+id/adminImagePreviewFragment"
         android:name="com.example.eventapp.admin.AdminImagePreviewFragment"
@@ -80,19 +80,19 @@
             app:argType="string" />
     </fragment>
 
-    <!-- REMOVE ORGANIZERS -->
+
     <fragment
         android:id="@+id/adminRemoveOrganizersFragment"
         android:name="com.example.eventapp.admin.AdminRemoveOrganizersFragment"
         android:label="Remove Organizers" />
 
-    <!-- NOTIFICATION LOGS -->
+
     <fragment
         android:id="@+id/adminNotificationLogsFragment"
         android:name="com.example.eventapp.admin.AdminNotificationLogsFragment"
         android:label="Notification Logs" />
 
-    <!-- SYSTEM CONFIG -->
+
     <fragment
         android:id="@+id/adminSystemConfigFragment"
         android:name="com.example.eventapp.admin.AdminSystemConfigFragment"

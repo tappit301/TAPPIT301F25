@@ -10,53 +10,60 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.R;
 
+/**
+ * Fragment that displays the main admin dashboard.
+ * Provides navigation to all admin management features such as events, users, images, organizers, and system settings.
+ */
 public class AdminDashboardFragment extends Fragment {
 
+    /**
+     * Creates the dashboard fragment and sets its layout.
+     */
     public AdminDashboardFragment() {
         super(R.layout.admin_dashboard);
     }
 
+    /**
+     * Sets up button navigation and checks if the admin is logged in.
+     * Redirects to the login screen if no active session is found.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        // 1) Check admin login
         if (!AdminSession.isLoggedIn(requireContext())) {
             NavHostFragment.findNavController(this)
                     .navigate(R.id.adminLoginFragment);
             return;
         }
 
-        // 2) Manage Events
         view.findViewById(R.id.btnAdminManageEvents).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_adminDashboardFragment_to_adminBrowseEventsFragment)
         );
 
-        // 3) Manage Users
         view.findViewById(R.id.btnAdminManageUsers).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_adminDashboardFragment_to_adminBrowseUsersFragment)
         );
 
-        // 4) Manage Images
         view.findViewById(R.id.btnAdminManageImages).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_adminDashboardFragment_to_adminBrowseImagesFragment)
         );
 
-        // 5) Remove Organizers
         view.findViewById(R.id.btnAdminRemoveOrganizers).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_adminDashboardFragment_to_adminRemoveOrganizersFragment)
         );
 
-        // 6) Notification Logs
         view.findViewById(R.id.btnAdminNotificationLogs).setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_adminDashboardFragment_to_adminNotificationLogsFragment)
         );
 
-        // 7) System Config
         View systemConfigButton = view.findViewById(R.id.btnAdminSystemConfig);
         if (systemConfigButton != null) {
             systemConfigButton.setOnClickListener(v ->

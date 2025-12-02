@@ -8,7 +8,7 @@
     android:background="@color/light_blue"
     tools:context=".EditProfileFragment">
 
-    <!-- Top app bar -->
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -36,7 +36,7 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-            <!-- Profile picture preview -->
+
             <ImageView
                 android:id="@+id/imgEditProfileAvatar"
                 android:layout_width="120dp"
@@ -50,7 +50,7 @@
                 android:focusable="true" />
 
 
-            <!-- Change picture button -->
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangeProfilePicture"
                 android:layout_width="wrap_content"
@@ -58,7 +58,7 @@
                 android:text="Change profile picture"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
-            <!-- White card with fields -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

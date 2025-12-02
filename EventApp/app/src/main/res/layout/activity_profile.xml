@@ -9,7 +9,7 @@
     tools:context=".ProfileFragment">
 
 
-    <!-- Top App Bar (same vibe as Home) -->
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:elevation="4dp" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Scrollable main content -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,7 +42,7 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-            <!-- Avatar -->
+
             <ImageView
                 android:id="@+id/imgProfileAvatar"
                 android:layout_width="120dp"
@@ -58,14 +58,14 @@
 
 
 
-            <!-- OPTION LIST -->
+
             <LinearLayout
                 android:id="@+id/profileOptionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Edit Profile -->
+
                 <LinearLayout
                     android:id="@+id/rowEditProfile"
                     android:layout_width="match_parent"
@@ -85,7 +85,7 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- Scan QR Code -->
+
                 <LinearLayout
                     android:id="@+id/rowScanQr"
                     android:layout_width="match_parent"
@@ -105,7 +105,7 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- Notifications (toggle only, actual list is on landing page) -->
+
                 <LinearLayout
                     android:id="@+id/rowNotifications"
                     android:layout_width="match_parent"
@@ -131,7 +131,7 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <!-- Log Out -->
+
                 <LinearLayout
                     android:id="@+id/rowLogout"
                     android:layout_width="match_parent"
@@ -151,7 +151,7 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- Delete Account -->
+
                 <LinearLayout
                     android:id="@+id/rowDeleteAccount"
                     android:layout_width="match_parent"

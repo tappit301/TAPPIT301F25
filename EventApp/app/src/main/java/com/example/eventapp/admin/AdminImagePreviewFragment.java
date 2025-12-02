@@ -15,12 +15,26 @@ import com.example.eventapp.R;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+/**
+ * Fragment that displays a full preview of a selected event image.
+ * Loads the image from Firebase Storage and shows a progress indicator while loading.
+ */
 public class AdminImagePreviewFragment extends Fragment {
 
+    /**
+     * Creates the fragment and sets its layout.
+     */
     public AdminImagePreviewFragment() {
         super(R.layout.fragment_admin_image_preview);
     }
 
+    /**
+     * Retrieves the image ID from arguments, loads the image from Firebase Storage,
+     * and displays it with a progress bar while loading.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 

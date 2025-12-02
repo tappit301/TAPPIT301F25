@@ -12,15 +12,28 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.R;
 
+/**
+ * Fragment that handles the admin login screen.
+ * Validates the admin's email and password locally and begins a session on success.
+ */
 public class AdminLoginFragment extends Fragment {
 
     private static final String ADMIN_EMAIL = "admin@tappit.ca";
     private static final String ADMIN_PASSWORD = "admin123";
 
+    /**
+     * Creates the login fragment and sets the layout resource.
+     */
     public AdminLoginFragment() {
         super(R.layout.fragment_admin_login);
     }
 
+    /**
+     * Sets up the login form and verifies credentials when the admin submits the form.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -37,16 +50,13 @@ public class AdminLoginFragment extends Fragment {
                 return;
             }
 
-            // Local-only admin login
             if (!e.equals(ADMIN_EMAIL) || !p.equals(ADMIN_PASSWORD)) {
                 Toast.makeText(getContext(), "Invalid admin credentials", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Save admin session
             AdminSession.login(requireContext());
 
-            // Navigate to dashboard
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_adminLoginFragment_to_adminDashboardFragment);
         });

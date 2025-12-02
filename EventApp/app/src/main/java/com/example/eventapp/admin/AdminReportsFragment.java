@@ -11,12 +11,25 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.eventapp.R;
 
+/**
+ * Fragment that provides access to admin reports and statistics.
+ * Currently demonstrates loading and logging report data.
+ */
 public class AdminReportsFragment extends Fragment {
 
+    /**
+     * Creates the fragment and assigns its layout resource.
+     */
     public AdminReportsFragment() {
         super(R.layout.admin_reports);
     }
 
+    /**
+     * Checks admin login status and sets up actions for viewing reports.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState previously saved instance state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 

@@ -28,7 +28,7 @@ public class ScanQrFragment extends Fragment {
     private boolean handlingResult = false;
 
     public ScanQrFragment() {
-        // Required empty public constructor
+
     }
 
     @Nullable
