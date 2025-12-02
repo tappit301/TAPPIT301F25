@@ -69,7 +69,7 @@ This section summarizes the required deliverables for **Project Part 3** and our
 This section summarizes the required deliverables for **Project Part 4** and our final progress towards the final version of the app.
 ---
 
-- [Product Backlog](https://github.com/tappit301/TAPPIT301F25/wiki/Product-Backlog:-project-3)
+- [Product Backlog](https://github.com/tappit301/TAPPIT301F25/wiki/product_backlog4)
 - [UI Mockups](https://github.com/tappit301/TAPPIT301F25/wiki/UI-Mockups:-Project-3)
 - [Storyboards](https://github.com/tappit301/TAPPIT301F25/wiki/Storyboard:-Project-3)
 - [UML Diagrams](https://github.com/tappit301/TAPPIT301F25/wiki/UML-Class-Diagrams-Project-Part-3)
