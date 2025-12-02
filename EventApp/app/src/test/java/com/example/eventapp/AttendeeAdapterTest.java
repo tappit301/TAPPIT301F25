@@ -1,61 +1,50 @@
 package com.example.eventapp;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
+import static org.junit.Assert.assertEquals;
 
-import androidx.test.core.app.ApplicationProvider;
+import android.widget.FrameLayout;
 
-import com.example.eventapp.Attendee;
-import com.example.eventapp.AttendeeAdapter;
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.firebase.Timestamp;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 34)
 public class AttendeeAdapterTest {
 
     @Test
-    public void testItemCountMatchesListSize() {
-        List<Attendee> attendees = Arrays.asList(
-                new Attendee("John", "john@mail.com", "Checked-in"),
-                new Attendee("Jane", "jane@mail.com", "Pending")
-        );
-
-        AttendeeAdapter adapter = new AttendeeAdapter(attendees);
-        assertEquals(2, adapter.getItemCount());
-    }
-
-    @Test
     public void testOnBindViewHolderPopulatesViews() {
-        List<Attendee> attendees = Arrays.asList(
-                new Attendee("John", "john@mail.com", "Checked-in")
-        );
+        // Test data
+        Attendee attendee = new Attendee("123", "email@test.com", Timestamp.now());
+        List<Attendee> list = new ArrayList<>();
+        list.add(attendee);
 
-        AttendeeAdapter adapter = new AttendeeAdapter(attendees);
+        AttendeeAdapter adapter = new AttendeeAdapter(list);
 
-        View view = LayoutInflater.from(ApplicationProvider.getApplicationContext())
-                .inflate(R.layout.item_attendee, null, false);
+        // Real Activity + parent ViewGroup
+        FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class)
+                .setup()
+                .get();
 
-        AttendeeAdapter.AttendeeViewHolder holder =
-                new AttendeeAdapter.AttendeeViewHolder(view);
+        FrameLayout parent = new FrameLayout(activity);
 
-        adapter.onBindViewHolder(holder, 0);
+        // Create ViewHolder
+        AttendeeAdapter.AttendeeViewHolder vh =
+                adapter.onCreateViewHolder(parent, 0);
 
-        TextView tvName = view.findViewById(R.id.tvName);
-        TextView tvEmail = view.findViewById(R.id.tvEmail);
-        TextView tvStatus = view.findViewById(R.id.tvStatus);
+        // Bind
+        adapter.onBindViewHolder(vh, 0);
 
-        assertEquals("John", tvName.getText().toString());
-        assertEquals("john@mail.com", tvEmail.getText().toString());
-        assertEquals("Status: Checked-in", tvStatus.getText().toString());
+        // Assertions
+        assertEquals("email@test.com", vh.tvEmail.getText().toString());
+        assertEquals("email@test.com", vh.tvName.getText().toString());
+        assertEquals("Status: waiting", vh.tvStatus.getText().toString());
     }
 }

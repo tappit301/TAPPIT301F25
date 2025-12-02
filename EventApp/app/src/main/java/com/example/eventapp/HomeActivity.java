@@ -28,6 +28,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.home_page);
 
         mAuth = FirebaseAuth.getInstance();
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if (currentUser != null) {
@@ -47,13 +48,16 @@ public class HomeActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Tappit");
         }
 
-        findViewById(R.id.btnGettingStarted).setOnClickListener(v ->
+        Button btnGettingStarted = findViewById(R.id.btnGettingStarted);
+        btnGettingStarted.setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, LoginActivity.class)));
 
-        findViewById(R.id.btnCreateAccount).setOnClickListener(v ->
+        Button btnCreateAccount = findViewById(R.id.btnCreateAccount);
+        btnCreateAccount.setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, SignUpActivity.class)));
 
-        findViewById(R.id.button_view_events).setOnClickListener(v -> continueAsGuest());
+        Button btnViewEvents = findViewById(R.id.button_view_events);
+        btnViewEvents.setOnClickListener(v -> continueAsGuest());
     }
 
     private void continueAsGuest() {
@@ -85,6 +89,7 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
         int id = item.getItemId();
 
         if (id == R.id.action_profile) {
@@ -98,12 +103,15 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_admin_login) {
-            // ⭐ Go to Admin Login Fragment via AdminHostActivity ⭐
-            Intent intent = new Intent(HomeActivity.this, AdminHostActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(HomeActivity.this, AdminHostActivity.class));
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // ⭐ ADDED FOR TESTS ⭐
+    public Toolbar getToolbar() {
+        return findViewById(R.id.topAppBar);
     }
 }

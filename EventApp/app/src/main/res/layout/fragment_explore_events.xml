@@ -63,8 +63,8 @@
                 android:gravity="center">
 
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Entertainment"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -81,8 +81,8 @@
                 android:gravity="center">
 
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Sports"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -99,8 +99,8 @@
                 android:gravity="center">
 
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Technology"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -117,8 +117,8 @@
                 android:gravity="center">
 
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Health"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -135,8 +135,8 @@
                 android:gravity="center">
 
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Others"
                     android:textSize="16sp"
                     android:textStyle="bold"

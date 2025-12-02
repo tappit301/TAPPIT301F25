@@ -6,22 +6,17 @@
         android:id="@+id/action_profile"
         android:title="Profile"
         android:icon="@drawable/profile_icon"
-        app:showAsAction="always"
-        android:contentDescription="Profile" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_sign_in"
         android:title="Sign In"
         android:icon="@null"
-        app:showAsAction="always"
-        android:contentDescription="Sign In" />
+        app:showAsAction="never" />
 
-    <!-- ⭐ ADMIN LOGIN ⭐ -->
     <item
         android:id="@+id/action_admin_login"
         android:title="Admin Login"
-        android:icon="@null"
-        app:showAsAction="always"
-        android:contentDescription="Admin Login" />
+        app:showAsAction="never" />
 
 </menu>

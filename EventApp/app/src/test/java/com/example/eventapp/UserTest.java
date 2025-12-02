@@ -3,11 +3,14 @@ package com.example.eventapp;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+// IMPORTANT: Import YOUR app's User class
+import com.example.eventapp.User;
+
 public class UserTest {
 
     @Test
     public void gettersAndSettersWork() {
-        User u = new User();
+        User u = new User(); // now works (Firestore requires empty constructor)
 
         u.setId("ID1");
         u.setName("John Doe");

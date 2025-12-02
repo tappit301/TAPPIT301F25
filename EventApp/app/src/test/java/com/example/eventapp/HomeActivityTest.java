@@ -1,11 +1,12 @@
 package com.example.eventapp;
 
 import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Button;
 
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -39,7 +40,6 @@ public class HomeActivityTest {
 
     @After
     public void teardown() {
-        // REQUIRED to avoid "static mocking already registered" error
         firebaseAuthMockStatic.close();
     }
 
@@ -109,20 +109,23 @@ public class HomeActivityTest {
     }
 
     @Test
-    public void clickingAdminLogin_opensAdminHostActivity() {
+    public void clickingAdminLoginMenu_opensAdminHostActivity() {
         Mockito.when(mockAuth.getCurrentUser()).thenReturn(null);
 
         HomeActivity activity = Robolectric.buildActivity(HomeActivity.class)
                 .setup()
                 .get();
 
-        // FIXED: this view is a FloatingActionButton, not a Button
-        FloatingActionButton adminBtn = activity.findViewById(R.id.btnAdminLogin);
-        adminBtn.performClick();
+        Menu menu = activity.getToolbar().getMenu();
+        MenuInflater inflater = activity.getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        activity.onOptionsItemSelected(menu.findItem(R.id.action_admin_login));
 
         ShadowActivity shadow = Shadows.shadowOf(activity);
         Intent intent = shadow.getNextStartedActivity();
 
+        assertNotNull(intent);
         assertEquals("com.example.eventapp.admin.AdminHostActivity",
                 intent.getComponent().getClassName());
     }
