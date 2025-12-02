@@ -10,7 +10,7 @@ public class UserTest {
 
     @Test
     public void gettersAndSettersWork() {
-        User u = new User(); // now works (Firestore requires empty constructor)
+        User u = new User();
 
         u.setId("ID1");
         u.setName("John Doe");

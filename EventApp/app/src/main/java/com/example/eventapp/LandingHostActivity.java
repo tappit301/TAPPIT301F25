@@ -18,10 +18,11 @@ public class LandingHostActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ================================
-        // AUTH CHECK — BUT SKIP IN TEST MODE
-        // ================================
-        if (!TestMode.IS_TEST) {
+
+        boolean isGuest = getIntent().getBooleanExtra("isGuest", false);
+
+
+        if (!isGuest && !TestMode.IS_TEST) {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user == null) {
                 startActivity(new Intent(this, LoginActivity.class));
@@ -30,14 +31,12 @@ public class LandingHostActivity extends AppCompatActivity {
             }
         }
 
-        // Continue normally
+
         setContentView(R.layout.activity_landing_host);
 
-        // Toolbar setup
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
 
-        // NavHost setup
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.nav_host_fragment);

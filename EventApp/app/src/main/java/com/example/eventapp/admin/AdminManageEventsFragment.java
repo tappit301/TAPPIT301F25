@@ -1,6 +1,7 @@
 package com.example.eventapp.admin;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -48,14 +49,16 @@ public class AdminManageEventsFragment extends Fragment {
                 .addOnSuccessListener(snap -> {
                     eventList.clear();
                     for (var doc : snap) {
+                        Log.d("ADMIN_EVENT", "Raw date in Firestore = " + doc.get("date"));
+
                         Event e = doc.toObject(Event.class);
                         e.setId(doc.getId());
+
                         eventList.add(e);
                     }
 
                     AdminEventAdapter adapter = new AdminEventAdapter(eventList, event -> {
-                        // When click event:
-                        // Navigate to event details or show delete dialog
+                        // delete logic later
                     });
 
                     recyclerView.setAdapter(adapter);

@@ -25,7 +25,6 @@ public class EventAdapterTest {
                 "20:00", "Campus Hall", "Entertainment"
         ));
 
-        // ✅ FIX: Pass required second argument
         adapter = new EventAdapter(events, 0);
     }
 

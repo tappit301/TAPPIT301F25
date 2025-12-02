@@ -39,8 +39,7 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        Event event = events.get(position);
-        holder.bind(event, listener);
+        holder.bind(events.get(position), listener);
     }
 
     @Override
@@ -48,7 +47,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
         return events.size();
     }
 
-    // --------------------------------------------------
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
 
@@ -68,24 +66,22 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
             title.setText(event.getTitle());
             organizer.setText("By: " + event.getOrganizerEmail());
 
-            // ----------------------------
-            // FORMAT DATE + TIME PROPERLY
-            // ----------------------------
-            String d = event.getDate();   // example: "2025-01-10"
-            String t = event.getTime();   // example: "14:30"
+            String d = event.getDate();    // "30/11/2025"
+            String t = event.getTime();    // "06:30"
+
 
             if (d != null && t != null && !d.isEmpty() && !t.isEmpty()) {
                 try {
-                    String input = d + " " + t; // "2025-01-10 14:30"
+                    String input = d + " " + t; // e.g., "30/11/2025 06:30"
 
+                    // MATCHES your Firestore format EXACTLY
                     SimpleDateFormat inputFormat =
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+                            new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US);
 
                     SimpleDateFormat outputFormat =
                             new SimpleDateFormat("MMM dd, yyyy  hh:mm a", Locale.US);
 
-                    String formatted = outputFormat.format(inputFormat.parse(input));
-                    date.setText(formatted);
+                    date.setText(outputFormat.format(inputFormat.parse(input)));
 
                 } catch (Exception e) {
                     date.setText("Invalid date");
@@ -94,7 +90,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
                 date.setText("No date set");
             }
 
-            // DELETE BUTTON
             deleteBtn.setOnClickListener(v -> listener.onDeleteClicked(event));
         }
     }
