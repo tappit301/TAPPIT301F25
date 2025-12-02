@@ -1,29 +1,24 @@
 package com.example.eventapp;
 
-import android.Manifest;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.eventapp.utils.CSVUtils;
 import com.example.eventapp.utils.FirebaseHelper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +27,7 @@ import java.util.Random;
 /**
  * Allows organizers to manage a specific event.
  * They can view attendees by status, edit the event,
- * run the lottery, open the map view, and export CSV.
+ * run the lottery, and open the map view.
  */
 public class ManageEventsFragment extends Fragment {
 
@@ -46,7 +41,7 @@ public class ManageEventsFragment extends Fragment {
     private String eventId;
 
     private View btnWaiting, btnSelected, btnEnrolled, btnCancelled;
-    private View btnEditEvent, btnRunLottery;
+    private View btnEditEvent, btnRunLottery, btnExportCSV;
 
     public ManageEventsFragment() {}
 
@@ -59,7 +54,7 @@ public class ManageEventsFragment extends Fragment {
     }
 
     /**
-     * Initializes UI, loads event ID, sets up list switching and controls.
+     * Initializes the UI, loads event ID, sets up lists and controls.
      */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -75,6 +70,7 @@ public class ManageEventsFragment extends Fragment {
 
         btnEditEvent = view.findViewById(R.id.btnEditEvent);
         btnRunLottery = view.findViewById(R.id.btnRunLottery);
+        btnExportCSV = view.findViewById(R.id.btnExportCSV);
 
         btnWaiting = view.findViewById(R.id.btnWaiting);
         btnSelected = view.findViewById(R.id.btnSelected);
@@ -91,7 +87,6 @@ public class ManageEventsFragment extends Fragment {
             return;
         }
 
-        // Edit Event
         btnEditEvent.setOnClickListener(v -> {
             Bundle b = new Bundle();
             b.putString("eventId", eventId);
@@ -99,16 +94,15 @@ public class ManageEventsFragment extends Fragment {
                     .navigate(R.id.action_manageEventsFragment_to_createEventFragment, b);
         });
 
-        // Load lists
         btnWaiting.setOnClickListener(v -> loadListByStatus("waiting"));
         btnSelected.setOnClickListener(v -> loadListByStatus("selected"));
         btnEnrolled.setOnClickListener(v -> loadListByStatus("enrolled"));
         btnCancelled.setOnClickListener(v -> loadListByStatus("cancelled"));
 
-        // Lottery
         btnRunLottery.setOnClickListener(v -> showLotteryDialog());
 
-        // Map button
+        btnExportCSV.setOnClickListener(v -> exportSelectedToCSV());
+
         View btnViewMap = view.findViewById(R.id.btnViewMap);
         btnViewMap.setOnClickListener(v -> {
             Bundle b = new Bundle();
@@ -117,22 +111,9 @@ public class ManageEventsFragment extends Fragment {
                     .navigate(R.id.action_manageEventsFragment_to_eventMapFragment, b);
         });
 
-        // CSV EXPORT button
-        Button btnExportCSV = view.findViewById(R.id.btnExportCSV);
-        btnExportCSV.setOnClickListener(v -> {
-            // Runtime permission (Android 6–10)
-            ActivityCompat.requestPermissions(requireActivity(),
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101);
-
-            exportAllListsCSV(eventId);
-        });
-
-        loadListByStatus("waiting");
+        loadListByStatus("selected");
     }
 
-    /**
-     * Loads attendees filtered by the chosen status.
-     */
     private void loadListByStatus(String status) {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -152,9 +133,6 @@ public class ManageEventsFragment extends Fragment {
                         Log.e(TAG, "Error loading list", e));
     }
 
-    /**
-     * Confirmation dialog before lottery.
-     */
     private void showLotteryDialog() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Run Lottery")
@@ -164,9 +142,6 @@ public class ManageEventsFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Randomly selects users from waiting list up to maxAttendees.
-     */
     private void runLottery() {
         firestore.collection("eventAttendees")
                 .document(eventId)
@@ -218,76 +193,24 @@ public class ManageEventsFragment extends Fragment {
                         Log.e(TAG, "Lottery failed", e));
     }
 
-    /**
-     * EXPORT ALL LISTS — waiting, selected, enrolled, cancelled — into one CSV file.
-     */
-    private void exportAllListsCSV(String eventId) {
-
-        String[] statuses = new String[]{"waiting", "selected", "enrolled", "cancelled"};
-
-        StringBuilder csvBuilder = new StringBuilder();
-        csvBuilder.append("List,Email,UID\n");
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final int[] remaining = {statuses.length};
-
-        for (String status : statuses) {
-
-            db.collection("eventAttendees")
-                    .document(eventId)
-                    .collection("attendees")
-                    .whereEqualTo("status", status)
-                    .get()
-                    .addOnSuccessListener(snap -> {
-
-                        snap.getDocuments().forEach(doc -> {
-                            String email = doc.getString("email");
-                            String uid = doc.getString("userId");
-
-                            csvBuilder.append(status).append(",")
-                                    .append(email == null ? "" : email).append(",")
-                                    .append(uid).append("\n");
-                        });
-
-                        remaining[0]--;
-                        if (remaining[0] == 0) {
-                            saveCSVToFile(csvBuilder.toString(),
-                                    "event_" + eventId + "_all_lists.csv");
-                        }
-
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "CSV export failed for: " + status, e);
-                        remaining[0]--;
-                        if (remaining[0] == 0) {
-                            saveCSVToFile(csvBuilder.toString(),
-                                    "event_" + eventId + "_all_lists.csv");
-                        }
+    private void exportSelectedToCSV() {
+        firestore.collection("eventAttendees")
+                .document(eventId)
+                .collection("attendees")
+                .whereEqualTo("status", "selected")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    StringBuilder csv = new StringBuilder("Email,Status\n");
+                    snapshot.getDocuments().forEach(doc -> {
+                        csv.append(doc.getString("email"))
+                                .append(",selected\n");
                     });
-        }
-    }
 
-    /**
-     * Saves CSV into Downloads folder.
-     */
-    private void saveCSVToFile(String csv, String fileName) {
-        try {
-            File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(downloads, fileName);
+                    CSVUtils.saveCSV(requireContext(), "selected_users.csv", csv.toString());
 
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(csv.getBytes());
-            fos.close();
-
-            Snackbar.make(requireView(),
-                    "CSV saved to Downloads: " + fileName,
-                    Snackbar.LENGTH_LONG).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Snackbar.make(requireView(),
-                    "Failed to save CSV: " + e.getMessage(),
-                    Snackbar.LENGTH_LONG).show();
-        }
+                    Snackbar.make(requireView(),
+                            "CSV exported successfully.",
+                            Snackbar.LENGTH_LONG).show();
+                });
     }
 }
