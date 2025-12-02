@@ -37,7 +37,7 @@ public class AdminLoginFragment extends Fragment {
                 return;
             }
 
-            // 🔥 LOCAL-ONLY ADMIN LOGIN
+            // Local-only admin login
             if (!e.equals(ADMIN_EMAIL) || !p.equals(ADMIN_PASSWORD)) {
                 Toast.makeText(getContext(), "Invalid admin credentials", Toast.LENGTH_SHORT).show();
                 return;

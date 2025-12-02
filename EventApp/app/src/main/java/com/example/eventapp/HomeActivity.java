@@ -1,6 +1,7 @@
 package com.example.eventapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -27,12 +28,11 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.home_page);
 
         mAuth = FirebaseAuth.getInstance();
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if (currentUser != null) {
-            startActivity(new Intent(HomeActivity.this, LandingHostActivity.class));
-            finish();
+            Log.d("AuthCheck", "Signed in. Going to LandingHostActivity...");
+            goToLandingAsUser();
             return;
         }
 
@@ -43,41 +43,67 @@ public class HomeActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
 
-        // === USER BUTTONS ===
-        Button btnGettingStarted = findViewById(R.id.btnGettingStarted);
-        btnGettingStarted.setOnClickListener(v ->
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Tappit");
+        }
+
+        findViewById(R.id.btnGettingStarted).setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, LoginActivity.class)));
 
-        Button btnCreateAccount = findViewById(R.id.btnCreateAccount);
-        btnCreateAccount.setOnClickListener(v ->
+        findViewById(R.id.btnCreateAccount).setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, SignUpActivity.class)));
 
-        Button btnViewEvents = findViewById(R.id.button_view_events);
-        btnViewEvents.setOnClickListener(v ->
-                Toast.makeText(this, "Guest view coming soon!", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.button_view_events).setOnClickListener(v -> continueAsGuest());
+    }
 
-        // === ADMIN BUTTON ===
-        findViewById(R.id.btnAdminLogin).setOnClickListener(v -> {
-            Intent adminIntent = new Intent(HomeActivity.this, AdminHostActivity.class);
-            startActivity(adminIntent);
-        });
+    private void continueAsGuest() {
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        prefs.edit().putBoolean("GUEST_MODE", true).apply();
+
+        Toast.makeText(this, "Continuing as guest...", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void goToLandingAsUser() {
+        SharedPreferences prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE);
+        prefs.edit().putBoolean("GUEST_MODE", false).apply();
+
+        Intent intent = new Intent(HomeActivity.this, LandingHostActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(this).inflate(R.menu.main_menu, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_profile) {
-            Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show();
+        int id = item.getItemId();
+
+        if (id == R.id.action_profile) {
+            Toast.makeText(this, "Sign in to view profile", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (item.getItemId() == R.id.action_sign_in) {
+        }
+
+        if (id == R.id.action_sign_in) {
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             return true;
         }
+
+        if (id == R.id.action_admin_login) {
+            // ⭐ Go to Admin Login Fragment via AdminHostActivity ⭐
+            Intent intent = new Intent(HomeActivity.this, AdminHostActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 }

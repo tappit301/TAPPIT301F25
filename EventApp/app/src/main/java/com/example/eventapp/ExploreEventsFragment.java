@@ -4,76 +4,56 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.eventapp.utils.FirebaseHelper;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.navigation.fragment.NavHostFragment;
 
 public class ExploreEventsFragment extends Fragment {
 
-    private RecyclerView rvExplore;
-    private LinearLayout emptyLayout;
-    private EventAdapter adapter;
-
-    private final List<Event> events = new ArrayList<>();
-    private FirebaseFirestore firestore;
+    public ExploreEventsFragment() {}
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_explore_events, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle sis) {
-        firestore = FirebaseHelper.getFirestore();
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        rvExplore = view.findViewById(R.id.rvExploreEvents);
-        emptyLayout = view.findViewById(R.id.exploreEmptyLayout);
+        // Back button
+        ImageButton btnBack = view.findViewById(R.id.btnBackExplore);
+        btnBack.setOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack()
+        );
 
-        rvExplore.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new EventAdapter(events,
-                R.id.action_exploreEventsFragment_to_eventDetailsFragment);
-        rvExplore.setAdapter(adapter);
+        // Category boxes
+        LinearLayout catEntertainment = view.findViewById(R.id.catEntertainment);
+        LinearLayout catSports = view.findViewById(R.id.catSports);
+        LinearLayout catTechnology = view.findViewById(R.id.catTechnology);
+        LinearLayout catHealth = view.findViewById(R.id.catHealth);
+        LinearLayout catOthers = view.findViewById(R.id.catOthers);
 
-        loadEvents();
+        catEntertainment.setOnClickListener(v -> openCategory("Entertainment"));
+        catSports.setOnClickListener(v -> openCategory("Sports"));
+        catTechnology.setOnClickListener(v -> openCategory("Technology"));
+        catHealth.setOnClickListener(v -> openCategory("Health"));
+        catOthers.setOnClickListener(v -> openCategory("Others"));
     }
 
-    private void loadEvents() {
-        if (firestore == null) {
-            updateState();
-            return;
-        }
+    private void openCategory(String category) {
+        Bundle bundle = new Bundle();
+        bundle.putString("categoryName", category);
 
-        firestore.collection("events")
-                .get()
-                .addOnSuccessListener(snap -> {
-                    events.clear();
-                    for (QueryDocumentSnapshot doc : snap) {
-                        Event e = doc.toObject(Event.class);
-                        e.setId(doc.getId());
-                        events.add(e);
-                    }
-                    adapter.notifyDataSetChanged();
-                    updateState();
-                })
-                .addOnFailureListener(e -> updateState());
-    }
-
-    private void updateState() {
-        boolean empty = events.isEmpty();
-        emptyLayout.setVisibility(empty ? View.VISIBLE : View.GONE);
-        rvExplore.setVisibility(empty ? View.GONE : View.VISIBLE);
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.action_exploreEventsFragment_to_categoryEventsFragment, bundle);
     }
 }

@@ -16,17 +16,11 @@ public class EventAdapterTest {
     @Before
     public void setUp() {
         events = new ArrayList<>();
-        events.add(new Event(
-                "Hackathon", "24h code event", "2025-12-02",
-                "09:00", "UofA Lab", "Tech"
-        ));
-        events.add(new Event(
-                "Music Night", "Live DJ", "2025-12-05",
-                "20:00", "Campus Hall", "Entertainment"
-        ));
+        events.add(new Event("Hackathon", "24h code event", "2025-12-02", "09:00", "UofA Lab"));
+        events.add(new Event("Music Night", "Live DJ", "2025-12-05", "20:00", "Campus Hall"));
 
-        // ✅ FIX: Pass required second argument
-        adapter = new EventAdapter(events, 0);
+        // ✅ This is safe in a JVM test because the adapter’s constructor just stores data.
+        adapter = new EventAdapter(events);
     }
 
     @Test
@@ -37,12 +31,9 @@ public class EventAdapterTest {
     @Test
     public void itemCount_updatesWhenListChanges() {
         int start = adapter.getItemCount();
-
-        events.add(new Event(
-                "Workshop", "AI 101", "2025-12-10",
-                "14:00", "ECERF", "Tech"
-        ));
-
+        events.add(new Event("Workshop", "AI 101", "2025-12-10", "14:00", "ECERF"));
+        // If your adapter internally keeps a reference to the same list, the count will update.
+        // If it copies data, you can call a hypothetical adapter.setItems(events) here instead.
         assertEquals(start + 1, adapter.getItemCount());
     }
 }

@@ -68,14 +68,33 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ev
             title.setText(event.getTitle());
             organizer.setText("By: " + event.getOrganizerEmail());
 
-            if (event.getDateTime() != null) {
-                String formatted = new SimpleDateFormat("MMM dd, yyyy  hh:mm a", Locale.US)
-                        .format(event.getDateTime().toDate());
-                date.setText(formatted);
+            // ----------------------------
+            // FORMAT DATE + TIME PROPERLY
+            // ----------------------------
+            String d = event.getDate();   // example: "2025-01-10"
+            String t = event.getTime();   // example: "14:30"
+
+            if (d != null && t != null && !d.isEmpty() && !t.isEmpty()) {
+                try {
+                    String input = d + " " + t; // "2025-01-10 14:30"
+
+                    SimpleDateFormat inputFormat =
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+
+                    SimpleDateFormat outputFormat =
+                            new SimpleDateFormat("MMM dd, yyyy  hh:mm a", Locale.US);
+
+                    String formatted = outputFormat.format(inputFormat.parse(input));
+                    date.setText(formatted);
+
+                } catch (Exception e) {
+                    date.setText("Invalid date");
+                }
             } else {
                 date.setText("No date set");
             }
 
+            // DELETE BUTTON
             deleteBtn.setOnClickListener(v -> listener.onDeleteClicked(event));
         }
     }

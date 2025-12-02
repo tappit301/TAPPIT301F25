@@ -166,6 +166,25 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- PRICE FIELD (REQUIRED) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEventPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Price ($)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEventPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEventCapacity"
             android:layout_width="match_parent"
@@ -189,7 +208,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:hint="Category"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <AutoCompleteTextView
@@ -228,8 +246,14 @@
                 android:paddingEnd="24dp"
                 app:cornerRadius="8dp" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchRequireGeo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Require geolocation to join waiting list"
+                android:textSize="14sp"
+                android:layout_marginTop="16dp" />
+
         </LinearLayout>
-
     </LinearLayout>
-
 </ScrollView>

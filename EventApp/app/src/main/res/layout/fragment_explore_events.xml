@@ -1,100 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#F8F6FF">
 
-    <!-- PURPLE HEADER -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="#7C6AC7"
-        android:gravity="bottom"
-        android:padding="16dp">
-
-        <ImageButton
-            android:id="@+id/btnBackExplore"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_back"
-            android:contentDescription="white"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true" />
-
-        <TextView
-            android:id="@+id/titleExplore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Explore Events"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:textSize="26sp" />
-
-    </LinearLayout>
-
-
-    <!-- FILTER ICON BOX (WHITE FLOATING CARD) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-26dp"
-        android:paddingHorizontal="20dp"
-        android:gravity="end">
+        android:orientation="vertical">
 
+        <!-- HEADER -->
         <LinearLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/white_box_round"
-            android:gravity="center"
-            android:elevation="6dp">
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="#7C6AC7"
+            android:gravity="bottom"
+            android:padding="16dp">
 
             <ImageButton
-                android:id="@+id/btnFilter"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:id="@+id/btnBackExplore"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_filter_icon"
-                android:contentDescription="Filter" />
+                android:src="@drawable/ic_back" />
+
+            <TextView
+                android:id="@+id/titleExplore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Explore Events"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="26sp"
+                android:layout_marginStart="12dp" />
         </LinearLayout>
-    </LinearLayout>
 
-
-    <!-- EMPTY STATE -->
-    <LinearLayout
-        android:id="@+id/exploreEmptyLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:alpha="0.4"
-            android:src="@drawable/empty_calender" />
-
+        <!-- CATEGORY TITLE -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No Events Found"
-            android:textSize="18sp"
+            android:text="Browse by Category"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginTop="16dp" />
+            android:textColor="#000"
+            android:paddingStart="20dp"
+            android:paddingTop="30dp" />
+
+        <!-- CATEGORY GRID -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:id="@+id/catEntertainment"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_margin="10dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/category_box_round"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Entertainment"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/catSports"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_margin="10dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/category_box_round"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Sports"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/catTechnology"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_margin="10dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/category_box_round"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Technology"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/catHealth"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_margin="10dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/category_box_round"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Health"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/catOthers"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_margin="10dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/category_box_round"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Others"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+        </GridLayout>
+
     </LinearLayout>
 
-
-    <!-- RECYCLER VIEW -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExploreEvents"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp" />
-
-</LinearLayout>
+</ScrollView>

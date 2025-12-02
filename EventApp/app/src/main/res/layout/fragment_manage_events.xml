@@ -10,7 +10,7 @@
     <!-- Title -->
     <TextView
         android:id="@+id/manageEventsTitle"
-        android:text="Manage Events"
+        android:text="Manage Event"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#4A148C"
@@ -18,15 +18,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <!-- Edit Event Button -->
+    <!-- Edit Event (PURPLE) -->
     <Button
         android:id="@+id/btnEditEvent"
         android:text="Edit Event"
         android:layout_marginTop="28dp"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:backgroundTint="#6A1B9A"
-        android:textColor="#FFFFFF"/>
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
 
     <!-- Tabs -->
     <LinearLayout
@@ -36,46 +37,83 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="View Map" />
+
+        <!-- Waiting List (LIGHT PURPLE) -->
         <Button
             android:id="@+id/btnWaiting"
             android:text="Waiting List"
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
-            android:backgroundTint="#D1C4E9"
             android:textColor="#4A148C"
-            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
             android:layout_height="42dp"/>
 
+        <!-- Selected (LIGHT PURPLE) -->
         <Button
             android:id="@+id/btnSelected"
             android:text="Selected"
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
-            android:backgroundTint="#D1C4E9"
             android:textColor="#4A148C"
-            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
             android:layout_height="42dp"/>
 
+        <!-- Enrolled (LIGHT PURPLE) -->
         <Button
             android:id="@+id/btnEnrolled"
             android:text="Enrolled"
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
-            android:backgroundTint="#D1C4E9"
             android:textColor="#4A148C"
-            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
             android:layout_height="42dp"/>
 
+        <!-- Cancelled (LIGHT PURPLE) -->
         <Button
             android:id="@+id/btnCancelled"
             android:text="Cancelled"
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
-            android:backgroundTint="#D1C4E9"
             android:textColor="#4A148C"
-            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_light_purple"
             android:layout_height="42dp"/>
     </LinearLayout>
+
+    <!-- Run Lottery (PURPLE) -->
+    <Button
+        android:id="@+id/btnRunLottery"
+        android:text="Run Lottery"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
+
+    <!-- Delete Event (PURPLE) -->
+    <Button
+        android:id="@+id/btnDeleteEvent"
+        android:text="Delete Event"
+        android:layout_marginTop="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/btn_purple"/>
 
     <!-- List -->
     <androidx.recyclerview.widget.RecyclerView
@@ -84,39 +122,5 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
-
-    <!-- Lottery Section -->
-    <LinearLayout
-        android:id="@+id/lotterySection"
-        android:visibility="gone"
-        android:orientation="vertical"
-        android:layout_marginTop="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:text="Number of participants to select:"
-            android:textColor="#4A148C"
-            android:textSize="15sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <EditText
-            android:id="@+id/inputNumber"
-            android:inputType="number"
-            android:layout_marginTop="12dp"
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"/>
-
-        <Button
-            android:id="@+id/btnDrawLottery"
-            android:text="Draw Lottery"
-            android:layout_marginTop="18dp"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:backgroundTint="#6A1B9A"
-            android:textColor="#FFFFFF"/>
-    </LinearLayout>
 
 </LinearLayout>
